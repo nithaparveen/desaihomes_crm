@@ -29,4 +29,42 @@ class ApiHelper {
       log("$e");
     }
   }
+
+  static getData({
+    required String endPoint,
+    Map<String, String>? header,
+  }) async {
+    log("ApiHelper -> getData");
+    final url = Uri.parse(AppConfig.baseurl + endPoint);
+    log("url -> $url");
+    try {
+      var response = await http.get(url, headers: header);
+      log("getData -> Status code -> ${response.statusCode}");
+      log("response -> ${response.body.toString()}");
+      if (response.statusCode == 200) {
+        var decodedData = jsonDecode(response.body);
+        log("$decodedData");
+        return decodedData;
+      } else {
+        log("Else Condition >> Api failed");
+      }
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Map<String, String> getApiHeader({String? access, String? dbName}) {
+    if (access != null) {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $access'
+      };
+    } else if (dbName != null) {
+      return {'Content-Type': 'application/json', 'dbName': dbName};
+    } else {
+      return {
+        'Content-Type': 'application/json',
+      };
+    }
+  }
 }

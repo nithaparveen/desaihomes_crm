@@ -6,5 +6,6 @@ class ColorTheme {
   static Color red = const Color.fromARGB(255, 209, 0, 0);
   static Color green = const Color(0xFF00c254);
   static Color blue = const Color(0xff1A3447);
-  static Color lightBlue = const Color(0xffE8FFFE);
+  static Color lightBlue = const Color(0xff0053a0);
+  static Color yellow = const Color(0xfffaab54);
 }

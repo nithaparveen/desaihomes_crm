@@ -14,7 +14,7 @@ class LoginController extends ChangeNotifier {
 
   Future onLogin(String email, String password, BuildContext context) async {
     log("loginController -> onLogin() started");
-    var data = {"email": email, "password": password};
+    // var data = {"email": email, "password": password};
     LoginService.postLoginData(email,password).then((value) {
       log("postLoginData() -> ${value["status"]}");
       if (value["status"] == true) {
