@@ -1,10 +1,7 @@
-// To parse this JSON data, do
-//
-//     final dashboardModel = dashboardModelFromJson(jsonString);
-
 import 'dart:convert';
 
-DashboardModel dashboardModelFromJson(String str) => DashboardModel.fromJson(json.decode(str));
+DashboardModel dashboardModelFromJson(String str) =>
+    DashboardModel.fromJson(json.decode(str));
 
 String dashboardModelToJson(DashboardModel data) => json.encode(data.toJson());
 
@@ -61,12 +58,16 @@ class Leads {
 
   factory Leads.fromJson(Map<String, dynamic> json) => Leads(
     currentPage: json["current_page"],
-    data: json["data"] == null ? [] : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
+    data: json["data"] == null
+        ? []
+        : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
     firstPageUrl: json["first_page_url"],
     from: json["from"],
     lastPage: json["last_page"],
     lastPageUrl: json["last_page_url"],
-    links: json["links"] == null ? [] : List<Link>.from(json["links"]!.map((x) => Link.fromJson(x))),
+    links: json["links"] == null
+        ? []
+        : List<Link>.from(json["links"]!.map((x) => Link.fromJson(x))),
     nextPageUrl: json["next_page_url"],
     path: json["path"],
     perPage: json["per_page"],
@@ -77,12 +78,16 @@ class Leads {
 
   Map<String, dynamic> toJson() => {
     "current_page": currentPage,
-    "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
+    "data": data == null
+        ? []
+        : List<dynamic>.from(data!.map((x) => x.toJson())),
     "first_page_url": firstPageUrl,
     "from": from,
     "last_page": lastPage,
     "last_page_url": lastPageUrl,
-    "links": links == null ? [] : List<dynamic>.from(links!.map((x) => x.toJson())),
+    "links": links == null
+        ? []
+        : List<dynamic>.from(links!.map((x) => x.toJson())),
     "next_page_url": nextPageUrl,
     "path": path,
     "per_page": perPage,
@@ -100,11 +105,11 @@ class Datum {
   dynamic altPhoneNumber;
   String? message;
   String? extraData;
-  LeadType? leadType;
+  String? leadType;
   int? crmLeadTypeId;
   String? utmSource;
   String? sourceUrl;
-  Source? source;
+  String? source; // Changed from enum Source to String
   String? campaignName;
   dynamic countryId;
   dynamic ageRange;
@@ -121,7 +126,7 @@ class Datum {
   String? assignedTo;
   dynamic followUpDate;
   dynamic referredBy;
-  Status? status;
+  String? status; // Changed from enum Status to String
   dynamic requestedDate;
   dynamic landingPageUrl;
   dynamic ogSourceUrl;
@@ -203,11 +208,11 @@ class Datum {
     altPhoneNumber: json["alt_phone_number"],
     message: json["message"],
     extraData: json["extra_data"],
-    leadType: leadTypeValues.map[json["lead_type"]]!,
+    leadType: json["lead_type"],
     crmLeadTypeId: json["crm_lead_type_id"],
     utmSource: json["utm_source"],
     sourceUrl: json["source_url"],
-    source: sourceValues.map[json["source"]]!,
+    source: json["source"],
     campaignName: json["campaign_name"],
     countryId: json["country_id"],
     ageRange: json["age_range"],
@@ -224,7 +229,7 @@ class Datum {
     assignedTo: json["assigned_to"],
     followUpDate: json["follow_up_date"],
     referredBy: json["referred_by"],
-    status: statusValues.map[json["status"]]!,
+    status: json["status"],
     requestedDate: json["requested_date"],
     landingPageUrl: json["landing_page_url"],
     ogSourceUrl: json["og_source_url"],
@@ -237,13 +242,25 @@ class Datum {
     emailAlreadyExistLeadId: json["email_already_exist_lead_id"],
     phoneAlreadyExistLeadId: json["phone_already_exist_lead_id"],
     updatedBy: json["updated_by"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+    createdAt: json["created_at"] == null
+        ? null
+        : DateTime.parse(json["created_at"]),
+    updatedAt: json["updated_at"] == null
+        ? null
+        : DateTime.parse(json["updated_at"]),
     deletedAt: json["deleted_at"],
-    project: json["project"] == null ? null : AssignedToDetails.fromJson(json["project"]),
-    crmStatusDetails: json["crm_status_details"] == null ? null : CrmStatusDetails.fromJson(json["crm_status_details"]),
-    leadLabels: json["lead_labels"] == null ? [] : List<dynamic>.from(json["lead_labels"]!.map((x) => x)),
-    assignedToDetails: json["assigned_to_details"] == null ? null : AssignedToDetails.fromJson(json["assigned_to_details"]),
+    project: json["project"] == null
+        ? null
+        : AssignedToDetails.fromJson(json["project"]),
+    crmStatusDetails: json["crm_status_details"] == null
+        ? null
+        : CrmStatusDetails.fromJson(json["crm_status_details"]),
+    leadLabels: json["lead_labels"] == null
+        ? []
+        : List<dynamic>.from(json["lead_labels"]!.map((x) => x)),
+    assignedToDetails: json["assigned_to_details"] == null
+        ? null
+        : AssignedToDetails.fromJson(json["assigned_to_details"]),
     duplicateFlag: json["duplicate_flag"],
   );
 
@@ -255,11 +272,11 @@ class Datum {
     "alt_phone_number": altPhoneNumber,
     "message": message,
     "extra_data": extraData,
-    "lead_type": leadTypeValues.reverse[leadType],
+    "lead_type": leadType,
     "crm_lead_type_id": crmLeadTypeId,
     "utm_source": utmSource,
     "source_url": sourceUrl,
-    "source": sourceValues.reverse[source],
+    "source": source,
     "campaign_name": campaignName,
     "country_id": countryId,
     "age_range": ageRange,
@@ -276,7 +293,7 @@ class Datum {
     "assigned_to": assignedTo,
     "follow_up_date": followUpDate,
     "referred_by": referredBy,
-    "status": statusValues.reverse[status],
+    "status": status,
     "requested_date": requestedDate,
     "landing_page_url": landingPageUrl,
     "og_source_url": ogSourceUrl,
@@ -294,7 +311,9 @@ class Datum {
     "deleted_at": deletedAt,
     "project": project?.toJson(),
     "crm_status_details": crmStatusDetails?.toJson(),
-    "lead_labels": leadLabels == null ? [] : List<dynamic>.from(leadLabels!.map((x) => x)),
+    "lead_labels": leadLabels == null
+        ? []
+        : List<dynamic>.from(leadLabels!.map((x) => x)),
     "assigned_to_details": assignedToDetails?.toJson(),
     "duplicate_flag": duplicateFlag,
   };
@@ -302,42 +321,33 @@ class Datum {
 
 class AssignedToDetails {
   int? id;
-  AssignedToDetailsName? name;
+  String? name;
 
   AssignedToDetails({
     this.id,
     this.name,
   });
 
-  factory AssignedToDetails.fromJson(Map<String, dynamic> json) => AssignedToDetails(
-    id: json["id"],
-    name: assignedToDetailsNameValues.map[json["name"]]!,
-  );
+  factory AssignedToDetails.fromJson(Map<String, dynamic> json) =>
+      AssignedToDetails(
+        id: json["id"],
+        name: json["name"],
+      );
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": assignedToDetailsNameValues.reverse[name],
+    "name": name,
   };
 }
 
-enum AssignedToDetailsName {
-  DD_QUEENS_SQUARE,
-  SOBHA_SPIDERWORKS
-}
-
-final assignedToDetailsNameValues = EnumValues({
-  "DD Queens Square": AssignedToDetailsName.DD_QUEENS_SQUARE,
-  "sobha Spiderworks": AssignedToDetailsName.SOBHA_SPIDERWORKS
-});
-
 class CrmStatusDetails {
   int? id;
-  CrmStatusDetailsName? name;
-  Slug? slug;
+  String? name;
+  String? slug;
   int? dispalyOrder;
-  Type? type;
-  TextColor? textColor;
-  BgColor? bgColor;
+  String? type;
+  String? textColor;
+  String? bgColor;
   int? status;
   int? createdBy;
   int? updatedBy;
@@ -359,29 +369,34 @@ class CrmStatusDetails {
     this.updatedAt,
   });
 
-  factory CrmStatusDetails.fromJson(Map<String, dynamic> json) => CrmStatusDetails(
-    id: json["id"],
-    name: crmStatusDetailsNameValues.map[json["name"]]!,
-    slug: slugValues.map[json["slug"]]!,
-    dispalyOrder: json["dispaly_order"],
-    type: typeValues.map[json["type"]]!,
-    textColor: textColorValues.map[json["text_color"]]!,
-    bgColor: bgColorValues.map[json["bg_color"]]!,
-    status: json["status"],
-    createdBy: json["created_by"],
-    updatedBy: json["updated_by"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-  );
+  factory CrmStatusDetails.fromJson(Map<String, dynamic> json) =>
+      CrmStatusDetails(
+        id: json["id"],
+        name: json["name"],
+        slug: json["slug"],
+        dispalyOrder: json["dispaly_order"],
+        type: json["type"],
+        textColor: json["text_color"],
+        bgColor: json["bg_color"],
+        status: json["status"],
+        createdBy: json["created_by"],
+        updatedBy: json["updated_by"],
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
+      );
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": crmStatusDetailsNameValues.reverse[name],
-    "slug": slugValues.reverse[slug],
+    "name": name,
+    "slug": slug,
     "dispaly_order": dispalyOrder,
-    "type": typeValues.reverse[type],
-    "text_color": textColorValues.reverse[textColor],
-    "bg_color": bgColorValues.reverse[bgColor],
+    "type": type,
+    "text_color": textColor,
+    "bg_color": bgColor,
     "status": status,
     "created_by": createdBy,
     "updated_by": updatedBy,
@@ -389,74 +404,6 @@ class CrmStatusDetails {
     "updated_at": updatedAt?.toIso8601String(),
   };
 }
-
-enum BgColor {
-  THE_23_CCFE
-}
-
-final bgColorValues = EnumValues({
-  "#23ccfe": BgColor.THE_23_CCFE
-});
-
-enum CrmStatusDetailsName {
-  NEW_LEADS
-}
-
-final crmStatusDetailsNameValues = EnumValues({
-  "New Leads": CrmStatusDetailsName.NEW_LEADS
-});
-
-enum Slug {
-  NEW_LEADS
-}
-
-final slugValues = EnumValues({
-  "new-leads": Slug.NEW_LEADS
-});
-
-enum TextColor {
-  THE_6962_F7
-}
-
-final textColorValues = EnumValues({
-  "#6962f7": TextColor.THE_6962_F7
-});
-
-enum Type {
-  NEUTRAL
-}
-
-final typeValues = EnumValues({
-  "Neutral": Type.NEUTRAL
-});
-
-enum LeadType {
-  CONTACT
-}
-
-final leadTypeValues = EnumValues({
-  "Contact": LeadType.CONTACT
-});
-
-enum Source {
-  CAMPAIGN,
-  FACEBOOK,
-  GOOGLE_ADS
-}
-
-final sourceValues = EnumValues({
-  "campaign": Source.CAMPAIGN,
-  "Facebook": Source.FACEBOOK,
-  "GoogleAds": Source.GOOGLE_ADS
-});
-
-enum Status {
-  OPEN
-}
-
-final statusValues = EnumValues({
-  "Open": Status.OPEN
-});
 
 class Link {
   String? url;

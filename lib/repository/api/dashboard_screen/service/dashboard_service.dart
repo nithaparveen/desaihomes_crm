@@ -29,4 +29,17 @@ class DashboardService {
       log("$e");
     }
   }
+
+  static Future<dynamic> assignedToTapped(id,assignedTo) async {
+    log("DashboardService -> assignedToTapped()");
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "lead/action/assigned-to-update?id=$id&assigned_to=$assignedTo",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
 }
