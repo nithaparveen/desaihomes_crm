@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/dashboard_screen/view/dashboard_screen.dart';
 import 'package:desaihomes_crm_application/repository/api/login_screen/service/login_service.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class LoginController extends ChangeNotifier {
         storeUserToken(value["token"]);
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            MaterialPageRoute(builder: (context) => const BottomNavBar()),
             (route) => false);
       } else {
         log("Else Condition >> Api failed");

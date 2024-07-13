@@ -1,3 +1,4 @@
+import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/dashboard_screen/view/dashboard_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DashboardScreen(),
+                    builder: (context) => BottomNavBar(),
                   ));
             },
             icon: Icon(Icons.arrow_back)),
