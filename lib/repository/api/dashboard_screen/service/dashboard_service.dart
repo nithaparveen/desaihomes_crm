@@ -42,4 +42,17 @@ class DashboardService {
       log("$e");
     }
   }
+
+  static Future<dynamic> fetchLeads( {required int page}) async {
+    log("DashboardService -> fetchLeads()");
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "leads-list?page=$page",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
 }

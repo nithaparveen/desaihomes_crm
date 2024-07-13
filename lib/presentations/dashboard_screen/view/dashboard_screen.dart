@@ -1,6 +1,5 @@
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
-import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/dashboard_screen/controller/dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,11 +17,25 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = -1;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     fetchData();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        Provider.of<DashboardController>(context, listen: false)
+            .loadMoreData(context);
+      }
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   fetchData() {
@@ -254,6 +267,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8),
           child: CustomScrollView(
+            controller: scrollController,
             slivers: [
               SliverToBoxAdapter(
                 child: Text(
@@ -270,12 +284,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Consumer<DashboardController>(builder: (context, controller, _) {
                 return controller.isLoading
                     ? const SliverToBoxAdapter(
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          backgroundColor: Colors.white,
+                          color: Colors.grey,
+                        )),
                       )
                     : SliverList.separated(
-                        itemCount:
-                            controller.dashboardModel.leads?.data?.length,
+                        itemCount: controller.isLoadingMore
+                            ? controller.dashboardModel.leads!.data!.length + 1
+                            : controller.dashboardModel.leads?.data?.length,
                         itemBuilder: (context, index) {
+                          if (index >=
+                              controller.dashboardModel.leads!.data!.length) {
+                            return const Center(
+                                child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                              color: Colors.grey,
+                            ));
+                          }
+
                           final projectName = controller
                               .dashboardModel.leads?.data?[index].project?.name
                               .toString();
@@ -285,6 +313,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           final id = controller
                               .dashboardModel.leads?.data?[index].id
                               ?.toInt();
+
                           return InkWell(
                             onTap: () {
                               Navigator.push(
@@ -308,7 +337,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                              // index.toString()+
                                               "${controller.dashboardModel.leads?.data?[index].name}",
                                               style: GLTextStyles.robotoStyle(
                                                   size: 16,
@@ -442,7 +470,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   )
                                                 ];
                                               },
-                                              // offset: Offset(-1.0, -220.0),
                                               elevation: 0.5,
                                               child: controller
                                                           .dashboardModel
@@ -516,7 +543,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-
     );
   }
 }

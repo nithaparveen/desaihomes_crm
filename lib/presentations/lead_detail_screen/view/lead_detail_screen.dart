@@ -54,83 +54,91 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             },
             icon: Icon(Icons.arrow_back)),
       ),
-      body: Column(
-        children: [
-          Consumer<LeadDetailController>(builder: (context, controller, _) {
-            return Container(
-              // surfaceTintColor: ColorTheme.white,
-              // elevation: 0,
-              margin: const EdgeInsets.all(6),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Consumer<LeadDetailController>(builder: (context, controller, _) {
+        return controller.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                backgroundColor: Colors.white,
+                color: Colors.grey,
+              ))
+            : Column(
+                children: [
+                  Container(
+                    // surfaceTintColor: ColorTheme.white,
+                    // elevation: 0,
+                    margin: const EdgeInsets.all(6),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
                         children: [
-                          Text("${controller.leadDetailModel.lead?.name}",
-                              style: GLTextStyles.robotoStyle(
-                                  size: 16, weight: FontWeight.w500)),
-                          const SizedBox(height: 4),
-                          Text(
-                              "${controller.leadDetailModel.lead?.project?.name}",
-                              style: GLTextStyles.robotoStyle(
-                                  size: 15, weight: FontWeight.w400)),
-                          const SizedBox(height: 4),
-                          Text("${controller.leadDetailModel.lead?.source}",
-                              style: GLTextStyles.robotoStyle(
-                                  size: 15, weight: FontWeight.w400)),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: controller
-                                        .leadDetailModel.lead?.assignedTo ==
-                                    null
-                                ? null
-                                : Container(
-                                    margin: const EdgeInsets.only(top: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: ColorTheme.yellow,
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Text(
-                                        "${controller.leadDetailModel.lead?.assignedToDetails?.name}"),
-                                  ),
-                          ),
-                          const SizedBox(height: 10),
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.orange[100],
-                              borderRadius: BorderRadius.circular(15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${controller.leadDetailModel.lead?.name}",
+                                    style: GLTextStyles.robotoStyle(
+                                        size: 16, weight: FontWeight.w500)),
+                                const SizedBox(height: 4),
+                                Text(
+                                    "${controller.leadDetailModel.lead?.project?.name}",
+                                    style: GLTextStyles.robotoStyle(
+                                        size: 15, weight: FontWeight.w400)),
+                                const SizedBox(height: 4),
+                                Text(
+                                    "${controller.leadDetailModel.lead?.source}",
+                                    style: GLTextStyles.robotoStyle(
+                                        size: 15, weight: FontWeight.w400)),
+                              ],
                             ),
-                            child: Text(
-                                GetTimeAgo.parse(DateTime.parse(
-                                    "${controller.leadDetailModel.lead?.updatedAt}")),
-                                style: const TextStyle(fontSize: 12)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: controller.leadDetailModel.lead
+                                              ?.assignedTo ==
+                                          null
+                                      ? null
+                                      : Container(
+                                          margin: const EdgeInsets.only(top: 8),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: ColorTheme.yellow,
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          child: Text(
+                                              "${controller.leadDetailModel.lead?.assignedToDetails?.name}"),
+                                        ),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange[100],
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Text(
+                                      GetTimeAgo.parse(DateTime.parse(
+                                          "${controller.leadDetailModel.lead?.updatedAt}")),
+                                      style: const TextStyle(fontSize: 12)),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          })
-        ],
-      ),
+                  )
+                ],
+              );
+      }),
     );
   }
 }

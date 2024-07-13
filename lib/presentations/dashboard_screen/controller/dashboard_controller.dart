@@ -14,6 +14,8 @@ class DashboardController extends ChangeNotifier {
   bool isLoading = false;
   bool isAssignLoading = false;
   bool isUserListLoading = false;
+  bool isLoadingMore = false;
+  int currentPage = 1;
 
   fetchData(context) async {
     isLoading = true;
@@ -47,7 +49,7 @@ class DashboardController extends ChangeNotifier {
     });
   }
 
-  assignedToTapped(String id, String assignedTo, context) {
+  assignedToTapped(String id, String assignedTo, context) async {
     log("DashboardController -> assignedToTapped()");
     DashboardService.assignedToTapped(id, assignedTo).then((value) {
       if (value["status"] == true) {
@@ -57,5 +59,27 @@ class DashboardController extends ChangeNotifier {
             context: context, bgColor: Colors.redAccent);
       }
     });
+  }
+
+  loadMoreData(BuildContext context) async {
+    if (!isLoadingMore) {
+      isLoadingMore = true;
+      currentPage++;
+      notifyListeners();
+      try {
+        var response = await DashboardService.fetchLeads(page: currentPage);
+        if (response != null && response["status"] == true) {
+          var newData = DashboardModel.fromJson(response);
+          dashboardModel.leads?.data!.addAll(newData.leads?.data as Iterable<Datum>);
+        } else {
+          AppUtils.oneTimeSnackBar("error", context: context);
+        }
+      } catch (e) {
+        log("$e");
+      } finally {
+        isLoadingMore = false;
+        notifyListeners();
+      }
+    }
   }
 }
