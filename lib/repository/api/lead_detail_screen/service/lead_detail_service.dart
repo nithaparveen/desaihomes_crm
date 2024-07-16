@@ -16,4 +16,17 @@ class LeadDetailService{
       log("$e");
     }
   }
+
+  static Future<dynamic> fetchNotes(id) async {
+    log("LeadDetailService -> fetchNotes()");
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "lead/notes?id=$id",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
 }
