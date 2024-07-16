@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "107202462728",
+    "project_id": "desainotifications",
+    "storage_bucket": "desainotifications.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:107202462728:android:613b4f0c9853d3e38a3dbd",
+        "android_client_info": {
+          "package_name": "com.spiderworks.desaihomes_crm_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVzFaruG8edoDFPEkqx790SGMrcfpcLVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
