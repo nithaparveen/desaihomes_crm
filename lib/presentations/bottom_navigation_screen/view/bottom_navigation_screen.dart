@@ -7,7 +7,7 @@ import '../controller/bottom_navigation_controller.dart';
 import 'menu.dart';
 
 class BottomNavBar extends StatefulWidget {
-  const BottomNavBar({Key? key}) : super(key: key);
+  const BottomNavBar({super.key});
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
@@ -39,11 +39,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
           return Theme(
             data: ThemeData(splashColor: Colors.transparent),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 25),
+              padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 28),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(42),
+                borderRadius: BorderRadius.circular(22),
                 child: SizedBox(
-                  height: size.width * 0.18,
+                  height: size.width * 0.16,
                   child: BottomNavigationBar(
                     selectedItemColor: ColorTheme.blue,
                     unselectedItemColor: Colors.grey,
@@ -51,7 +51,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                         color: ColorTheme.blue, size: 10),
                     unselectedLabelStyle:
                         GLTextStyles.cabinStyle(color: Colors.grey, size: 10),
-                    backgroundColor: Colors.orange[50],
+                    backgroundColor: Colors.blue[50],
                     currentIndex: controller.selectedIndex,
                     onTap: (index) {
                       setState(() {
@@ -61,15 +61,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
                     elevation: 0,
                     items: const [
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.dashboard_outlined),
+                        icon: Icon(Icons.dashboard_outlined,size: 20),
                         label: 'Leads',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.label_off_outlined),
+                        icon: Icon(Icons.label_off_outlined,size: 20),
                         label: 'menu',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.label_off_outlined),
+                        icon: Icon(Icons.label_off_outlined,size: 20),
                         label: 'menu',
                       ),
                     ],

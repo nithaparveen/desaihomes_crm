@@ -43,16 +43,18 @@ class DashboardService {
     }
   }
 
-  static Future<dynamic> fetchLeads( {required int page}) async {
+  static Future<dynamic> fetchLeads({required int page}) async {
     log("DashboardService -> fetchLeads()");
     try {
-      var decodedData = await ApiHelper.getData(
-        endPoint: "leads-list?page=$page",
+      var nextPageUrl = "http://www.desaihomes.com/api/leads-list?page=$page";
+      var decodedData = await ApiHelper.getDataWObaseUrl(
+        endPoint: nextPageUrl,
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
     } catch (e) {
       log("$e");
+      throw Exception('Failed to fetch leads');
     }
   }
 }

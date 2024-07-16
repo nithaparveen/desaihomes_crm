@@ -70,7 +70,7 @@ class DashboardController extends ChangeNotifier {
         var response = await DashboardService.fetchLeads(page: currentPage);
         if (response != null && response["status"] == true) {
           var newData = DashboardModel.fromJson(response);
-          dashboardModel.leads?.data!.addAll(newData.leads?.data as Iterable<Datum>);
+          dashboardModel.leads?.data?.addAll(newData.leads?.data ?? []);
         } else {
           AppUtils.oneTimeSnackBar("error", context: context);
         }

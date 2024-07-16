@@ -4,7 +4,6 @@ import '../../../../core/utils/app_utils.dart';
 import '../../../helper/api_helper.dart';
 
 class LeadDetailService{
-
   static Future<dynamic> fetchDetailData(id) async {
     log("LeadDetailService -> fetchDetailData()");
     try {
