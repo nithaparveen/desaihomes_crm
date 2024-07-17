@@ -378,7 +378,11 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          // Implement delete functionality
+                          Provider.of<LeadDetailController>(
+                              context,
+                              listen: false)
+                              .deleteSiteVisits(
+                              controller.siteVisitModel.data![index].id,context);
                         },
                         icon: Icon(Icons.delete_outline, size: 22),
                       ),

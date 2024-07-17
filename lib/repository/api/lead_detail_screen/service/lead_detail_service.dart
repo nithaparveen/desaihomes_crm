@@ -55,4 +55,16 @@ class LeadDetailService{
       log("$e");
     }
   }
+  static Future<dynamic> deleteSiteVisits(int id) async {
+    log("LeadDetailService -> deleteSiteVisits()");
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "site-visit/delete?id=$id",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
 }

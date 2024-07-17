@@ -87,4 +87,16 @@ class LeadDetailController extends ChangeNotifier {
       notifyListeners();
     });
   }
+
+  deleteSiteVisits(id, context) async {
+    log("LeadDetailController -> deleteSiteVisits()");
+    LeadDetailService.deleteSiteVisits(id).then((value) {
+      if (value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
 }
