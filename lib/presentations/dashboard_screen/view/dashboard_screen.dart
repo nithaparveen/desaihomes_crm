@@ -320,7 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  LeadDetailScreen(id: id),
+                                  LeadDetailScreen(id: id,leadId: id,),
                             ));
                       },
                       child: Card(
@@ -428,7 +428,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               MaterialPageRoute(
                                                                 builder: (context) =>
                                                                     LeadDetailScreen(
-                                                                        id: id),
+                                                                        id: id,leadId: id,),
                                                               ));
                                                           await dashboardController
                                                               .fetchData(

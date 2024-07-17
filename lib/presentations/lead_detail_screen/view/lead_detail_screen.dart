@@ -4,32 +4,46 @@ import 'package:flutter/material.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/textstyles.dart';
 import '../../dashboard_screen/controller/dashboard_controller.dart';
 
 class LeadDetailScreen extends StatefulWidget {
-  const LeadDetailScreen({
-    super.key,
-    required this.id,
-  });
-
   final int? id;
+  final int? leadId;
+
+  const LeadDetailScreen({Key? key, required this.id, this.leadId})
+      : super(key: key);
 
   @override
-  State<LeadDetailScreen> createState() => _LeadDetailScreenState();
+  _LeadDetailScreenState createState() => _LeadDetailScreenState();
 }
 
 class _LeadDetailScreenState extends State<LeadDetailScreen> {
+  final TextEditingController noteController = TextEditingController();
+  final TextEditingController siteVisitController = TextEditingController();
+
   @override
   void initState() {
     fetchData();
     super.initState();
   }
 
-  fetchData() {
+  @override
+  void dispose() {
+    noteController.dispose();
+    siteVisitController.dispose();
+    super.dispose();
+  }
+
+  void fetchData() {
     Provider.of<LeadDetailController>(context, listen: false)
         .fetchDetailData(widget.id, context);
+    Provider.of<LeadDetailController>(context, listen: false)
+        .fetchNotes(widget.leadId, context);
+    Provider.of<LeadDetailController>(context, listen: false)
+        .fetchSiteVisits(widget.leadId, context);
   }
 
   @override
@@ -41,47 +55,53 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
           style: GLTextStyles.robotoStyle(size: 22, weight: FontWeight.w500),
         ),
         leading: IconButton(
-            onPressed: () {
-              Provider.of<DashboardController>(context, listen: false)
-                  .fetchData(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BottomNavBar(),
-                  ));
-            },
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              size: 20,
-            )),
+          onPressed: () {
+            Provider.of<DashboardController>(context, listen: false)
+                .fetchData(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BottomNavBar(),
+              ),
+            );
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            size: 20,
+          ),
+        ),
       ),
-      body: Consumer<LeadDetailController>(builder: (context, controller, _) {
-        String formattedDate =
-            controller.leadDetailModel.lead?.requestedDate != null
-                ? DateFormat('dd/MM/yyyy')
-                    .format(controller.leadDetailModel.lead!.requestedDate!)
-                : '';
-        return controller.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                backgroundColor: Colors.white,
-                color: Colors.grey,
-              ))
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildLeadInfoCard(controller, formattedDate),
-                    buildDetailSection(controller),
-                    buildStatusSection(controller),
-                    buildSourceSection(controller),
-                    buildSiteVisitSection(controller),
-                    buildNotesSection(controller),
-                  ],
-                ),
-              );
-      }),
+      body: Consumer<LeadDetailController>(
+        builder: (context, controller, _) {
+          String formattedDate =
+              controller.leadDetailModel.lead?.requestedDate != null
+                  ? DateFormat('dd/MM/yyyy')
+                      .format(controller.leadDetailModel.lead!.requestedDate!)
+                  : '';
+
+          return controller.isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    backgroundColor: Colors.white,
+                    color: Colors.grey,
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildLeadInfoCard(controller, formattedDate),
+                      buildDetailSection(controller),
+                      buildStatusSection(controller),
+                      buildSourceSection(controller),
+                      buildSiteVisitSection(controller),
+                      buildNotesSection(controller),
+                    ],
+                  ),
+                );
+        },
+      ),
     );
   }
 
@@ -98,36 +118,42 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("${controller.leadDetailModel.lead?.name}",
-                      style: GLTextStyles.robotoStyle(
-                          size: 18, weight: FontWeight.w500)),
+                  Text(
+                    "${controller.leadDetailModel.lead?.name}",
+                    style: GLTextStyles.robotoStyle(
+                        size: 18, weight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 4),
-                  Text("${controller.leadDetailModel.lead?.project?.name}",
-                      style: GLTextStyles.robotoStyle(
-                          size: 15, weight: FontWeight.w400)),
+                  Text(
+                    "${controller.leadDetailModel.lead?.project?.name}",
+                    style: GLTextStyles.robotoStyle(
+                        size: 15, weight: FontWeight.w400),
+                  ),
                   const SizedBox(height: 4),
-                  Text("${controller.leadDetailModel.lead?.source}",
-                      style: GLTextStyles.robotoStyle(
-                          size: 15, weight: FontWeight.w400)),
+                  Text(
+                    "${controller.leadDetailModel.lead?.source}",
+                    style: GLTextStyles.robotoStyle(
+                        size: 15, weight: FontWeight.w400),
+                  ),
                 ],
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                controller.leadDetailModel.lead?.assignedToDetails?.name != null
-                    ? Container(
-                        margin: const EdgeInsets.only(top: 8),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: ColorTheme.yellow,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Text(
-                            "${controller.leadDetailModel.lead?.assignedToDetails?.name}"),
-                      )
-                    : const SizedBox.shrink(),
+                if (controller.leadDetailModel.lead?.assignedToDetails?.name !=
+                    null)
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: ColorTheme.yellow,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Text(
+                        "${controller.leadDetailModel.lead?.assignedToDetails?.name}"),
+                  ),
                 const SizedBox(height: 10),
                 Container(
                   margin: const EdgeInsets.only(top: 8),
@@ -138,9 +164,10 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Text(
-                      GetTimeAgo.parse(DateTime.parse(
-                          "${controller.leadDetailModel.lead?.updatedAt}")),
-                      style: const TextStyle(fontSize: 12)),
+                    GetTimeAgo.parse(DateTime.parse(
+                        "${controller.leadDetailModel.lead?.updatedAt}")),
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -172,14 +199,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
-                    child: Wrap(children: [
-                      Text(
-                        ": ${getDetailValue(controller, index)}",
-                        style: GLTextStyles.cabinStyle(
-                            size: 18, weight: FontWeight.w500),
-                        overflow: TextOverflow.fade,
-                      ),
-                    ]),
+                    child: Wrap(
+                      children: [
+                        Text(
+                          ": ${getDetailValue(controller, index)}",
+                          style: GLTextStyles.cabinStyle(
+                              size: 18, weight: FontWeight.w500),
+                          overflow: TextOverflow.fade,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -212,14 +241,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
-                    child: Wrap(children: [
-                      Text(
-                        ": ${getStatusValue(controller, index)}",
-                        style: GLTextStyles.cabinStyle(
-                            size: 18, weight: FontWeight.w500),
-                        overflow: TextOverflow.fade,
-                      ),
-                    ]),
+                    child: Wrap(
+                      children: [
+                        Text(
+                          ": ${getStatusValue(controller, index)}",
+                          style: GLTextStyles.cabinStyle(
+                              size: 18, weight: FontWeight.w500),
+                          overflow: TextOverflow.fade,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -252,14 +283,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
-                    child: Wrap(children: [
-                      Text(
-                        ": ${getSourceValue(controller, index)}",
-                        style: GLTextStyles.cabinStyle(
-                            size: 18, weight: FontWeight.w500),
-                        overflow: TextOverflow.fade,
-                      ),
-                    ]),
+                    child: Wrap(
+                      children: [
+                        Text(
+                          ": ${getSourceValue(controller, index)}",
+                          style: GLTextStyles.cabinStyle(
+                              size: 18, weight: FontWeight.w500),
+                          overflow: TextOverflow.fade,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -278,12 +311,14 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text("Site Visits", style: GLTextStyles.cabinStyle(size: 18)),
-            const Padding(
-              padding: EdgeInsets.all(5.0),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
               child: TextField(
+                controller: siteVisitController,
                 decoration: InputDecoration(
                   hintText: "Remarks",
                   border: OutlineInputBorder(
@@ -298,16 +333,66 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               width: size.width * 0.3,
               child: MaterialButton(
                 color: ColorTheme.blue,
-                onPressed: () {},
+                onPressed: () {
+                  final leadDetailController =
+                  Provider.of<LeadDetailController>(context, listen: false);
+                  if (siteVisitController.text.isNotEmpty) {
+                    leadDetailController.postNotes(
+                      widget.leadId.toString(),
+                      siteVisitController.text,
+                      context,
+                    );
+                    siteVisitController.clear();
+                  }
+                },
                 child: Text(
                   "Submit",
                   style: GLTextStyles.robotoStyle(
-                      color: ColorTheme.white,
-                      size: 16,
-                      weight: FontWeight.w400),
+                    color: ColorTheme.white,
+                    size: 16,
+                    weight: FontWeight.w400,
+                  ),
                 ),
               ),
-            )
+            ),
+            const SizedBox(height: 15),
+            Flexible(
+              fit: FlexFit.loose,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: controller.siteVisitModel.data?.length ?? 0,
+                itemBuilder: (context, index) => ListTile(
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("${controller.siteVisitModel.data?[index].siteVisitRemarks}"),
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(
+                            controller.siteVisitModel.data?[index].siteVisitDate ??
+                                DateTime.now()),
+                      ),
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          // Implement delete functionality
+                        },
+                        icon: Icon(Icons.delete_outline, size: 22),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // Implement edit functionality
+                        },
+                        icon: Icon(Icons.edit, size: 22),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -322,12 +407,14 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text("Notes", style: GLTextStyles.cabinStyle(size: 18)),
-            const Padding(
-              padding: EdgeInsets.all(5.0),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
               child: TextField(
+                controller: noteController,
                 decoration: InputDecoration(
                   hintText: "Notes",
                   border: OutlineInputBorder(
@@ -342,33 +429,69 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               width: size.width * 0.3,
               child: MaterialButton(
                 color: ColorTheme.blue,
-                onPressed: () {},
+                onPressed: () {
+                  final leadDetailController =
+                      Provider.of<LeadDetailController>(context, listen: false);
+                  if (noteController.text.isNotEmpty) {
+                    leadDetailController.postNotes(
+                      widget.leadId.toString(),
+                      noteController.text,
+                      context,
+                    );
+                    noteController.clear();
+                  }
+                },
                 child: Text(
                   "Submit",
                   style: GLTextStyles.robotoStyle(
-                      color: ColorTheme.white,
-                      size: 16,
-                      weight: FontWeight.w400),
+                    color: ColorTheme.white,
+                    size: 16,
+                    weight: FontWeight.w400,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 15),
-            // SizedBox(
-            //   child: ListView.builder(
-            //     shrinkWrap: true,
-            //     itemBuilder: (context, index) => ListTile(
-            //       title: Text("${controller.notesModel.data?[index].notes}"),
-            //       trailing: Row(
-            //         children: [
-            //           IconButton(
-            //               onPressed: () {}, icon: Icon(Icons.delete_outline)),
-            //           IconButton(
-            //               onPressed: () {}, icon: Icon(Icons.edit)),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // ),
+            Flexible(
+              fit: FlexFit.loose,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: controller.notesModel.data?.length ?? 0,
+                itemBuilder: (context, index) => ListTile(
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("${controller.notesModel.data?[index].notes}"),
+                      Text(
+                        "${controller.notesModel.data?[index].createdUser?.name ?? ''}",
+                      ),
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(
+                            controller.notesModel.data?[index].createdAt ??
+                                DateTime.now()),
+                      ),
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          // Implement delete functionality
+                        },
+                        icon: Icon(Icons.delete_outline, size: 22),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // Implement edit functionality
+                        },
+                        icon: Icon(Icons.edit, size: 22),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
