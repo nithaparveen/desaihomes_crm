@@ -382,7 +382,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                               context,
                               listen: false)
                               .deleteSiteVisits(
-                              controller.siteVisitModel.data![index].id,context);
+                              controller.siteVisitModel.data?[index].id,context);
                         },
                         icon: Icon(Icons.delete_outline, size: 22),
                       ),
