@@ -3,7 +3,7 @@ import 'dart:developer';
 import '../../../../core/utils/app_utils.dart';
 import '../../../helper/api_helper.dart';
 
-class LeadDetailService{
+class LeadDetailService {
   static Future<dynamic> fetchDetailData(id) async {
     log("LeadDetailService -> fetchDetailData()");
     try {
@@ -30,7 +30,7 @@ class LeadDetailService{
     }
   }
 
-  static Future<dynamic> postNotes(leadId,notes) async {
+  static Future<dynamic> postNotes(leadId, notes) async {
     log("LeadDetailService -> postNotes()");
     try {
       var decodedData = await ApiHelper.postData(
@@ -55,6 +55,21 @@ class LeadDetailService{
       log("$e");
     }
   }
+
+  static Future<dynamic> postSiteVisits(leadId, date, content) async {
+    log("LeadDetailService -> postSiteVisits()");
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint:
+            "site-visit/create?lead_id=$leadId&site_visit_date=$date&site_visit_remarks=$content",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
   static Future<dynamic> deleteSiteVisits(int id) async {
     log("LeadDetailService -> deleteSiteVisits()");
     try {

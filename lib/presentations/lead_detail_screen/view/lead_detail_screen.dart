@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:flutter/material.dart';
@@ -13,16 +15,16 @@ class LeadDetailScreen extends StatefulWidget {
   final int? id;
   final int? leadId;
 
-  const LeadDetailScreen({Key? key, required this.id, this.leadId})
-      : super(key: key);
+  const LeadDetailScreen({super.key, required this.id, this.leadId});
 
   @override
-  _LeadDetailScreenState createState() => _LeadDetailScreenState();
+  LeadDetailScreenState createState() => LeadDetailScreenState();
 }
 
-class _LeadDetailScreenState extends State<LeadDetailScreen> {
+class LeadDetailScreenState extends State<LeadDetailScreen> {
   final TextEditingController noteController = TextEditingController();
   final TextEditingController siteVisitController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
 
   @override
   void initState() {
@@ -34,6 +36,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   void dispose() {
     noteController.dispose();
     siteVisitController.dispose();
+    dateController.dispose();
     super.dispose();
   }
 
@@ -303,6 +306,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     );
   }
 
+  Future<void> selectedDate() async {
+    DateTime? picked = await showDatePicker(
+        context: context, firstDate: DateTime(2000), lastDate: DateTime(2100),initialDate: DateTime.now());
+    if(picked != null){
+      setState(() {
+        dateController.text = picked.toString().split(" ")[0];
+      });
+    }
+  }
+
   Widget buildSiteVisitSection(LeadDetailController controller) {
     var size = MediaQuery.sizeOf(context);
     return Card(
@@ -318,9 +331,26 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: TextField(
+                controller: dateController,
+                decoration: const InputDecoration(
+                  labelText: 'Date',
+                  prefixIcon: Icon(Icons.calendar_today_outlined, size: 20),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
+                  ),
+                ),
+                readOnly: true,
+                onTap: (){
+                  selectedDate();
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: TextField(
                 controller: siteVisitController,
-                decoration: InputDecoration(
-                  hintText: "Remarks",
+                decoration: const InputDecoration(
+                  labelText: "Remarks",
                   border: OutlineInputBorder(
                     borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
                   ),
@@ -335,15 +365,20 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                 color: ColorTheme.blue,
                 onPressed: () {
                   final leadDetailController =
-                  Provider.of<LeadDetailController>(context, listen: false);
+                      Provider.of<LeadDetailController>(context, listen: false);
                   if (siteVisitController.text.isNotEmpty) {
-                    leadDetailController.postNotes(
-                      widget.leadId.toString(),
-                      siteVisitController.text,
-                      context,
-                    );
-                    siteVisitController.clear();
+                    setState(() {
+                      leadDetailController.postSiteVisits(
+                        widget.leadId.toString(),
+                        dateController.text,
+                        siteVisitController.text,
+                        context,
+                      );
+                      siteVisitController.clear();
+                      dateController.clear();
+                    });
                   }
+                  fetchData();
                 },
                 child: Text(
                   "Submit",
@@ -359,17 +394,19 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             Flexible(
               fit: FlexFit.loose,
               child: ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: controller.siteVisitModel.data?.length ?? 0,
                 itemBuilder: (context, index) => ListTile(
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("${controller.siteVisitModel.data?[index].siteVisitRemarks}"),
                       Text(
-                        DateFormat('dd/MM/yyyy').format(
-                            controller.siteVisitModel.data?[index].siteVisitDate ??
-                                DateTime.now()),
+                          "${controller.siteVisitModel.data?[index].siteVisitRemarks}"),
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(controller
+                                .siteVisitModel.data?[index].siteVisitDate ??
+                            DateTime.now()),
                       ),
                     ],
                   ),
@@ -378,19 +415,18 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Provider.of<LeadDetailController>(
-                              context,
-                              listen: false)
+                          Provider.of<LeadDetailController>(context,
+                                  listen: false)
                               .deleteSiteVisits(
-                              controller.siteVisitModel.data?[index].id,context);
+                                  controller.siteVisitModel.data?[index].id,
+                                  context);
+                          fetchData();
                         },
-                        icon: Icon(Icons.delete_outline, size: 22),
+                        icon: const Icon(Icons.delete_outline, size: 22),
                       ),
                       IconButton(
-                        onPressed: () {
-                          // Implement edit functionality
-                        },
-                        icon: Icon(Icons.edit, size: 22),
+                        onPressed: () {},
+                        icon: const Icon(Icons.edit, size: 22),
                       ),
                     ],
                   ),
@@ -419,8 +455,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               padding: const EdgeInsets.all(5.0),
               child: TextField(
                 controller: noteController,
-                decoration: InputDecoration(
-                  hintText: "Notes",
+                decoration: const InputDecoration(
+                  labelText: "Notes",
                   border: OutlineInputBorder(
                     borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
                   ),
@@ -444,6 +480,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     );
                     noteController.clear();
                   }
+                  fetchData();
                 },
                 child: Text(
                   "Submit",
@@ -459,6 +496,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             Flexible(
               fit: FlexFit.loose,
               child: ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: controller.notesModel.data?.length ?? 0,
                 itemBuilder: (context, index) => ListTile(
@@ -467,7 +505,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       Text("${controller.notesModel.data?[index].notes}"),
                       Text(
-                        "${controller.notesModel.data?[index].createdUser?.name ?? ''}",
+                        controller.notesModel.data?[index].createdUser?.name ??
+                            '',
                       ),
                       Text(
                         DateFormat('dd/MM/yyyy').format(
@@ -483,13 +522,13 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                         onPressed: () {
                           // Implement delete functionality
                         },
-                        icon: Icon(Icons.delete_outline, size: 22),
+                        icon: const Icon(Icons.delete_outline, size: 22),
                       ),
                       IconButton(
                         onPressed: () {
                           // Implement edit functionality
                         },
-                        icon: Icon(Icons.edit, size: 22),
+                        icon: const Icon(Icons.edit, size: 22),
                       ),
                     ],
                   ),

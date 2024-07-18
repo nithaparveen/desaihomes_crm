@@ -32,7 +32,7 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  fetchNotes(leadId,context) async {
+  fetchNotes(leadId, context) async {
     isNotesLoading = true;
     notifyListeners();
     log("LeadDetailController -> fetchNotes()");
@@ -72,7 +72,7 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  fetchSiteVisits(leadId,context) async {
+  fetchSiteVisits(leadId, context) async {
     isSiteVisitsLoading = true;
     notifyListeners();
     log("LeadDetailController -> fetchSiteVisits()");
@@ -85,6 +85,18 @@ class LeadDetailController extends ChangeNotifier {
             context: context, bgColor: ColorTheme.red);
       }
       notifyListeners();
+    });
+  }
+
+  postSiteVisits(leadId, date, content, context) async {
+    log("LeadDetailController -> postSiteVisits()");
+    LeadDetailService.postSiteVisits(leadId, date, content).then((value) {
+      if (value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
     });
   }
 
