@@ -86,7 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             : Icons.visibility),
                       ),
                       border: const OutlineInputBorder(
-                        borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
+                        borderSide:
+                            BorderSide(width: 1, color: Color(0xff1A3447)),
                       ),
                     ),
                   ),
@@ -103,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Provider.of<LoginController>(context, listen: false)
                         .onLogin(emailController.text.trim(),
-                        passwordController.text.trim(), context);
+                            passwordController.text.trim(), context);
                   },
                   child: Text(
                     "Login",
