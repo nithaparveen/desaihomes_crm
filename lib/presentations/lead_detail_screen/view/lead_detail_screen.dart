@@ -40,12 +40,12 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
     super.dispose();
   }
 
-  void fetchData() {
-    Provider.of<LeadDetailController>(context, listen: false)
+  Future<void> fetchData() async {
+    await Provider.of<LeadDetailController>(context, listen: false)
         .fetchDetailData(widget.id, context);
-    Provider.of<LeadDetailController>(context, listen: false)
+    await Provider.of<LeadDetailController>(context, listen: false)
         .fetchNotes(widget.leadId, context);
-    Provider.of<LeadDetailController>(context, listen: false)
+    await Provider.of<LeadDetailController>(context, listen: false)
         .fetchSiteVisits(widget.leadId, context);
   }
 
@@ -74,36 +74,39 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
           ),
         ),
       ),
-      body: Consumer<LeadDetailController>(
-        builder: (context, controller, _) {
-          String formattedDate =
-              controller.leadDetailModel.lead?.requestedDate != null
-                  ? DateFormat('dd/MM/yyyy')
-                      .format(controller.leadDetailModel.lead!.requestedDate!)
-                  : '';
+      body: RefreshIndicator(
+        onRefresh: () => fetchData(),
+        child: Consumer<LeadDetailController>(
+          builder: (context, controller, _) {
+            String formattedDate =
+                controller.leadDetailModel.lead?.requestedDate != null
+                    ? DateFormat('dd/MM/yyyy')
+                        .format(controller.leadDetailModel.lead!.requestedDate!)
+                    : '';
 
-          return controller.isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.white,
-                    color: Colors.grey,
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildLeadInfoCard(controller, formattedDate),
-                      buildDetailSection(controller),
-                      buildStatusSection(controller),
-                      buildSourceSection(controller),
-                      buildSiteVisitSection(controller),
-                      buildNotesSection(controller),
-                    ],
-                  ),
-                );
-        },
+            return controller.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.white,
+                      color: Colors.grey,
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        buildLeadInfoCard(controller, formattedDate),
+                        buildDetailSection(controller),
+                        buildStatusSection(controller),
+                        buildSourceSection(controller),
+                        buildSiteVisitSection(controller),
+                        buildNotesSection(controller),
+                      ],
+                    ),
+                  );
+          },
+        ),
       ),
     );
   }
@@ -538,7 +541,14 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Provider.of<LeadDetailController>(context,
+                                  listen: false)
+                              .deleteNotes(
+                                  controller.notesModel.data?[index].id,
+                                  context);
+                          fetchData();
+                        },
                         icon: const Icon(Icons.delete_outline, size: 22),
                       ),
                       IconButton(

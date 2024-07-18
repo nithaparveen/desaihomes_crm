@@ -43,11 +43,37 @@ class LeadDetailService {
     }
   }
 
+  static Future<dynamic> deleteNotes(int id) async {
+    log("LeadDetailService -> deleteNotes()");
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "lead/delete-note?id=$id",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
   static Future<dynamic> fetchSiteVisits(leadId) async {
     log("LeadDetailService -> fetchSiteVisits()");
     try {
       var decodedData = await ApiHelper.getData(
         endPoint: "site-visit/list?lead_id=$leadId",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> editSiteVisits(id) async {
+    log("LeadDetailService -> editSiteVisits()");
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "site-visit/edit/$id",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

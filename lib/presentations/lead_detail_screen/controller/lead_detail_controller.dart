@@ -7,6 +7,7 @@ import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/ser
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../repository/api/lead_detail_screen/model/site_visit_edit_model.dart';
 
 class LeadDetailController extends ChangeNotifier {
   bool isLoading = false;
@@ -15,6 +16,8 @@ class LeadDetailController extends ChangeNotifier {
   LeadDetailModel leadDetailModel = LeadDetailModel();
   bool isSiteVisitsLoading = false;
   SiteVisitModel siteVisitModel = SiteVisitModel();
+  bool isSiteVisitsEditLoading = false;
+  SiteVisitEditModel siteVisitEditModel = SiteVisitEditModel();
 
   fetchDetailData(id, context) async {
     isLoading = true;
@@ -60,9 +63,9 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  deleteNotes(String leadId, String notes, context) async {
+  deleteNotes(id, context) async {
     log("LeadDetailController -> deleteNotes()");
-    LeadDetailService.postNotes(leadId, notes).then((value) {
+    LeadDetailService.deleteNotes(id).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
       } else {
@@ -80,6 +83,22 @@ class LeadDetailController extends ChangeNotifier {
       if (value["status"] == true) {
         siteVisitModel = SiteVisitModel.fromJson(value);
         isSiteVisitsLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
+      }
+      notifyListeners();
+    });
+  }
+
+  editSiteVisits(id, context) async {
+    isSiteVisitsEditLoading = true;
+    notifyListeners();
+    log("LeadDetailController -> editSiteVisits()");
+    LeadDetailService.editSiteVisits(id).then((value) {
+      if (value["status"] == true) {
+        siteVisitEditModel = SiteVisitEditModel.fromJson(value);
+        isSiteVisitsEditLoading = false;
       } else {
         AppUtils.oneTimeSnackBar("Unable to fetch Data",
             context: context, bgColor: ColorTheme.red);
