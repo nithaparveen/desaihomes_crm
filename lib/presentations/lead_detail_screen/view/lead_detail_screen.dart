@@ -188,35 +188,38 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(details.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(details[index],
-                        style: GLTextStyles.cabinStyle(size: 18)),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 3,
-                    child: Wrap(
-                      children: [
-                        Text(
-                          ": ${getDetailValue(controller, index)}",
-                          style: GLTextStyles.cabinStyle(
-                              size: 18, weight: FontWeight.w500),
-                          overflow: TextOverflow.fade,
-                        ),
-                      ],
+          children: List.generate(
+            details.length,
+            (index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(details[index],
+                          style: GLTextStyles.cabinStyle(size: 18)),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 3,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            ": ${getDetailValue(controller, index)}",
+                            style: GLTextStyles.cabinStyle(
+                                size: 18, weight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -230,35 +233,38 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(details1.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(details1[index],
-                        style: GLTextStyles.cabinStyle(size: 18)),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 3,
-                    child: Wrap(
-                      children: [
-                        Text(
-                          ": ${getStatusValue(controller, index)}",
-                          style: GLTextStyles.cabinStyle(
-                              size: 18, weight: FontWeight.w500),
-                          overflow: TextOverflow.fade,
-                        ),
-                      ],
+          children: List.generate(
+            details1.length,
+            (index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(details1[index],
+                          style: GLTextStyles.cabinStyle(size: 18)),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 3,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            ": ${getStatusValue(controller, index)}",
+                            style: GLTextStyles.cabinStyle(
+                                size: 18, weight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -272,35 +278,38 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(details2.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(details2[index],
-                        style: GLTextStyles.cabinStyle(size: 18)),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 3,
-                    child: Wrap(
-                      children: [
-                        Text(
-                          ": ${getSourceValue(controller, index)}",
-                          style: GLTextStyles.cabinStyle(
-                              size: 18, weight: FontWeight.w500),
-                          overflow: TextOverflow.fade,
-                        ),
-                      ],
+          children: List.generate(
+            details2.length,
+            (index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(details2[index],
+                          style: GLTextStyles.cabinStyle(size: 18)),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 3,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            ": ${getSourceValue(controller, index)}",
+                            style: GLTextStyles.cabinStyle(
+                                size: 18, weight: FontWeight.w500),
+                            overflow: TextOverflow.fade,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -308,11 +317,16 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
 
   Future<void> selectedDate() async {
     DateTime? picked = await showDatePicker(
-        context: context, firstDate: DateTime(2000), lastDate: DateTime(2100),initialDate: DateTime.now());
-    if(picked != null){
-      setState(() {
-        dateController.text = picked.toString().split(" ")[0];
-      });
+        context: context,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+        initialDate: DateTime.now());
+    if (picked != null) {
+      setState(
+        () {
+          dateController.text = picked.toString().split(" ")[0];
+        },
+      );
     }
   }
 
@@ -324,7 +338,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text("Site Visits", style: GLTextStyles.cabinStyle(size: 18)),
@@ -340,7 +354,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                   ),
                 ),
                 readOnly: true,
-                onTap: (){
+                onTap: () {
                   selectedDate();
                 },
               ),
@@ -352,7 +366,10 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                 decoration: const InputDecoration(
                   labelText: "Remarks",
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: Color(0xff1A3447),
+                    ),
                   ),
                 ),
                 maxLines: 3,
@@ -367,16 +384,18 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                   final leadDetailController =
                       Provider.of<LeadDetailController>(context, listen: false);
                   if (siteVisitController.text.isNotEmpty) {
-                    setState(() {
-                      leadDetailController.postSiteVisits(
-                        widget.leadId.toString(),
-                        dateController.text,
-                        siteVisitController.text,
-                        context,
-                      );
-                      siteVisitController.clear();
-                      dateController.clear();
-                    });
+                    setState(
+                      () {
+                        leadDetailController.postSiteVisits(
+                          widget.leadId.toString(),
+                          dateController.text,
+                          siteVisitController.text,
+                          context,
+                        );
+                        siteVisitController.clear();
+                        dateController.clear();
+                      },
+                    );
                   }
                   fetchData();
                 },
@@ -447,7 +466,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text("Notes", style: GLTextStyles.cabinStyle(size: 18)),
@@ -519,15 +538,11 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          // Implement delete functionality
-                        },
+                        onPressed: () {},
                         icon: const Icon(Icons.delete_outline, size: 22),
                       ),
                       IconButton(
-                        onPressed: () {
-                          // Implement edit functionality
-                        },
+                        onPressed: () {},
                         icon: const Icon(Icons.edit, size: 22),
                       ),
                     ],
