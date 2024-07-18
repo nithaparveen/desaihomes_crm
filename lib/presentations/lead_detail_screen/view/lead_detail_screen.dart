@@ -447,7 +447,17 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                         icon: const Icon(Icons.delete_outline, size: 22),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(context: context, builder: (context) => const AlertDialog(
+                            title: ListBody(
+                              children: [
+                                TextField(
+                                  
+                                )
+                              ],
+                            ),
+                          ),);
+                        },
                         icon: const Icon(Icons.edit, size: 22),
                       ),
                     ],
