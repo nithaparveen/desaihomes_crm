@@ -83,16 +83,17 @@ class LeadDetailService {
     }
   }
 
-  static Future<dynamic> editSiteVisits(id) async {
+  static Future<dynamic> editSiteVisits(int id, String remarks, String date) async {
     log("LeadDetailService -> editSiteVisits()");
     try {
-      var decodedData = await ApiHelper.getData(
-        endPoint: "site-visit/edit/$id",
+      var decodedData = await ApiHelper.postData(
+        endPoint: "site-visit/update?id=$id&site_visit_date=$date&site_visit_remarks=$remarks",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
     } catch (e) {
       log("$e");
+      return null;
     }
   }
 

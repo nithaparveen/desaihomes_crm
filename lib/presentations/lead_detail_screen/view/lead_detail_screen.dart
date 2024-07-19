@@ -318,23 +318,22 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
     );
   }
 
-  Future<void> selectedDate() async {
-    DateTime? picked = await showDatePicker(
-        context: context,
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-        initialDate: DateTime.now());
-    if (picked != null) {
-      setState(
-        () {
-          dateController.text = picked.toString().split(" ")[0];
-        },
-      );
-    }
-  }
-
   Widget buildSiteVisitSection(LeadDetailController controller) {
     var size = MediaQuery.sizeOf(context);
+
+    Future<void> selectDate(
+        BuildContext context, TextEditingController dateController) async {
+      final DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2101),
+      );
+      if (pickedDate != null && pickedDate != DateTime.now()) {
+        dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+      }
+    }
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
@@ -360,7 +359,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                 ),
                 readOnly: true,
                 onTap: () {
-                  selectedDate();
+                  selectDate(context, dateController);
                 },
               ),
             ),
@@ -452,15 +451,96 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                         onPressed: () {
                           showDialog(
                             context: context,
-                            builder: (context) => const AlertDialog(
-                              title: ListBody(
-                                children: [TextField()],
-                              ),
-                            ),
+                            builder: (context) {
+                              final TextEditingController
+                                  editSiteVisitController =
+                                  TextEditingController(
+                                text: controller.siteVisitModel.data?[index]
+                                    .siteVisitRemarks,
+                              );
+                              final TextEditingController editDateController =
+                                  TextEditingController(
+                                text: DateFormat('yyyy-MM-dd').format(controller
+                                        .siteVisitModel
+                                        .data?[index]
+                                        .siteVisitDate ??
+                                    DateTime.now()),
+                              );
+                              return AlertDialog(
+                                title: const Text('Edit Note'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: editDateController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Date',
+                                        prefixIcon: Icon(
+                                            Icons.calendar_today_outlined,
+                                            size: 20),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              width: 1,
+                                              color: Color(0xff1A3447)),
+                                        ),
+                                      ),
+                                      readOnly: true,
+                                      onTap: () {
+                                        selectDate(context, editDateController);
+                                      },
+                                    ),
+                                    const SizedBox(height: 15),
+                                    TextField(
+                                      controller: editSiteVisitController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Note',
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              width: 1,
+                                              color: Color(0xff1A3447)),
+                                        ),
+                                      ),
+                                      maxLines: 3,
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      final updatedRemark =
+                                          editSiteVisitController.text;
+                                      final updatedDate =
+                                          editDateController.text;
+                                      if (updatedRemark.isNotEmpty &&
+                                          updatedDate.isNotEmpty) {
+                                        Provider.of<LeadDetailController>(
+                                                context,
+                                                listen: false)
+                                            .editSiteVisits(
+                                                controller.siteVisitModel
+                                                    .data![index].id,
+                                                updatedRemark,
+                                                updatedDate,
+                                                context);
+                                        fetchData();
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                    child: const Text('Save'),
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         },
                         icon: const Icon(Icons.edit, size: 22),
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -503,9 +583,11 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
               child: MaterialButton(
                 color: ColorTheme.blue,
                 onPressed: () {
-                  final leadDetailController = Provider.of<LeadDetailController>(context, listen: false);
+                  final leadDetailController =
+                      Provider.of<LeadDetailController>(context, listen: false);
                   if (noteController.text.isNotEmpty) {
-                    leadDetailController.postNotes(widget.leadId.toString(), noteController.text, context);
+                    leadDetailController.postNotes(
+                        widget.leadId.toString(), noteController.text, context);
                     noteController.clear();
                   }
                   fetchData();
@@ -533,11 +615,13 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       Text("${controller.notesModel.data?[index].notes}"),
                       Text(
-                        controller.notesModel.data?[index].createdUser?.name ?? '',
+                        controller.notesModel.data?[index].createdUser?.name ??
+                            '',
                       ),
                       Text(
                         DateFormat('dd/MM/yyyy').format(
-                            controller.notesModel.data?[index].createdAt ?? DateTime.now()),
+                            controller.notesModel.data?[index].createdAt ??
+                                DateTime.now()),
                       ),
                     ],
                   ),
@@ -546,8 +630,11 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Provider.of<LeadDetailController>(context, listen: false)
-                              .deleteNotes(controller.notesModel.data?[index].id, context);
+                          Provider.of<LeadDetailController>(context,
+                                  listen: false)
+                              .deleteNotes(
+                                  controller.notesModel.data?[index].id,
+                                  context);
                           fetchData();
                         },
                         icon: const Icon(Icons.delete_outline, size: 22),
@@ -557,7 +644,8 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                           showDialog(
                             context: context,
                             builder: (context) {
-                              final TextEditingController editNoteController = TextEditingController(
+                              final TextEditingController editNoteController =
+                                  TextEditingController(
                                 text: controller.notesModel.data?[index].notes,
                               );
                               return AlertDialog(
@@ -567,7 +655,8 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                                   decoration: const InputDecoration(
                                     labelText: 'Note',
                                     border: OutlineInputBorder(
-                                      borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
+                                      borderSide: BorderSide(
+                                          width: 1, color: Color(0xff1A3447)),
                                     ),
                                   ),
                                   maxLines: 3,
@@ -581,10 +670,17 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      final updatedNote = editNoteController.text;
+                                      final updatedNote =
+                                          editNoteController.text;
                                       if (updatedNote.isNotEmpty) {
-                                        Provider.of<LeadDetailController>(context, listen: false)
-                                            .editNotes(controller.notesModel.data![index].id, updatedNote, context);
+                                        Provider.of<LeadDetailController>(
+                                                context,
+                                                listen: false)
+                                            .editNotes(
+                                                controller
+                                                    .notesModel.data![index].id,
+                                                updatedNote,
+                                                context);
                                         fetchData();
                                         Navigator.of(context).pop();
                                       }

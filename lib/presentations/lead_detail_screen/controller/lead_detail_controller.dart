@@ -63,7 +63,7 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  Future<void> editNotes( id, String note, BuildContext context) async {
+  Future<void> editNotes(id, String note, BuildContext context) async {
     log("LeadDetailController -> editNotes()");
     LeadDetailService.editNotes(id, note).then((value) {
       if (value != null && value["status"] == true) {
@@ -104,19 +104,14 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  editSiteVisits(id, context) async {
-    isSiteVisitsEditLoading = true;
-    notifyListeners();
+  Future<void> editSiteVisits(id,remarks,date, context) async {
     log("LeadDetailController -> editSiteVisits()");
-    LeadDetailService.editSiteVisits(id).then((value) {
-      if (value["status"] == true) {
-        siteVisitEditModel = SiteVisitEditModel.fromJson(value);
-        isSiteVisitsEditLoading = false;
+    LeadDetailService.editSiteVisits(id, remarks, date).then((value) {
+      if (value != null && value["status"] == true) {
       } else {
-        AppUtils.oneTimeSnackBar("Unable to fetch Data",
-            context: context, bgColor: ColorTheme.red);
+        AppUtils.oneTimeSnackBar(value?["message"] ?? "An error occurred",
+            context: context, bgColor: Colors.redAccent);
       }
-      notifyListeners();
     });
   }
 
