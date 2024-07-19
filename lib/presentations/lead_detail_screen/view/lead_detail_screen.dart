@@ -336,7 +336,9 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
   Widget buildSiteVisitSection(LeadDetailController controller) {
     var size = MediaQuery.sizeOf(context);
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+      ),
       elevation: 1,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -448,15 +450,14 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                       ),
                       IconButton(
                         onPressed: () {
-                          showDialog(context: context, builder: (context) => const AlertDialog(
-                            title: ListBody(
-                              children: [
-                                TextField(
-                                  
-                                )
-                              ],
+                          showDialog(
+                            context: context,
+                            builder: (context) => const AlertDialog(
+                              title: ListBody(
+                                children: [TextField()],
+                              ),
                             ),
-                          ),);
+                          );
                         },
                         icon: const Icon(Icons.edit, size: 22),
                       ),
@@ -502,14 +503,9 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
               child: MaterialButton(
                 color: ColorTheme.blue,
                 onPressed: () {
-                  final leadDetailController =
-                      Provider.of<LeadDetailController>(context, listen: false);
+                  final leadDetailController = Provider.of<LeadDetailController>(context, listen: false);
                   if (noteController.text.isNotEmpty) {
-                    leadDetailController.postNotes(
-                      widget.leadId.toString(),
-                      noteController.text,
-                      context,
-                    );
+                    leadDetailController.postNotes(widget.leadId.toString(), noteController.text, context);
                     noteController.clear();
                   }
                   fetchData();
@@ -537,13 +533,11 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       Text("${controller.notesModel.data?[index].notes}"),
                       Text(
-                        controller.notesModel.data?[index].createdUser?.name ??
-                            '',
+                        controller.notesModel.data?[index].createdUser?.name ?? '',
                       ),
                       Text(
                         DateFormat('dd/MM/yyyy').format(
-                            controller.notesModel.data?[index].createdAt ??
-                                DateTime.now()),
+                            controller.notesModel.data?[index].createdAt ?? DateTime.now()),
                       ),
                     ],
                   ),
@@ -552,17 +546,56 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Provider.of<LeadDetailController>(context,
-                                  listen: false)
-                              .deleteNotes(
-                                  controller.notesModel.data?[index].id,
-                                  context);
+                          Provider.of<LeadDetailController>(context, listen: false)
+                              .deleteNotes(controller.notesModel.data?[index].id, context);
                           fetchData();
                         },
                         icon: const Icon(Icons.delete_outline, size: 22),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              final TextEditingController editNoteController = TextEditingController(
+                                text: controller.notesModel.data?[index].notes,
+                              );
+                              return AlertDialog(
+                                title: const Text('Edit Note'),
+                                content: TextField(
+                                  controller: editNoteController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Note',
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
+                                    ),
+                                  ),
+                                  maxLines: 3,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      final updatedNote = editNoteController.text;
+                                      if (updatedNote.isNotEmpty) {
+                                        Provider.of<LeadDetailController>(context, listen: false)
+                                            .editNotes(controller.notesModel.data![index].id, updatedNote, context);
+                                        fetchData();
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                    child: const Text('Save'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                         icon: const Icon(Icons.edit, size: 22),
                       ),
                     ],

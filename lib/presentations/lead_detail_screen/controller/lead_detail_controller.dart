@@ -63,6 +63,19 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
+  Future<void> editNotes( id, String note, BuildContext context) async {
+    log("LeadDetailController -> editNotes()");
+    LeadDetailService.editNotes(id, note).then((value) {
+      if (value != null && value["status"] == true) {
+      } else {
+        AppUtils.oneTimeSnackBar(value?["message"] ?? "An error occurred",
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
+
+
+
   deleteNotes(id, context) async {
     log("LeadDetailController -> deleteNotes()");
     LeadDetailService.deleteNotes(id).then((value) {

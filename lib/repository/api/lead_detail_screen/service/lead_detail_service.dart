@@ -43,6 +43,20 @@ class LeadDetailService {
     }
   }
 
+  static Future<dynamic> editNotes(int id, String note) async {
+    log("LeadDetailService -> editNotes()");
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "lead/update-note?id=$id&notes=$note",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+      return null;
+    }
+  }
+
   static Future<dynamic> deleteNotes(int id) async {
     log("LeadDetailService -> deleteNotes()");
     try {
