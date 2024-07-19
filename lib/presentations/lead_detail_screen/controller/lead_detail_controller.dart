@@ -3,21 +3,21 @@ import 'dart:developer';
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/lead_detail_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/notes_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/site_visit_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/status_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/service/lead_detail_service.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
-import '../../../repository/api/lead_detail_screen/model/site_visit_edit_model.dart';
 
 class LeadDetailController extends ChangeNotifier {
   bool isLoading = false;
+  LeadDetailModel leadDetailModel = LeadDetailModel();
   bool isNotesLoading = false;
   NotesModel notesModel = NotesModel();
-  LeadDetailModel leadDetailModel = LeadDetailModel();
   bool isSiteVisitsLoading = false;
   SiteVisitModel siteVisitModel = SiteVisitModel();
-  bool isSiteVisitsEditLoading = false;
-  SiteVisitEditModel siteVisitEditModel = SiteVisitEditModel();
+  bool isStatusListLoading = false;
+  StatusListModel statusListModel = StatusListModel();
 
   fetchDetailData(id, context) async {
     isLoading = true;
@@ -74,8 +74,6 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-
-
   deleteNotes(id, context) async {
     log("LeadDetailController -> deleteNotes()");
     LeadDetailService.deleteNotes(id).then((value) {
@@ -104,7 +102,7 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  Future<void> editSiteVisits(id,remarks,date, context) async {
+  Future<void> editSiteVisits(id, remarks, date, context) async {
     log("LeadDetailController -> editSiteVisits()");
     LeadDetailService.editSiteVisits(id, remarks, date).then((value) {
       if (value != null && value["status"] == true) {
@@ -136,6 +134,22 @@ class LeadDetailController extends ChangeNotifier {
         AppUtils.oneTimeSnackBar(value["message"],
             context: context, bgColor: Colors.redAccent);
       }
+    });
+  }
+
+  fetchStatusList(context) async {
+    isStatusListLoading = true;
+    notifyListeners();
+    log("LeadDetailController -> fetchStatusList()");
+    LeadDetailService.fetchStatusList().then((value) {
+      if (value["status"] == true) {
+        statusListModel = StatusListModel.fromJson(value);
+        isStatusListLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
+      }
+      notifyListeners();
     });
   }
 }

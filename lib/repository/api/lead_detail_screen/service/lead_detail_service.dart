@@ -123,4 +123,16 @@ class LeadDetailService {
       log("$e");
     }
   }
+  
+  static Future<dynamic> fetchStatusList() async {
+    log("LeadDetailService -> fetchStatusList() ");
+    try{
+      var decodedData = await ApiHelper.getData(endPoint: "crm-status/list",
+      header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    }catch(e){
+      log("$e");
+    }
+  }
 }
