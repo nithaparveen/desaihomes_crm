@@ -42,8 +42,14 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
   Future<void> fetchData() async {
     await Provider.of<LeadDetailController>(context, listen: false)
         .fetchDetailData(widget.leadId, context);
+  }
+
+  Future<void> fetchNotes() async {
     await Provider.of<LeadDetailController>(context, listen: false)
         .fetchNotes(widget.leadId, context);
+  }
+
+  Future<void> fetchSiteVisits() async {
     await Provider.of<LeadDetailController>(context, listen: false)
         .fetchSiteVisits(widget.leadId, context);
   }
@@ -58,14 +64,15 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
         ),
         leading: IconButton(
           onPressed: () {
-            Provider.of<DashboardController>(context, listen: false)
-                .fetchData(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const BottomNavBar(),
-              ),
-            );
+            Navigator.pop(context);
+            // Provider.of<DashboardController>(context, listen: false)
+            //     .fetchData(context);
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => const BottomNavBar(),
+            //   ),
+            // );
           },
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -78,32 +85,31 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
         child: Consumer<LeadDetailController>(
           builder: (context, controller, _) {
             String formattedDate =
-            controller.leadDetailModel.lead?.requestedDate != null
-                ? DateFormat('dd/MM/yyyy')
-                .format(controller.leadDetailModel.lead!.requestedDate!)
-                : '';
-
+                controller.leadDetailModel.lead?.requestedDate != null
+                    ? DateFormat('dd/MM/yyyy')
+                        .format(controller.leadDetailModel.lead!.requestedDate!)
+                    : '';
             return controller.isLoading
                 ? const Center(
-              child: CircularProgressIndicator(
-                backgroundColor: Colors.white,
-                color: Colors.grey,
-              ),
-            )
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.white,
+                      color: Colors.grey,
+                    ),
+                  )
                 : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildLeadInfoCard(controller, formattedDate),
-                  buildDetailSection(controller),
-                  buildStatusSection(controller),
-                  buildSourceSection(controller),
-                  buildSiteVisitSection(controller),
-                  buildNotesSection(controller),
-                ],
-              ),
-            );
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        buildLeadInfoCard(controller, formattedDate),
+                        buildDetailSection(controller),
+                        buildStatusSection(controller),
+                        buildSourceSection(controller),
+                        buildSiteVisitSection(controller),
+                        buildNotesSection(controller),
+                      ],
+                    ),
+                  );
           },
         ),
       ),
@@ -151,7 +157,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                   Container(
                     margin: const EdgeInsets.only(top: 8),
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: ColorTheme.yellow,
                       borderRadius: BorderRadius.circular(15),
@@ -163,7 +169,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                 Container(
                   margin: const EdgeInsets.only(top: 8),
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.orange[100],
                     borderRadius: BorderRadius.circular(15),
@@ -192,7 +198,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: List.generate(
             details.length,
-                (index) {
+            (index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
@@ -237,7 +243,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: List.generate(
             details1.length,
-                (index) {
+            (index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
@@ -282,7 +288,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: List.generate(
             details2.length,
-                (index) {
+            (index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
@@ -385,10 +391,10 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                 color: ColorTheme.blue,
                 onPressed: () {
                   final leadDetailController =
-                  Provider.of<LeadDetailController>(context, listen: false);
+                      Provider.of<LeadDetailController>(context, listen: false);
                   if (siteVisitController.text.isNotEmpty) {
                     setState(
-                          () {
+                      () {
                         leadDetailController.postSiteVisits(
                           widget.leadId.toString(),
                           dateController.text,
@@ -400,7 +406,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                       },
                     );
                   }
-                  fetchData();
+                  fetchSiteVisits();
                 },
                 child: Text(
                   "Submit",
@@ -427,7 +433,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                           "${controller.siteVisitModel.data?[index].siteVisitRemarks}"),
                       Text(
                         DateFormat('dd/MM/yyyy').format(controller
-                            .siteVisitModel.data?[index].siteVisitDate ??
+                                .siteVisitModel.data?[index].siteVisitDate ??
                             DateTime.now()),
                       ),
                     ],
@@ -437,12 +443,29 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Provider.of<LeadDetailController>(context,
-                              listen: false)
-                              .deleteSiteVisits(
-                              controller.siteVisitModel.data?[index].id,
-                              context);
-                          fetchData();
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text("Confirm Delete"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Provider.of<LeadDetailController>(
+                                                context,
+                                                listen: false)
+                                            .deleteSiteVisits(
+                                                controller.siteVisitModel
+                                                    .data?[index].id,
+                                                context);
+                                        fetchSiteVisits();
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                );
+                              });
                         },
                         icon: const Icon(Icons.delete_outline, size: 22),
                       ),
@@ -452,17 +475,17 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                             context: context,
                             builder: (context) {
                               final TextEditingController
-                              editSiteVisitController =
-                              TextEditingController(
+                                  editSiteVisitController =
+                                  TextEditingController(
                                 text: controller.siteVisitModel.data?[index]
                                     .siteVisitRemarks,
                               );
                               final TextEditingController editDateController =
-                              TextEditingController(
+                                  TextEditingController(
                                 text: DateFormat('yyyy-MM-dd').format(controller
-                                    .siteVisitModel
-                                    .data?[index]
-                                    .siteVisitDate ??
+                                        .siteVisitModel
+                                        .data?[index]
+                                        .siteVisitDate ??
                                     DateTime.now()),
                               );
                               return AlertDialog(
@@ -519,16 +542,16 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                                       if (updatedRemark.isNotEmpty &&
                                           updatedDate.isNotEmpty) {
                                         Provider.of<LeadDetailController>(
-                                            context,
-                                            listen: false)
+                                                context,
+                                                listen: false)
                                             .editSiteVisits(
-                                            controller.siteVisitModel
-                                                .data![index].id,
-                                            updatedRemark,
-                                            updatedDate,
-                                            context);
-                                        fetchData();
-                                        Navigator.of(context).pop();
+                                                controller.siteVisitModel
+                                                    .data![index].id,
+                                                updatedRemark,
+                                                updatedDate,
+                                                context);
+                                        fetchSiteVisits();
+                                        // Navigator.of(context).pop();
                                       }
                                     },
                                     child: const Text('Save'),
@@ -583,13 +606,13 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                 color: ColorTheme.blue,
                 onPressed: () {
                   final leadDetailController =
-                  Provider.of<LeadDetailController>(context, listen: false);
+                      Provider.of<LeadDetailController>(context, listen: false);
                   if (noteController.text.isNotEmpty) {
                     leadDetailController.postNotes(
                         widget.leadId.toString(), noteController.text, context);
                     noteController.clear();
                   }
-                  fetchData();
+                  fetchNotes();
                 },
                 child: Text(
                   "Submit",
@@ -629,12 +652,29 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Provider.of<LeadDetailController>(context,
-                              listen: false)
-                              .deleteNotes(
-                              controller.notesModel.data?[index].id,
-                              context);
-                          fetchData();
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text("Confirm Delete"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Provider.of<LeadDetailController>(
+                                                context,
+                                                listen: false)
+                                            .deleteNotes(
+                                                controller
+                                                    .notesModel.data?[index].id,
+                                                context);
+                                        fetchNotes();
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                );
+                              });
                         },
                         icon: const Icon(Icons.delete_outline, size: 22),
                       ),
@@ -644,7 +684,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                             context: context,
                             builder: (context) {
                               final TextEditingController editNoteController =
-                              TextEditingController(
+                                  TextEditingController(
                                 text: controller.notesModel.data?[index].notes,
                               );
                               return AlertDialog(
@@ -673,13 +713,13 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                                           editNoteController.text;
                                       if (updatedNote.isNotEmpty) {
                                         Provider.of<LeadDetailController>(
-                                            context,
-                                            listen: false)
+                                                context,
+                                                listen: false)
                                             .editNotes(
-                                            controller
-                                                .notesModel.data![index].id,
-                                            updatedNote,
-                                            context);
+                                                controller
+                                                    .notesModel.data![index].id,
+                                                updatedNote,
+                                                context);
                                         fetchData();
                                         Navigator.of(context).pop();
                                       }
@@ -730,7 +770,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
       case "Requested Date":
         return controller.leadDetailModel.lead?.requestedDate != null
             ? DateFormat('dd/MM/yyyy')
-            .format(controller.leadDetailModel.lead!.requestedDate!)
+                .format(controller.leadDetailModel.lead!.requestedDate!)
             : "";
       case "Lead Source":
         return controller.leadDetailModel.lead?.source ?? "";
@@ -789,7 +829,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
       case "Next Follow Up Date":
         return controller.leadDetailModel.lead?.followUpDate != null
             ? DateFormat('dd/MM/yyyy')
-            .format(controller.leadDetailModel.lead!.followUpDate!)
+                .format(controller.leadDetailModel.lead!.followUpDate!)
             : "";
       case "Assign To":
         return controller.leadDetailModel.lead?.assignedToDetails?.name ?? "";
