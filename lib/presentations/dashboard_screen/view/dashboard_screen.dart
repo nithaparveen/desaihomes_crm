@@ -340,7 +340,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => LeadDetailScreen(
-                                      id: id,
                                       leadId: id,
                                     ),
                                   ),
@@ -460,7 +459,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                       builder:
                                                                           (context) =>
                                                                               LeadDetailScreen(
-                                                                        id: id,
                                                                         leadId:
                                                                             id,
                                                                       ),

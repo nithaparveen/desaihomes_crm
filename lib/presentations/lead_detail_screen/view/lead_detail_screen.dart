@@ -12,10 +12,9 @@ import '../../../core/constants/textstyles.dart';
 import '../../dashboard_screen/controller/dashboard_controller.dart';
 
 class LeadDetailScreen extends StatefulWidget {
-  final int? id;
   final int? leadId;
 
-  const LeadDetailScreen({super.key, required this.id, this.leadId});
+  const LeadDetailScreen({super.key, this.leadId});
 
   @override
   LeadDetailScreenState createState() => LeadDetailScreenState();
@@ -42,7 +41,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
 
   Future<void> fetchData() async {
     await Provider.of<LeadDetailController>(context, listen: false)
-        .fetchDetailData(widget.id, context);
+        .fetchDetailData(widget.leadId, context);
     await Provider.of<LeadDetailController>(context, listen: false)
         .fetchNotes(widget.leadId, context);
     await Provider.of<LeadDetailController>(context, listen: false)

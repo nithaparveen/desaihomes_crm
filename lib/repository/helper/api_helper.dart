@@ -40,10 +40,10 @@ class ApiHelper {
     try {
       var response = await http.get(url, headers: header);
       log("getData -> Status code -> ${response.statusCode}");
-      log("response -> ${response.body.toString()}");
+      // log("response -> ${response.body.toString()}");
       if (response.statusCode == 200) {
         var decodedData = jsonDecode(response.body);
-        log("$decodedData");
+        // log("$decodedData");
         return decodedData;
       } else {
         log("Else Condition >> Api failed");
@@ -63,10 +63,10 @@ class ApiHelper {
     try {
       var response = await http.get(url, headers: header);
       log("getData -> Status code -> ${response.statusCode}");
-      log("response -> ${response.body.toString()}");
+      // log("response -> ${response.body.toString()}");
       if (response.statusCode == 200) {
         var decodedData = jsonDecode(response.body);
-        log("$decodedData");
+        // log("$decodedData");
         return decodedData;
       } else {
         log("Else Condition >> Api failed");

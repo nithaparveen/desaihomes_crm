@@ -19,11 +19,11 @@ class LeadDetailController extends ChangeNotifier {
   bool isStatusListLoading = false;
   StatusListModel statusListModel = StatusListModel();
 
-  fetchDetailData(id, context) async {
+  fetchDetailData(leadId, context) async {
     isLoading = true;
     notifyListeners();
     log("LeadDetailController -> fetchDetailData()");
-    LeadDetailService.fetchDetailData(id).then((value) {
+    LeadDetailService.fetchDetailData(leadId).then((value) {
       if (value["status"] == true) {
         leadDetailModel = LeadDetailModel.fromJson(value);
         isLoading = false;
