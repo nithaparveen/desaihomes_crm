@@ -1,10 +1,8 @@
 import 'dart:developer';
-
 import 'package:desaihomes_crm_application/repository/api/dashboard_screen/model/dashboard_model.dart';
 import 'package:desaihomes_crm_application/repository/api/dashboard_screen/model/user_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/dashboard_screen/service/dashboard_service.dart';
 import 'package:flutter/material.dart';
-
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
 
@@ -14,11 +12,16 @@ class DashboardController extends ChangeNotifier {
   bool isLoading = false;
   bool isAssignLoading = false;
   bool isUserListLoading = false;
-  bool isLoadingMore = false;
-  int currentPage = 1;
+  int _currentPage = 1;
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
+
+  bool get isLoadingMore => _isLoadingMore;
 
   fetchData(context) async {
     isLoading = true;
+    _currentPage = 1;
+    _hasMoreData = true;
     notifyListeners();
     log("DashboardController -> fetchData()");
     DashboardService.fetchData().then((value) {
@@ -32,7 +35,6 @@ class DashboardController extends ChangeNotifier {
       notifyListeners();
     });
   }
-
 
   fetchUserList(context) async {
     isUserListLoading = true;
@@ -62,23 +64,27 @@ class DashboardController extends ChangeNotifier {
     });
   }
 
-  loadMoreData(BuildContext context) async {
-    if (!isLoadingMore) {
-      isLoadingMore = true;
-      currentPage++;
+  Future<void> loadMoreData(BuildContext context) async {
+    if (!_isLoadingMore && _hasMoreData) {
+      _isLoadingMore = true;
+      _currentPage++;
       notifyListeners();
       try {
-        var response = await DashboardService.fetchLeads(page: currentPage);
+        var response = await DashboardService.fetchLeads(page: _currentPage);
         if (response != null && response["status"] == true) {
           var newData = DashboardModel.fromJson(response);
-          dashboardModel.leads?.data?.addAll(newData.leads?.data ?? []);
+          if (newData.leads?.data?.isNotEmpty ?? false) {
+            dashboardModel.leads?.data?.addAll(newData.leads?.data ?? []);
+          } else {
+            _hasMoreData = false;
+          }
         } else {
           AppUtils.oneTimeSnackBar("error", context: context);
         }
       } catch (e) {
         log("$e");
       } finally {
-        isLoadingMore = false;
+        _isLoadingMore = false;
         notifyListeners();
       }
     }

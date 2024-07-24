@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../../core/constants/textstyles.dart';
 import '../../lead_detail_screen/controller/lead_detail_controller.dart';
 

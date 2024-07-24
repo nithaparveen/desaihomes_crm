@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:another_flushbar/flushbar.dart';
-
 import '../../lead_detail_screen/view/lead_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -17,31 +16,47 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = -1;
-  final ScrollController scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
-    fetchData();
-    scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
-        Provider.of<DashboardController>(context, listen: false)
-            .loadMoreData(context);
-      }
-    });
     super.initState();
+    fetchData();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void fetchData() async {
+    await Provider.of<DashboardController>(context, listen: false)
+        .fetchData(context);
+    Provider.of<DashboardController>(context, listen: false)
+        .fetchUserList(context);
+    setState(() {});
+  }
+
+  void fetchMoreData() async {
+    if (!_isLoadingMore) {
+      setState(() {
+        _isLoadingMore = true;
+      });
+      await Provider.of<DashboardController>(context, listen: false)
+          .loadMoreData(context);
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.extentAfter < 500) {
+      fetchMoreData();
+    }
   }
 
   @override
   void dispose() {
-    scrollController.dispose();
+    _scrollController.dispose();
     super.dispose();
-  }
-
-  fetchData() {
-    Provider.of<DashboardController>(context, listen: false).fetchData(context);
-    Provider.of<DashboardController>(context, listen: false)
-        .fetchUserList(context);
   }
 
   String removeClassName(String input) {
@@ -63,227 +78,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         automaticallyImplyLeading: false,
         forceMaterialTransparency: true,
       ),
-      endDrawer: Drawer(
-        width: size.width * .75,
-        child: ListView(
-          children: [
-            ListTile(
-              splashColor: Colors.transparent,
-              leading: Icon(
-                Icons.leaderboard_outlined,
-                color: _selectedIndex == 0 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Leads",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 0 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 0 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(() {
-                  _selectedIndex = 0;
-                });
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.warning_amber,
-                color: _selectedIndex == 1 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Triage Leads",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 1 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 1 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 1;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.campaign,
-                color: _selectedIndex == 2 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Campaigns",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 2 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 2 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 2;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.sticky_note_2_outlined,
-                color: _selectedIndex == 3 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Follow Ups",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 3 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 3 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 3;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.pin_drop_outlined,
-                color: _selectedIndex == 4 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Site Visits",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 4 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 4 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 4;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.article_outlined,
-                color: _selectedIndex == 5 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Reports",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 5 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 5 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 5;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.label_outline,
-                color: _selectedIndex == 6 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Labels",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 6 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 6 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 6;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.archive_outlined,
-                color: _selectedIndex == 7 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Archived Leads",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 7 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 7 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 7;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.delete_outline,
-                color: _selectedIndex == 8 ? ColorTheme.yellow : Colors.black,
-              ),
-              title: Text(
-                "Recycle Bin",
-                style: GLTextStyles.robotoStyle(
-                  size: 18,
-                  weight: FontWeight.w500,
-                  color: _selectedIndex == 8 ? ColorTheme.white : Colors.black,
-                ),
-              ),
-              tileColor: _selectedIndex == 8 ? ColorTheme.lightBlue : null,
-              onTap: () {
-                setState(
-                  () {
-                    _selectedIndex = 8;
-                  },
-                );
-              },
-              splashColor: Colors.transparent,
-            ),
-          ],
-        ),
-      ),
+      // endDrawer: buildDrawer(size),
       body: RefreshIndicator(
         onRefresh: () async {
-          Provider.of<DashboardController>(context, listen: false)
+          await Provider.of<DashboardController>(context, listen: false)
               .fetchData(context);
+          setState(() {});
         },
         child: Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8),
           child: CustomScrollView(
-            controller: scrollController,
+            controller: _scrollController,
             slivers: [
               SliverToBoxAdapter(
                 child: Text(
@@ -312,7 +117,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           itemCount: controller.isLoadingMore
                               ? controller.dashboardModel.leads!.data!.length +
                                   1
-                              : controller.dashboardModel.leads?.data?.length,
+                              : controller.dashboardModel.leads?.data?.length ??
+                                  0,
                           itemBuilder: (context, index) {
                             if (index >=
                                 controller.dashboardModel.leads!.data!.length) {
@@ -580,6 +386,221 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Drawer buildDrawer(Size size) {
+    return Drawer(
+      width: size.width * .75,
+      child: ListView(
+        children: [
+          ListTile(
+            splashColor: Colors.transparent,
+            leading: Icon(
+              Icons.leaderboard_outlined,
+              color: _selectedIndex == 0 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Leads",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 0 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 0 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(() {
+                _selectedIndex = 0;
+              });
+            },
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.warning_amber,
+              color: _selectedIndex == 1 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Triage Leads",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 1 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 1 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 1;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.campaign,
+              color: _selectedIndex == 2 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Campaigns",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 2 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 2 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 2;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.sticky_note_2_outlined,
+              color: _selectedIndex == 3 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Follow Ups",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 3 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 3 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 3;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.pin_drop_outlined,
+              color: _selectedIndex == 4 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Site Visits",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 4 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 4 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 4;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.article_outlined,
+              color: _selectedIndex == 5 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Reports",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 5 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 5 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 5;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.label_outline,
+              color: _selectedIndex == 6 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Labels",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 6 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 6 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 6;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.archive_outlined,
+              color: _selectedIndex == 7 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Archived Leads",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 7 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 7 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 7;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.delete_outline,
+              color: _selectedIndex == 8 ? ColorTheme.yellow : Colors.black,
+            ),
+            title: Text(
+              "Recycle Bin",
+              style: GLTextStyles.robotoStyle(
+                size: 18,
+                weight: FontWeight.w500,
+                color: _selectedIndex == 8 ? ColorTheme.white : Colors.black,
+              ),
+            ),
+            tileColor: _selectedIndex == 8 ? ColorTheme.lightBlue : null,
+            onTap: () {
+              setState(
+                () {
+                  _selectedIndex = 8;
+                },
+              );
+            },
+            splashColor: Colors.transparent,
+          ),
+        ],
       ),
     );
   }
