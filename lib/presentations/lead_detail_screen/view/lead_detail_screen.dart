@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get_time_ago/get_time_ago.dart';
@@ -9,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/textstyles.dart';
-import '../../dashboard_screen/controller/dashboard_controller.dart';
 
 class LeadDetailScreen extends StatefulWidget {
   final int? leadId;
@@ -24,6 +22,8 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
   final TextEditingController noteController = TextEditingController();
   final TextEditingController siteVisitController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
+  bool remarkValidate = false;
+  bool noteValidate = false;
 
   @override
   void initState() {
@@ -79,6 +79,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
             size: 20,
           ),
         ),
+        forceMaterialTransparency: true,
       ),
       body: RefreshIndicator(
         onRefresh: () => fetchData(),
@@ -371,10 +372,22 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: TextField(
+                onTapOutside: (event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  setState(() {
+                    remarkValidate = siteVisitController.text.isEmpty;
+                  });
+                },
                 controller: siteVisitController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: "Remarks",
-                  border: OutlineInputBorder(
+                  errorText: remarkValidate ? "Value can't be empty" : null,
+                  errorStyle: GLTextStyles.robotoStyle(
+                    color: ColorTheme.red,
+                    size: 14,
+                    weight: FontWeight.w400,
+                  ),
+                  border: const OutlineInputBorder(
                     borderSide: BorderSide(
                       width: 1,
                       color: Color(0xff1A3447),
@@ -403,9 +416,15 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                         );
                         siteVisitController.clear();
                         dateController.clear();
+                        remarkValidate = false;
                       },
                     );
+                  } else {
+                    setState(() {
+                      remarkValidate = true;
+                    });
                   }
+                  // remarkValidate = siteVisitController.text.isEmpty;
                   fetchSiteVisits();
                 },
                 child: Text(
@@ -447,7 +466,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                  title: Text("Confirm Delete"),
+                                  title: const Text("Confirm Delete"),
                                   actions: [
                                     TextButton(
                                       onPressed: () {
@@ -589,10 +608,19 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: TextField(
+                onTapOutside: (event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
                 controller: noteController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: "Notes",
-                  border: OutlineInputBorder(
+                  errorStyle: GLTextStyles.robotoStyle(
+                    color: ColorTheme.red,
+                    size: 14,
+                    weight: FontWeight.w400,
+                  ),
+                  errorText: noteValidate ? "Value can't be empty" : null,
+                  border: const OutlineInputBorder(
                     borderSide: BorderSide(width: 1, color: Color(0xff1A3447)),
                   ),
                 ),
@@ -610,9 +638,10 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                   if (noteController.text.isNotEmpty) {
                     leadDetailController.postNotes(
                         widget.leadId.toString(), noteController.text, context);
-                    noteController.clear();
                   }
+                  noteValidate = noteController.text.isEmpty;
                   fetchNotes();
+                  noteController.clear();
                 },
                 child: Text(
                   "Submit",
@@ -656,7 +685,7 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                  title: Text("Confirm Delete"),
+                                  title: const Text("Confirm Delete"),
                                   actions: [
                                     TextButton(
                                       onPressed: () {

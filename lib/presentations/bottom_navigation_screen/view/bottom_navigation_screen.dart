@@ -30,7 +30,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
         builder: (context, provider, child) {
           return IndexedStack(
             index: provider.selectedIndex,
-            children: const [DashboardScreen(), menuScreen(), menuScreen()],
+            children: const [
+              DashboardScreen(),
+              LeadChart(),
+              LeadChart(),
+            ],
           );
         },
       ),
@@ -61,15 +65,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
                     elevation: 0,
                     items: const [
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.dashboard_outlined,size: 20),
+                        icon: Icon(Icons.dashboard_outlined, size: 20),
                         label: 'Leads',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.label_off_outlined,size: 20),
-                        label: 'menu',
+                        icon: Icon(Icons.bar_chart, size: 20),
+                        label: 'Chart',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.label_off_outlined,size: 20),
+                        icon: Icon(Icons.label_off_outlined, size: 20),
                         label: 'menu',
                       ),
                     ],

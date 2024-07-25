@@ -75,6 +75,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ),
+        title: Text(
+          "Leads",
+          style: GLTextStyles.robotoStyle(size: 22, weight: FontWeight.w500),
+        ),
         automaticallyImplyLeading: false,
         forceMaterialTransparency: true,
       ),
@@ -90,13 +94,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
-              SliverToBoxAdapter(
-                child: Text(
-                  "Leads",
-                  style: GLTextStyles.robotoStyle(
-                      size: 22, weight: FontWeight.w500),
-                ),
-              ),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: size.width * .02,
