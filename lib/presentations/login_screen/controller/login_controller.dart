@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
-import 'package:desaihomes_crm_application/presentations/dashboard_screen/view/dashboard_screen.dart';
 import 'package:desaihomes_crm_application/repository/api/login_screen/service/login_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../app_config/app_config.dart';
 
 class LoginController extends ChangeNotifier {
@@ -15,9 +12,7 @@ class LoginController extends ChangeNotifier {
 
   Future onLogin(String email, String password, BuildContext context) async {
     log("loginController -> onLogin() started");
-    // var data = {"email": email, "password": password};
-    LoginService.postLoginData(email,password).then((value) {
-      log("postLoginData() -> ${value["status"]}");
+    LoginService.postLoginData(email, password).then((value) {
       if (value["status"] == true) {
         log("token -> ${value["token"]} ");
         storeLoginData(value);
@@ -31,13 +26,14 @@ class LoginController extends ChangeNotifier {
       }
     });
   }
+
   void onPressed() {
     visibility = !visibility;
     notifyListeners();
   }
 
   void storeLoginData(loginReceivedData) async {
-    log("storeLoginData()");
+    log("storeLoginData");
     sharedPreferences = await SharedPreferences.getInstance();
     String storeData = jsonEncode(loginReceivedData);
     sharedPreferences.setString(AppConfig.loginData, storeData);

@@ -5,7 +5,6 @@ import '../../../helper/api_helper.dart';
 
 class DashboardService {
   static Future<dynamic> fetchData() async {
-    log("DashboardService -> fetchData()");
     try {
       var decodedData = await ApiHelper.getData(
         endPoint: "leads-list",
@@ -18,7 +17,6 @@ class DashboardService {
   }
 
   static Future<dynamic> fetchUsersData() async {
-    log("DashboardService -> fetchUsersData()");
     try {
       var decodedData = await ApiHelper.getData(
         endPoint: "users-list",
@@ -30,11 +28,11 @@ class DashboardService {
     }
   }
 
-  static Future<dynamic> assignedToTapped(id,assignedTo) async {
-    log("DashboardService -> assignedToTapped()");
+  static Future<dynamic> assignedToTapped(id, assignedTo) async {
     try {
       var decodedData = await ApiHelper.postData(
-        endPoint: "lead/action/assigned-to-update?id=$id&assigned_to=$assignedTo",
+        endPoint:
+            "lead/action/assigned-to-update?id=$id&assigned_to=$assignedTo",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -44,7 +42,6 @@ class DashboardService {
   }
 
   static Future<dynamic> fetchLeads({required int page}) async {
-    log("DashboardService -> fetchLeads()");
     try {
       var nextPageUrl = "http://www.desaihomes.com/api/leads-list?page=$page";
       var decodedData = await ApiHelper.getDataWObaseUrl(

@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/lead_detail_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/notes_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/site_visit_model.dart';
@@ -22,7 +21,6 @@ class LeadDetailController extends ChangeNotifier {
   fetchDetailData(leadId, context) async {
     isLoading = true;
     notifyListeners();
-    log("LeadDetailController -> fetchDetailData()");
     LeadDetailService.fetchDetailData(leadId).then((value) {
       if (value["status"] == true) {
         leadDetailModel = LeadDetailModel.fromJson(value);
@@ -38,7 +36,6 @@ class LeadDetailController extends ChangeNotifier {
   fetchNotes(leadId, context) async {
     isNotesLoading = true;
     notifyListeners();
-    log("LeadDetailController -> fetchNotes()");
     LeadDetailService.fetchNotes(leadId).then((value) {
       if (value["status"] == true) {
         notesModel = NotesModel.fromJson(value);
@@ -52,7 +49,6 @@ class LeadDetailController extends ChangeNotifier {
   }
 
   postNotes(String leadId, String notes, context) async {
-    log("LeadDetailController -> postNotes()");
     LeadDetailService.postNotes(leadId, notes).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
@@ -64,7 +60,6 @@ class LeadDetailController extends ChangeNotifier {
   }
 
   Future<void> editNotes(id, String note, BuildContext context) async {
-    log("LeadDetailController -> editNotes()");
     LeadDetailService.editNotes(id, note).then((value) {
       if (value != null && value["status"] == true) {
       } else {
@@ -75,7 +70,6 @@ class LeadDetailController extends ChangeNotifier {
   }
 
   deleteNotes(id, context) async {
-    log("LeadDetailController -> deleteNotes()");
     LeadDetailService.deleteNotes(id).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
@@ -103,7 +97,6 @@ class LeadDetailController extends ChangeNotifier {
   }
 
   Future<void> editSiteVisits(id, remarks, date, context) async {
-    log("LeadDetailController -> editSiteVisits()");
     LeadDetailService.editSiteVisits(id, remarks, date).then((value) {
       if (value != null && value["status"] == true) {
       } else {
@@ -114,7 +107,6 @@ class LeadDetailController extends ChangeNotifier {
   }
 
   postSiteVisits(leadId, date, content, context) async {
-    log("LeadDetailController -> postSiteVisits()");
     LeadDetailService.postSiteVisits(leadId, date, content).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
@@ -126,7 +118,6 @@ class LeadDetailController extends ChangeNotifier {
   }
 
   deleteSiteVisits(id, context) async {
-    log("LeadDetailController -> deleteSiteVisits()");
     LeadDetailService.deleteSiteVisits(id).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
@@ -140,7 +131,6 @@ class LeadDetailController extends ChangeNotifier {
   fetchStatusList(context) async {
     isStatusListLoading = true;
     notifyListeners();
-    log("LeadDetailController -> fetchStatusList()");
     LeadDetailService.fetchStatusList().then((value) {
       if (value["status"] == true) {
         statusListModel = StatusListModel.fromJson(value);

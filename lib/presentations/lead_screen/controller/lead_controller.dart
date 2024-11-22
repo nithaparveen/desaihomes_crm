@@ -1,32 +1,31 @@
 import 'dart:developer';
-import 'package:desaihomes_crm_application/repository/api/dashboard_screen/model/dashboard_model.dart';
-import 'package:desaihomes_crm_application/repository/api/dashboard_screen/model/user_list_model.dart';
-import 'package:desaihomes_crm_application/repository/api/dashboard_screen/service/dashboard_service.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/user_list_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/service/lead_service.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
 
-class DashboardController extends ChangeNotifier {
-  DashboardModel dashboardModel = DashboardModel();
+class LeadController extends ChangeNotifier {
+  LeadModel leadModel = LeadModel();
   UserListModel userListModel = UserListModel();
   bool isLoading = false;
   bool isAssignLoading = false;
   bool isUserListLoading = false;
-  int _currentPage = 1;
+  int currentPage = 1;
   bool _isLoadingMore = false;
-  bool _hasMoreData = true;
+  bool hasMoreData = true;
 
   bool get isLoadingMore => _isLoadingMore;
 
   fetchData(context) async {
     isLoading = true;
-    _currentPage = 1;
-    _hasMoreData = true;
+    currentPage = 1;
+    hasMoreData = true;
     notifyListeners();
-    log("DashboardController -> fetchData()");
     DashboardService.fetchData().then((value) {
       if (value["status"] == true) {
-        dashboardModel = DashboardModel.fromJson(value);
+        leadModel = LeadModel.fromJson(value);
         isLoading = false;
       } else {
         AppUtils.oneTimeSnackBar("Unable to fetch Data",
@@ -39,7 +38,6 @@ class DashboardController extends ChangeNotifier {
   fetchUserList(context) async {
     isUserListLoading = true;
     notifyListeners();
-    log("DashboardController -> fetchUserList()");
     DashboardService.fetchUsersData().then((value) {
       if (value["status"] == true) {
         userListModel = UserListModel.fromJson(value);
@@ -53,7 +51,6 @@ class DashboardController extends ChangeNotifier {
   }
 
   assignedToTapped(String id, String assignedTo, context) async {
-    log("DashboardController -> assignedToTapped()");
     DashboardService.assignedToTapped(id, assignedTo).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
@@ -65,18 +62,18 @@ class DashboardController extends ChangeNotifier {
   }
 
   Future<void> loadMoreData(BuildContext context) async {
-    if (!_isLoadingMore && _hasMoreData) {
+    if (!_isLoadingMore && hasMoreData) {
       _isLoadingMore = true;
-      _currentPage++;
+      currentPage++;
       notifyListeners();
       try {
-        var response = await DashboardService.fetchLeads(page: _currentPage);
+        var response = await DashboardService.fetchLeads(page: currentPage);
         if (response != null && response["status"] == true) {
-          var newData = DashboardModel.fromJson(response);
+          var newData = LeadModel.fromJson(response);
           if (newData.leads?.data?.isNotEmpty ?? false) {
-            dashboardModel.leads?.data?.addAll(newData.leads?.data ?? []);
+            leadModel.leads?.data?.addAll(newData.leads?.data ?? []);
           } else {
-            _hasMoreData = false;
+            hasMoreData = false;
           }
         } else {
           AppUtils.oneTimeSnackBar("error", context: context);

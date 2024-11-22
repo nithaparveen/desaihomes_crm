@@ -34,7 +34,6 @@ class ApiHelper {
     required String endPoint,
     Map<String, String>? header,
   }) async {
-    log("ApiHelper -> getData");
     final url = Uri.parse(AppConfig.baseurl + endPoint);
     log("url -> $url");
     try {

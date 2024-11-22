@@ -1,20 +1,20 @@
 import 'dart:convert';
 
-DashboardModel dashboardModelFromJson(String str) =>
-    DashboardModel.fromJson(json.decode(str));
+LeadModel dashboardModelFromJson(String str) =>
+    LeadModel.fromJson(json.decode(str));
 
-String dashboardModelToJson(DashboardModel data) => json.encode(data.toJson());
+String dashboardModelToJson(LeadModel data) => json.encode(data.toJson());
 
-class DashboardModel {
+class LeadModel {
   Leads? leads;
   bool? status;
 
-  DashboardModel({
+  LeadModel({
     this.leads,
     this.status,
   });
 
-  factory DashboardModel.fromJson(Map<String, dynamic> json) => DashboardModel(
+  factory LeadModel.fromJson(Map<String, dynamic> json) => LeadModel(
     leads: json["leads"] == null ? null : Leads.fromJson(json["leads"]),
     status: json["status"],
   );

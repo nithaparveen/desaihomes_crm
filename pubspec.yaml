@@ -48,6 +48,9 @@ dependencies:
   onesignal_flutter: ^5.2.2
   fl_chart: ^0.68.0
   rename_app: ^1.6.1
+  flutter_screenutil: ^5.9.3
+  iconsax: ^0.0.8
+  
 
 dev_dependencies:
   flutter_test:
