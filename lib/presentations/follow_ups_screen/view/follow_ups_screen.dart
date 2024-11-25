@@ -12,16 +12,17 @@ class FollowUpScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           StatusButton(),
-          Padding(
-            padding: EdgeInsets.all(15.0),
-            child: LeadCard(
-              name: 'Jishnu Ambadi',
-              location: 'DD Queens square',
-              platform: 'Facebook',
-              timeAgo: '6 hours ago',
-              initials: 'JA', status: 'Booked',
-            ),
-          )
+          // Padding(
+          //   padding: EdgeInsets.all(15.0),
+          //   child: 
+          //   LeadCard(
+          //     name: 'Jishnu Ambadi',
+          //     location: 'DD Queens square',
+          //     platform: 'Facebook',
+          //     timeAgo: '6 hours ago',
+          //     initials: 'JA', status: 'Booked',
+          //   ),
+          // )
         ],
       ),
     );

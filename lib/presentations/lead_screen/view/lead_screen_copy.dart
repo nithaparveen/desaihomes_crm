@@ -1,13 +1,14 @@
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/global_widgets/logout_button.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
+import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/filter_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:get_time_ago/get_time_ago.dart';
-import 'package:another_flushbar/flushbar.dart';
 import '../../lead_detail_screen/view/lead_detail_screen.dart';
 
 class LeadScreenCopy extends StatefulWidget {
@@ -21,6 +22,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   int selectedIndex = -1;
   final ScrollController scrollController = ScrollController();
   bool isLoadingMore = false;
+  final Map<String, String?> selectedUsers = {};
 
   @override
   void initState() {
@@ -55,6 +57,12 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
     if (scrollController.position.extentAfter < 500) {
       fetchMoreData();
     }
+  }
+
+  void updateSelectedUser(String leadId, String? user) {
+    setState(() {
+      selectedUsers[leadId] = user;
+    });
   }
 
   @override
@@ -117,30 +125,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
             )
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Iconsax.logout,
-                  color: Colors.white,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "Logout",
-                  style: GLTextStyles.manropeStyle(
-                    color: ColorTheme.white,
-                    size: 13,
-                    weight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        actions: const [LogoutButton()],
         automaticallyImplyLeading: false,
       ),
       body: Column(
@@ -197,13 +182,22 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                           color: const Color.fromARGB(255, 255, 255, 255),
                           borderRadius: BorderRadius.circular(7.38),
                         ),
-                        child: const Center(
-                          child: Icon(
+                        child: Center(
+                            child: IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const FilterModal();
+                              },
+                            );
+                          },
+                          icon: const Icon(
                             Iconsax.setting_5,
                             size: 18,
                             color: Color(0xffABB7C2),
                           ),
-                        ),
+                        )),
                       ),
                     ],
                   ),
@@ -212,7 +206,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
             ],
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
             child: Text(
               "Leads",
               style: GLTextStyles.manropeStyle(
@@ -225,6 +219,10 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
           Expanded(
             child: Consumer<LeadController>(
               builder: (context, controller, _) {
+                if (controller.leadModel.leads?.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
                 return ListView.separated(
                   controller: scrollController,
                   itemBuilder: (context, index) {
@@ -236,14 +234,13 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                         ),
                       );
                     }
-                    final projectName = controller
-                        .leadModel.leads?.data?[index].project?.name
-                        .toString();
-                    final sourceName = controller
-                        .leadModel.leads?.data?[index].source
-                        .toString();
-                    final id =
-                        controller.leadModel.leads?.data?[index].id?.toInt();
+
+                    final lead = controller.leadModel.leads?.data?[index];
+                    final projectName = lead?.project?.name.toString();
+                    final sourceName = lead?.source.toString();
+                    final id = lead?.id?.toInt();
+                    final leadId = '${lead?.id}';
+
                     return InkWell(
                       onTap: () {
                         Navigator.push(
@@ -256,27 +253,37 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 15,right:15),
+                        padding: const EdgeInsets.only(left: 15, right: 15),
                         child: LeadCard(
-                          name:
-                              '${controller.leadModel.leads?.data?[index].name}',
+                          name: '${lead?.name}',
                           location: projectName != null
                               ? removeClassName(projectName)
                               : '',
                           platform: sourceName != null
                               ? removeClassName(sourceName)
                               : '',
-                          timeAgo: GetTimeAgo.parse(DateTime.parse(
-                              "${controller.leadModel.leads?.data?[index].updatedAt}")),
-                          initials: getInitials(
-                              controller.leadModel.leads?.data?[index].name),
-                          status:
-                              '${controller.leadModel.leads?.data?[index].crmStatusDetails?.name}',
+                          timeAgo: GetTimeAgo.parse(
+                            DateTime.parse("${lead?.updatedAt}"),
+                          ),
+                          initials: getInitials(lead?.name),
+                          status: '${lead?.crmStatusDetails?.name}',
+                          users: controller.userListModel.users
+                                  ?.map((user) => user.name ?? '')
+                                  .toList() ??
+                              [],
+                          leadId: leadId,
+                          userId: index <
+                                  (controller.userListModel.users?.length ?? 0)
+                              ? '${controller.userListModel.users?[index].id}'
+                              : '',
+                          selectedUser: selectedUsers[leadId],
+                          onUserSelected: updateSelectedUser,
+                          index: index,
                         ),
                       ),
                     );
                   },
-                  separatorBuilder: (context, index) => SizedBox(height: 8.w),
+                  separatorBuilder: (context, index) => SizedBox(height: 14.w),
                   itemCount: controller.isLoadingMore
                       ? controller.leadModel.leads!.data!.length + 1
                       : controller.leadModel.leads?.data?.length ?? 0,

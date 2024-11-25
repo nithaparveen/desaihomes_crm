@@ -1,23 +1,33 @@
 import 'dart:developer';
+import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/controller/bottom_navigation_controller.dart';
+import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen.dart';
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
-import 'package:desaihomes_crm_application/presentations/login_screen/view/login_screen.dart';
 import 'package:desaihomes_crm_application/presentations/splash_screen/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => LoginController()),
-    ChangeNotifierProvider(create: (context) => LeadController()),
-    ChangeNotifierProvider(create: (context) => LeadDetailController()),
-    ChangeNotifierProvider(create: (context) => BottomNavigationController()),
-  ], child: const MyApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool? loggedIn = prefs.getBool(AppConfig.loggedIn);
+  runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LoginController()),
+        ChangeNotifierProvider(create: (context) => LeadController()),
+        ChangeNotifierProvider(create: (context) => LeadDetailController()),
+        ChangeNotifierProvider(
+            create: (context) => BottomNavigationController()),
+      ],
+      child: MyApp(
+        isLoggedIn: loggedIn ?? false,
+      )));
   initOneSignal();
 }
 
@@ -28,7 +38,8 @@ Future<void> initOneSignal() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.isLoggedIn});
+  final bool isLoggedIn;
 
   static final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -44,7 +55,7 @@ class MyApp extends StatelessWidget {
             theme:
                 ThemeData(appBarTheme: const AppBarTheme(color: Colors.white)),
             debugShowCheckedModeBanner: false,
-            home: const SplashScreen(),
+            home: isLoggedIn ? const BottomNavBar() : const SplashScreen(),
           );
         });
   }
