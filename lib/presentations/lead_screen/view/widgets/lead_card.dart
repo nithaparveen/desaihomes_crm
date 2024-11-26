@@ -123,7 +123,7 @@ class LeadCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             PopupMenuButton<String>(
-              color: Colors.white,
+              color: const Color(0xfff5f5f5),
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<String>(
@@ -144,7 +144,7 @@ class LeadCard extends StatelessWidget {
                           itemCount: users.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                              tileColor: Colors.white,
+                              tileColor: const Color(0xfff5f5f5),
                               title: Text(
                                 users[index],
                                 style: GLTextStyles.manropeStyle(
@@ -235,18 +235,15 @@ class LeadCard extends StatelessWidget {
             ),
             SizedBox(width: 15.w),
             InkWell(
-              // onTap: () {
-              //   showModalBottomSheet(
-              //     context: context,
-              //     isScrollControlled: true,
-              //     shape: const RoundedRectangleBorder(
-              //       borderRadius:
-              //           BorderRadius.vertical(top: Radius.circular(16)),
-              //     ),
-              //     builder: (context) => QuickEditContent(),
-              //   );
-              // },
-              child: Icon(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const QuickEditModal();
+                  },
+                );
+              },
+              child: const Icon(
                 Icons.more_vert,
                 color: Colors.black54,
               ),
@@ -287,7 +284,7 @@ class LeadCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

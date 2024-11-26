@@ -24,7 +24,7 @@ class LogoutButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Iconsax.logout,
+              Icons.logout,
               color: Colors.white,
               size: 16.sp,
             ),

@@ -50,6 +50,7 @@ dependencies:
   rename_app: ^1.6.1
   flutter_screenutil: ^5.9.3
   iconsax: ^0.0.8
+  multi_dropdown: ^3.0.1
   
 
 dev_dependencies:
