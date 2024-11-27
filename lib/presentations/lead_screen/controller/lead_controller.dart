@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/age_list_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/countries_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_source_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/professions_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/project_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/user_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/service/lead_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
 
@@ -14,13 +17,21 @@ class LeadController extends ChangeNotifier {
   UserListModel userListModel = UserListModel();
   LeadSourceModel leadSourceModel = LeadSourceModel();
   ProjectListModel projectListModel = ProjectListModel();
+  ProfessionsListModel professionsListModel = ProfessionsListModel();
   TextEditingController searchController = TextEditingController();
+  List<CountriesListModel> countriesList = <CountriesListModel>[];
+  List<AgeListModel> ageList = <AgeListModel>[];
+  List<ProfessionsListModel> professionList = <ProfessionsListModel>[];
+
   bool isLoading = false;
   bool isFilterLoading = false;
   bool isAssignLoading = false;
   bool isUserListLoading = false;
+  bool isProfessionsLoading = false;
   bool isProjectListLoading = false;
   bool isSourceLoading = false;
+  bool isCountriesLoading = false;
+  bool isAgeLoading = false;
   int currentPage = 1;
   bool _isLoadingMore = false;
   bool hasMoreData = true;
@@ -42,6 +53,69 @@ class LeadController extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  Future<void> fetchCountries(BuildContext context) async {
+    isCountriesLoading = true;
+    countriesList = [];
+    notifyListeners();
+
+    final resp = await LeadService.fetchCountries();
+
+    if (resp != null) {
+      countriesList = countriesListModelFromJson(jsonEncode(resp));
+    } else {
+      AppUtils.oneTimeSnackBar(
+        "Unable to fetch Data",
+        context: context,
+        bgColor: ColorTheme.red,
+      );
+    }
+
+    isCountriesLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchAgeList(BuildContext context) async {
+    isAgeLoading = true;
+    ageList = [];
+    notifyListeners();
+
+    final resp = await LeadService.fetchAgeList();
+
+    if (resp != null) {
+      ageList = ageListModelFromJson(jsonEncode(resp));
+    } else {
+      AppUtils.oneTimeSnackBar(
+        "Unable to fetch Data",
+        context: context,
+        bgColor: ColorTheme.red,
+      );
+    }
+
+    isAgeLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchProfessionsList(BuildContext context) async {
+    isProfessionsLoading = true;
+    professionList = [];
+    notifyListeners();
+
+    final resp = await LeadService.fetchProfessionsList();
+
+    if (resp != null) {
+      professionList = professionsListModelFromJson(jsonEncode(resp));
+    } else {
+      AppUtils.oneTimeSnackBar(
+        "Unable to fetch Data",
+        context: context,
+        bgColor: ColorTheme.red,
+      );
+    }
+
+    isProfessionsLoading = false;
+    notifyListeners();
   }
 
   searchLeads(BuildContext context) async {

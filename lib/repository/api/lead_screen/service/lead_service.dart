@@ -95,10 +95,46 @@ class LeadService {
     }
   }
 
+  static Future<dynamic> fetchCountries() async {
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "countries",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchAgeList() async {
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "age-ranges",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
   static Future<dynamic> fetchProjectList() async {
     try {
       var decodedData = await ApiHelper.getData(
         endPoint: "user-projects",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchProfessionsList() async {
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "professions",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

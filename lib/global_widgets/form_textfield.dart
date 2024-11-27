@@ -1,4 +1,7 @@
+import 'package:desaihomes_crm_application/core/constants/colors.dart';
+import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FormTextField extends StatelessWidget {
   final String? hintText;
@@ -11,7 +14,7 @@ class FormTextField extends StatelessWidget {
   final bool readOnly;
 
   const FormTextField({
-    Key? key,
+    super.key,
     this.hintText,
     this.suffixIcon,
     this.controller,
@@ -19,8 +22,8 @@ class FormTextField extends StatelessWidget {
     this.onTap,
     this.height = 35.0,
     this.width = double.infinity,
-    this.readOnly = true,
-  }) : super(key: key);
+    this.readOnly = false ,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +35,12 @@ class FormTextField extends StatelessWidget {
         child: TextField(
           controller: controller,
           readOnly: readOnly,
-          style: textStyle ?? const TextStyle(
-            fontWeight: FontWeight.w400,
-            fontSize: 15,
-            color: Color.fromARGB(255, 87, 87, 87),
-          ),
+          style: textStyle ?? GLTextStyles.manropeStyle(
+                  weight: FontWeight.w400,
+                  size: 14.sp,
+                  color: const Color.fromARGB(255, 87, 87, 87),
+                ),
+                cursorColor: ColorTheme.desaiGreen,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,

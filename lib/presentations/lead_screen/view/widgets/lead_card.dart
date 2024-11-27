@@ -239,7 +239,12 @@ class LeadCard extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return const QuickEditModal();
+                    return QuickEditModal(
+                      email: leadController.leadModel.leads?.data?[index].email ??
+                          "",
+                          phoneNumber: leadController.leadModel.leads?.data?[index].phoneNumber ??
+                          "",
+                    );
                   },
                 );
               },

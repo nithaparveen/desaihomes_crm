@@ -1,6 +1,7 @@
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/logout_button.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/filter_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
@@ -261,6 +262,20 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                   if (controller.leadModel.leads?.data == null) {
                     return const Center(child: CircularProgressIndicator());
                   }
+                  final leads = controller.leadModel.leads?.data ?? [];
+
+                  if (leads.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "No Leads Found",
+                        style: GLTextStyles.manropeStyle(
+                          size: 16,
+                          weight: FontWeight.w400,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    );
+                  }
 
                   return RefreshIndicator(
                     color: ColorTheme.desaiGreen,
@@ -289,7 +304,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => LeadDetailScreen(
+                                builder: (context) => LeadDetailScreenCopy(
                                   leadId: id,
                                 ),
                               ),
