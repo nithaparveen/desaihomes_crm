@@ -1,4 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:desaihomes_crm_application/global_widgets/dummy_status_list.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/quick_edit_modal.dart';
@@ -82,23 +83,25 @@ class LeadCard extends StatelessWidget {
               weight: FontWeight.w700,
             ),
           ),
-          Text(
-            location,
-            style: GLTextStyles.manropeStyle(
-              color: ColorTheme.grey,
-              size: 14,
-              weight: FontWeight.w500,
+          if (location != "null")
+            Text(
+              location,
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.grey,
+                size: 14,
+                weight: FontWeight.w500,
+              ),
             ),
-          ),
           const SizedBox(height: 4),
-          Text(
-            platform,
-            style: GLTextStyles.manropeStyle(
-              color: ColorTheme.black,
-              size: 14,
-              weight: FontWeight.w500,
+          if (platform != "null")
+            Text(
+              platform,
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.black,
+                size: 14,
+                weight: FontWeight.w500,
+              ),
             ),
-          ),
           Text(
             timeAgo,
             style: GLTextStyles.manropeStyle(
@@ -115,6 +118,7 @@ class LeadCard extends StatelessWidget {
   Widget _buildActions(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final leadController = Provider.of<LeadController>(context, listen: false);
+    final dummyStatus = DummyStatusList.getStatusDetails(status);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -240,9 +244,11 @@ class LeadCard extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return QuickEditModal(
-                      email: leadController.leadModel.leads?.data?[index].email ??
-                          "",
-                          phoneNumber: leadController.leadModel.leads?.data?[index].phoneNumber ??
+                      email:
+                          leadController.leadModel.leads?.data?[index].email ??
+                              "",
+                      phoneNumber: leadController
+                              .leadModel.leads?.data?[index].phoneNumber ??
                           "",
                     );
                   },
@@ -260,14 +266,18 @@ class LeadCard extends StatelessWidget {
           width: 95,
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
           decoration: BoxDecoration(
-            color: const Color(0xFFEEF4FF),
+            color: Color(int.parse(
+                'FF${dummyStatus['bgColor']?.replaceFirst('#', '')}',
+                radix: 16)),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Center(
             child: Text(
               status,
               style: GLTextStyles.manropeStyle(
-                color: ColorTheme.lightBlue,
+                color: Color(int.parse(
+                    'FF${dummyStatus['textColor']?.replaceFirst('#', '')}',
+                    radix: 16)),
                 size: 10,
                 weight: FontWeight.w600,
               ),

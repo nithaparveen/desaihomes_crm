@@ -11,26 +11,26 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class SiteVisitSection extends StatefulWidget {
-  final Function fetchSiteVisits;
+class NotesSectionCopy extends StatefulWidget {
+  final Function fetchNotes;
   final String leadId;
 
-  const SiteVisitSection({
+  const NotesSectionCopy({
     super.key,
-    required this.fetchSiteVisits,
+    required this.fetchNotes,
     required this.leadId,
-    required bool remarkValidate,
+    required bool noteValidate,
   });
 
   @override
-  State<SiteVisitSection> createState() => _SiteVisitSectionState();
+  State<NotesSectionCopy> createState() => _NotesSectionCopyState();
 }
 
-class _SiteVisitSectionState extends State<SiteVisitSection> {
+class _NotesSectionCopyState extends State<NotesSectionCopy> {
   final TextEditingController dateController = TextEditingController();
-  final TextEditingController siteVisitController = TextEditingController();
+  final TextEditingController notesController = TextEditingController();
   DateTime? toDate;
-  bool remarkValidate = false;
+  bool noteValidate = false;
 
   Future<void> selectDate(
       BuildContext context, TextEditingController controller) async {
@@ -58,7 +58,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              "Remarks",
+              "Notes",
               style: GLTextStyles.manropeStyle(
                 size: 18,
                 weight: FontWeight.w600,
@@ -94,10 +94,10 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
             ),
             SizedBox(height: 18.h),
             CustomTextField(
-              hintText: "Remarks",
+              hintText: "Notes",
               maxlines: 6,
               border: 3,
-              controller: siteVisitController,
+              controller: notesController,
               // errorText: remarkValidate ? "Value can't be empty" : null,
             ),
             SizedBox(height: 18.h),
@@ -109,21 +109,17 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      remarkValidate = siteVisitController.text.isEmpty;
+                      noteValidate = notesController.text.isEmpty;
                     });
-                    if (!remarkValidate) {
+                    if (!noteValidate) {
                       String formattedDate =
                           DateFormat('yyyy-MM-dd').format(toDate!);
-                      leadDetailController.postSiteVisits(
-                        widget.leadId,
-                        formattedDate,
-                        siteVisitController.text,
-                        context,
-                      );
-                      siteVisitController.clear();
+                      leadDetailController.postNotes(widget.leadId,
+                          formattedDate, notesController.text, context);
+                      notesController.clear();
                       dateController.clear();
                     }
-                    widget.fetchSiteVisits();
+                    widget.fetchNotes();
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -149,18 +145,16 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
               child: ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount:
-                    leadDetailController.siteVisitModel.data?.length ?? 0,
+                itemCount: leadDetailController.notesModel.data?.length ?? 0,
                 separatorBuilder: (context, index) => SizedBox(height: 12.h),
                 itemBuilder: (context, index) {
-                  final siteVisit =
-                      leadDetailController.siteVisitModel.data?[index];
-                  if (siteVisit == null) return const SizedBox.shrink();
+                  final note = leadDetailController.notesModel.data?[index];
+                  if (note == null) return const SizedBox.shrink();
 
                   return Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(3),
-                        border: Border.all(color: const Color(0xffD5D7DA))),
+                        border: Border.all(color: Color(0xffD5D7DA))),
                     child: Padding(
                       padding: const EdgeInsets.only(
                           top: 6, bottom: 12, left: 6, right: 6),
@@ -172,18 +166,18 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Iconsax.layer, size: 16),
+                                  Icon(Iconsax.layer, size: 16),
                                   SizedBox(
                                     width: 8.w,
                                   ),
                                   Text(
                                     DateFormat('dd-MM-yyyy').format(
-                                      siteVisit.siteVisitDate ?? DateTime.now(),
+                                      note.createdAt ?? DateTime.now(),
                                     ),
                                     style: GLTextStyles.interStyle(
                                         size: 14,
                                         weight: FontWeight.w400,
-                                        color: const Color(0xff57595B)),
+                                        color: Color(0xff57595B)),
                                   ),
                                 ],
                               ),
@@ -194,23 +188,18 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                       showDialog(
                                         context: context,
                                         builder: (context) {
-                                          final editSiteVisitController =
+                                          final editNoteController =
                                               TextEditingController(
-                                            text: siteVisit.siteVisitRemarks,
+                                            text: note.notes,
                                           );
                                           final editDateController =
                                               TextEditingController(
                                             text:
                                                 DateFormat('yyyy-MM-dd').format(
-                                              siteVisit.siteVisitDate ??
-                                                  DateTime.now(),
+                                              note.createdAt ?? DateTime.now(),
                                             ),
                                           );
                                           return AlertDialog(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
                                             surfaceTintColor: Colors.white,
                                             title: Row(
                                               mainAxisAlignment:
@@ -222,14 +211,16 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                   width: 50.w,
                                                   height: 50.h,
                                                   decoration: BoxDecoration(
-                                                    color: const Color.fromARGB(
+                                                    color: Color.fromARGB(
                                                         255, 196, 229, 217),
                                                     shape: BoxShape.circle,
                                                     border: Border.all(
                                                         width: 4.5,
-                                                        color: const Color
-                                                            .fromARGB(255, 231,
-                                                            251, 244)),
+                                                        color: Color.fromARGB(
+                                                            255,
+                                                            231,
+                                                            251,
+                                                            244)),
                                                   ),
                                                   child: Center(
                                                       child: Icon(
@@ -271,7 +262,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                   const SizedBox(height: 15),
                                                   FormTextField(
                                                     controller:
-                                                        editSiteVisitController,
+                                                        editNoteController,
                                                     maxLines: 4,
                                                   ),
                                                 ],
@@ -298,22 +289,20 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                 textColor: Colors.white,
                                                 width: 120.w,
                                                 onPressed: () async {
-                                                  final updatedRemark =
-                                                      editSiteVisitController
-                                                          .text;
+                                                  final updatedNote =
+                                                      editNoteController.text;
                                                   final updatedDate =
                                                       editDateController.text;
-                                                  if (updatedRemark
-                                                          .isNotEmpty &&
+                                                  if (updatedNote.isNotEmpty &&
                                                       updatedDate.isNotEmpty) {
                                                     leadDetailController
-                                                        .editSiteVisits(
-                                                      siteVisit.id,
-                                                      updatedRemark,
+                                                        .editNotes(
+                                                      note.id,
+                                                      updatedNote,
                                                       updatedDate,
                                                       context,
                                                     );
-                                                    widget.fetchSiteVisits();
+                                                    widget.fetchNotes();
                                                     Navigator.pop(context);
                                                   }
                                                 },
@@ -334,10 +323,6 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                       showDialog(
                                         context: context,
                                         builder: (context) => AlertDialog(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                          ),
                                           surfaceTintColor: Colors.white,
                                           title: Column(
                                             mainAxisAlignment:
@@ -360,8 +345,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                 child: Center(
                                                     child: Icon(
                                                   Iconsax.trash,
-                                                  color:
-                                                      const Color(0xffF9A7A4),
+                                                  color: Color(0xffF9A7A4),
                                                   size: 18.sp,
                                                 )),
                                               ),
@@ -405,11 +389,11 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                               onPressed: () async {
                                                 Navigator.of(context).pop();
                                                 await leadDetailController
-                                                    .deleteSiteVisits(
-                                                  siteVisit.id,
+                                                    .deleteNotes(
+                                                  note.id,
                                                   context,
                                                 );
-                                                widget.fetchSiteVisits();
+                                                widget.fetchNotes();
                                               },
                                             ),
                                           ],
@@ -431,11 +415,11 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                               SizedBox(width: 26.w),
                               Expanded(
                                 child: Text(
-                                  siteVisit.siteVisitRemarks ?? '',
+                                  note.notes ?? '',
                                   style: GLTextStyles.interStyle(
                                       size: 14,
                                       weight: FontWeight.w400,
-                                      color: const Color(0xff170e2b)),
+                                      color: Color(0xff170e2b)),
                                 ),
                               ),
                             ],

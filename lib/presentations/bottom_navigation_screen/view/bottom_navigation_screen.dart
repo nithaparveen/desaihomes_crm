@@ -1,5 +1,7 @@
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/status_button.dart';
 import 'package:desaihomes_crm_application/presentations/follow_ups_screen/view/follow_ups_screen.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/status_section.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/lead_screen_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,7 +38,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             index: provider.selectedIndex,
             children: const [
               LeadScreen(),
-              FollowUpScreen(),
+              LeadScreenCopy(),
               LeadScreenCopy(),
             ],
           );

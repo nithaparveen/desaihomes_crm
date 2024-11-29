@@ -25,4 +25,11 @@ class GLTextStyles {
       color: color ?? ColorTheme.black,
     );
   }
+  static interStyle({double? size, FontWeight? weight, Color? color}) {
+    return GoogleFonts.inter(
+      fontSize: size ?? 22,
+      fontWeight: weight ?? FontWeight.bold,
+      color: color ?? ColorTheme.black,
+    );
+  }
 }

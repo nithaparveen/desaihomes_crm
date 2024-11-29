@@ -30,11 +30,11 @@ class LeadDetailService {
     }
   }
 
-  static Future<dynamic> postNotes(leadId, notes) async {
+  static Future<dynamic> postNotes(leadId, date, notes) async {
     log("LeadDetailService -> postNotes()");
     try {
       var decodedData = await ApiHelper.postData(
-        endPoint: "lead/save-note?id=$leadId&notes=$notes",
+        endPoint: "lead/save-note?id=$leadId&notes=$notes&note_date=$date",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -43,11 +43,11 @@ class LeadDetailService {
     }
   }
 
-  static Future<dynamic> editNotes(int id, String note) async {
+  static Future<dynamic> editNotes(int id, date, String note) async {
     log("LeadDetailService -> editNotes()");
     try {
       var decodedData = await ApiHelper.postData(
-        endPoint: "lead/update-note?id=$id&notes=$note",
+        endPoint: "lead/update-note?id=$id&notes=$note&note_date=$date",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -83,11 +83,13 @@ class LeadDetailService {
     }
   }
 
-  static Future<dynamic> editSiteVisits(int id, String remarks, String date) async {
+  static Future<dynamic> editSiteVisits(
+      int id, String remarks, String date) async {
     log("LeadDetailService -> editSiteVisits()");
     try {
       var decodedData = await ApiHelper.postData(
-        endPoint: "site-visit/update?id=$id&site_visit_date=$date&site_visit_remarks=$remarks",
+        endPoint:
+            "site-visit/update?id=$id&site_visit_date=$date&site_visit_remarks=$remarks",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -123,15 +125,28 @@ class LeadDetailService {
       log("$e");
     }
   }
-  
-  static Future<dynamic> fetchStatusList() async {
-    log("LeadDetailService -> fetchStatusList() ");
-    try{
-      var decodedData = await ApiHelper.getData(endPoint: "crm-status/list",
-      header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+
+  static Future<dynamic> updateStatus(int leadId, String slug) async {
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "lead/action/status-update?id=$leadId&crm_status=$slug",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
-    }catch(e){
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchStatusList() async {
+    log("LeadDetailService -> fetchStatusList() ");
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "crm-status/list",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
       log("$e");
     }
   }

@@ -1,5 +1,7 @@
+import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DetailText extends StatelessWidget {
   const DetailText({
@@ -22,12 +24,19 @@ class DetailText extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Divider(
+          thickness: 0.2,
+          color: ColorTheme.lightgrey,
+        ),
+        SizedBox(height: 22.h),
         Text(
           text,
-          style: GLTextStyles.cabinStyle(size: 18, weight: FontWeight.w400),
+          style: GLTextStyles.interStyle(
+              size: 12, weight: FontWeight.w400, color: ColorTheme.lightgrey),
         ),
         Text(value,
-            style: GLTextStyles.cabinStyle(size: 20, weight: FontWeight.w500)),
+            style: GLTextStyles.interStyle(
+                size: 14, weight: FontWeight.w400, color: ColorTheme.blue)),
       ],
     );
   }

@@ -64,22 +64,22 @@ class _NotesSectionState extends State<NotesSection> {
               child: MaterialButton(
                 color: ColorTheme.blue,
                 onPressed: () {
-                  if (noteController.text.isNotEmpty) {
-                    leadDetailController.postNotes(
-                      widget.leadId,
-                      noteController.text,
-                      context,
-                    );
-                    noteController.clear();
-                    setState(() {
-                      noteValidate = false;
-                    });
-                    widget.fetchNotes(widget.leadId);
-                  } else {
-                    setState(() {
-                      noteValidate = true;
-                    });
-                  }
+                  // if (noteController.text.isNotEmpty) {
+                  //   leadDetailController.postNotes(
+                  //     widget.leadId,
+                  //     noteController.text,
+                  //     context,
+                  //   );
+                  //   noteController.clear();
+                  //   setState(() {
+                  //     noteValidate = false;
+                  //   });
+                  //   widget.fetchNotes(widget.leadId);
+                  // } else {
+                  //   setState(() {
+                  //     noteValidate = true;
+                  //   });
+                  // }
                 },
                 child: Text(
                   "Submit",
@@ -187,12 +187,12 @@ class _NotesSectionState extends State<NotesSection> {
             ),
             TextButton(
               onPressed: () {
-                final updatedNote = editNoteController.text;
-                if (updatedNote.isNotEmpty) {
-                  controller.editNotes(note.id, updatedNote, context);
-                  widget.fetchNotes(widget.leadId);
-                  Navigator.of(context).pop();
-                }
+                // final updatedNote = editNoteController.text;
+                // if (updatedNote.isNotEmpty) {
+                //   controller.editNotes(note.id, updatedNote, context);
+                //   widget.fetchNotes(widget.leadId);
+                //   Navigator.of(context).pop();
+                // }
               },
               child: const Text('Save'),
             ),

@@ -3,15 +3,11 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/cont
 import 'package:flutter/material.dart';
 
 class StatusSection extends StatefulWidget {
-  final LeadDetailController controller;
-  final List<String> details1;
-  final String Function(LeadDetailController, int) getStatusValue;
+ 
 
   const StatusSection({
     super.key,
-    required this.controller,
-    required this.details1,
-    required this.getStatusValue,
+    
   });
 
   @override
@@ -25,7 +21,7 @@ class _StatusSectionState extends State<StatusSection>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this); // Four tabs
+    _tabController = TabController(length: 4, vsync: this); 
   }
 
   @override
@@ -64,7 +60,7 @@ class _StatusSectionState extends State<StatusSection>
                 controller: _tabController,
                 children: [
                   // Tab 1: Overview
-                  _buildDetailsSection(widget.details1, widget.getStatusValue),
+                  // _buildDetailsSection(widget.details1, widget.getStatusValue),
                   // Tab 2: Source
                   Center(child: Text("Source Content Here")),
                   // Tab 3: Extra Data
@@ -105,7 +101,7 @@ class _StatusSectionState extends State<StatusSection>
                   child: Wrap(
                     children: [
                       Text(
-                        ": ${getValue(widget.controller, index)}",
+                        ": ",
                         style: GLTextStyles.cabinStyle(
                             size: 18, weight: FontWeight.w500),
                         overflow: TextOverflow.fade,

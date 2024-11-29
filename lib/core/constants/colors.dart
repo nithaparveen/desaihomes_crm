@@ -10,5 +10,6 @@ class ColorTheme {
   static Color yellow = const Color(0xfffaab54);
   static Color desaiGreen = const Color(0xff3E9E7C);
   static Color grey = const Color(0xff57595B);
+  static Color lightgrey = const Color(0xffA0A0A0);
   static Color logoutRed = const Color(0xffD92D20);
 }

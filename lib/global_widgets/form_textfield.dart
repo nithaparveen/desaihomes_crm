@@ -12,6 +12,7 @@ class FormTextField extends StatelessWidget {
   final double? height;
   final double? width;
   final bool readOnly;
+  final int? maxLines;
 
   const FormTextField({
     super.key,
@@ -22,7 +23,8 @@ class FormTextField extends StatelessWidget {
     this.onTap,
     this.height = 35.0,
     this.width = double.infinity,
-    this.readOnly = false ,
+    this.readOnly = false,
+    this.maxLines,
   });
 
   @override
@@ -32,21 +34,29 @@ class FormTextField extends StatelessWidget {
       width: width,
       child: GestureDetector(
         onTap: onTap,
-        child: TextField(
+        child: TextField( 
           controller: controller,
           readOnly: readOnly,
-          style: textStyle ?? GLTextStyles.manropeStyle(
-                  weight: FontWeight.w400,
-                  size: 14.sp,
-                  color: const Color.fromARGB(255, 87, 87, 87),
-                ),
-                cursorColor: ColorTheme.desaiGreen,
+          style: textStyle ??
+              GLTextStyles.manropeStyle(
+                weight: FontWeight.w400,
+                size: 14.sp,
+                color: const Color.fromARGB(255, 87, 87, 87),
+              ),
+          cursorColor: ColorTheme.desaiGreen,
+          maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
             hintText: hintText,
-            suffixIcon: suffixIcon != null ? Icon(suffixIcon , size: 15,) : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            suffixIcon: suffixIcon != null
+                ? Icon(
+                    suffixIcon,
+                    size: 15,
+                  )
+                : null,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Color(0xffD5D7DA)),

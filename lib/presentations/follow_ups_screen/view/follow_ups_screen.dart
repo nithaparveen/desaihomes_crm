@@ -1,4 +1,4 @@
-import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/button.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/status_button.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,7 @@ class FollowUpScreen extends StatelessWidget {
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StatusButton(),
+          // StatusButton(),
           // Padding(
           //   padding: EdgeInsets.all(15.0),
           //   child: 

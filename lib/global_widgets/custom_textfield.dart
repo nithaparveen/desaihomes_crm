@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final String? hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final Widget? Icon;
   final bool isPasswordField;
   final bool obscureText;
   final TextInputType? keyboardType;
@@ -18,6 +19,8 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final String? Function(String?)? validator;
   final FocusNode? focusNode;
+  final double? border;
+  final int? maxlines;
   final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
@@ -37,6 +40,8 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.focusNode,
     this.inputFormatters,
+    this.border,
+    this.maxlines, this.Icon,
   });
 
   @override
@@ -63,31 +68,34 @@ class CustomTextField extends StatelessWidget {
             onTap: onTap,
             readOnly: readOnly,
             focusNode: focusNode,
+            maxLines: maxlines,
             decoration: InputDecoration(
               prefixIcon: prefixIcon,
               suffixIcon: suffixIcon,
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(border ?? 8),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(border ?? 8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(border ?? 8),
                 borderSide: BorderSide.none,
               ),
+              
               focusColor: Colors.transparent,
               hintText: hintText,
+              icon: Icon,
               hintStyle: GLTextStyles.manropeStyle(
                 weight: FontWeight.w400,
                 size: 12,
                 color: const Color(0xff4E4E4E),
               ),
-              fillColor: const Color(0x1A666666),
+              fillColor: Color.fromARGB(26, 161, 161, 161),
               filled: true,
               errorStyle: const TextStyle(height: 0),
               errorBorder: OutlineInputBorder(

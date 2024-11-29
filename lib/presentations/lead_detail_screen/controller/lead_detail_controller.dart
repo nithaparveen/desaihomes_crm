@@ -48,8 +48,8 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  postNotes(String leadId, String notes, context) async {
-    LeadDetailService.postNotes(leadId, notes).then((value) {
+  postNotes( leadId, date, notes, context) async {
+    LeadDetailService.postNotes(leadId,date, notes).then((value) {
       if (value["status"] == true) {
         // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
       } else {
@@ -59,8 +59,8 @@ class LeadDetailController extends ChangeNotifier {
     });
   }
 
-  Future<void> editNotes(id, String note, BuildContext context) async {
-    LeadDetailService.editNotes(id, note).then((value) {
+  Future<void> editNotes(id, String note,date, BuildContext context) async {
+    LeadDetailService.editNotes(id,date, note).then((value) {
       if (value != null && value["status"] == true) {
       } else {
         AppUtils.oneTimeSnackBar(value?["message"] ?? "An error occurred",
@@ -140,6 +140,17 @@ class LeadDetailController extends ChangeNotifier {
             context: context, bgColor: ColorTheme.red);
       }
       notifyListeners();
+    });
+  }
+
+  updateStatus(leadId, slug, context) async {
+    LeadDetailService.updateStatus(leadId, slug).then((value) {
+      if (value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
     });
   }
 }

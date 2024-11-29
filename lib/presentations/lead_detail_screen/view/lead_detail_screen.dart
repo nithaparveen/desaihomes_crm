@@ -108,11 +108,11 @@ class LeadDetailScreenState extends State<LeadDetailScreen> {
                           details: details,
                           getDetailValue: getDetailValue,
                         ),
-                        StatusSection(
-                          controller: controller,
-                          details1: details1,
-                          getStatusValue: getStatusValue,
-                        ),
+                        // StatusSection(
+                        //   controller: controller,
+                        //   details1: details1,
+                        //   getStatusValue: getStatusValue,
+                        // ),
                         SourceSection(
                           controller: controller,
                           details2: details2,
