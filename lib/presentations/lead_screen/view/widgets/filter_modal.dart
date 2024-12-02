@@ -5,8 +5,10 @@ import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:provider/provider.dart';
 
 class FilterModal extends StatefulWidget {
@@ -20,14 +22,18 @@ class _FilterModalState extends State<FilterModal> {
   DateTime? fromDate;
   DateTime? toDate;
   String? selectedProject;
-  String? selectedLeadSource;
+  List<String> selectedLeadSources = [];
+
+  final MultiSelectController<String> leadSourceController =
+      MultiSelectController<String>();
 
   void _clearFilters() {
     setState(() {
       fromDate = null;
       toDate = null;
       selectedProject = null;
-      selectedLeadSource = null;
+      selectedLeadSources.clear();
+      leadSourceController.clearAll();
     });
   }
 
@@ -43,6 +49,12 @@ class _FilterModalState extends State<FilterModal> {
   @override
   Widget build(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
+
+    // Prepare lead source dropdown items
+    final leadSourceItems = leadController.leadSourceModel.data
+            ?.map((item) => item.source ?? '')
+            .toList() ??
+        [];
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -197,48 +209,53 @@ class _FilterModalState extends State<FilterModal> {
                 ),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: selectedLeadSource,
-                icon: const Icon(Iconsax.arrow_down_1, size: 15),
-                style: GLTextStyles.manropeStyle(
-                  weight: FontWeight.w400,
-                  size: 15,
-                  color: const Color.fromARGB(255, 87, 87, 87),
+              MultiDropdown<String>(
+                // searchDecoration: SearchFieldDecoration(
+                //   border: OutlineInputBorder(
+                //     borderRadius: BorderRadius.circular(8),
+                //     borderSide: const BorderSide(color: Color(0xffD5D7DA)),
+                //   ),
+                // ),
+                items: leadSourceItems
+                    .map((source) => DropdownItem<String>(
+                          label: source,
+                          value: source,
+                        ))
+                    .toList(),
+                controller: leadSourceController,
+                enabled: true,
+                // searchEnabled: true,
+                chipDecoration: const ChipDecoration(
+                  backgroundColor: Color(0xffECEEFF),
+                  deleteIcon: Icon(Iconsax.close_circle, size: 15),
+                  wrap: true,
+                  runSpacing: 2,
+                  spacing: 10,
                 ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                fieldDecoration: FieldDecoration(
+                  hintText: "",
+                  suffixIcon: const Icon(Iconsax.arrow_down_1, size: 15),
+                  showClearIcon: true,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xffD5D7DA)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: Color(0xffD5D7DA)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xffD5D7DA)),
+                    borderSide: const BorderSide(color: Colors.grey),
                   ),
                 ),
-                items: leadController.leadSourceModel.data
-                    ?.map((item) => DropdownMenuItem(
-                          value: item.source,
-                          child: Text(
-                            item.source ?? '',
-                            style: GLTextStyles.manropeStyle(
-                              weight: FontWeight.w400,
-                              size: 15,
-                              color: const Color.fromARGB(255, 87, 87, 87),
-                            ),
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (value) {
+                dropdownDecoration: const DropdownDecoration(
+                  marginTop: 2,
+                  maxHeight: 300,
+                ),
+                dropdownItemDecoration: const DropdownItemDecoration(
+                  selectedIcon: Icon(Iconsax.tick_square, size: 18),
+                ),
+                onSelectionChange: (selectedItems) {
                   setState(() {
-                    selectedLeadSource = value;
+                    selectedLeadSources =
+                        selectedItems.map((item) => item).toList();
                   });
                 },
               ),
@@ -269,13 +286,14 @@ class _FilterModalState extends State<FilterModal> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        log("Button Pressed -> projectId: $selectedProject, fromDate: $fromDate, toDate: $toDate");
+                        log("Button Pressed -> projectId: $selectedProject, fromDate: $fromDate, toDate: $toDate, leadSources: $selectedLeadSources");
 
                         Provider.of<LeadController>(context, listen: false)
                             .fetchFilterData(
                           projectId: selectedProject,
                           fromDate: fromDate?.toIso8601String(),
                           toDate: toDate?.toIso8601String(),
+                          leadSources: selectedLeadSources,
                           context: context,
                         );
 

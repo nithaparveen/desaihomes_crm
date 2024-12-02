@@ -12,11 +12,14 @@ import 'package:provider/provider.dart';
 
 class QuickEditModal extends StatefulWidget {
   const QuickEditModal(
-      {super.key, required this.email, required this.phoneNumber, this.leadId});
+      {super.key,
+      required this.email,
+      required this.phoneNumber,
+      required this.leadId});
 
   final String email;
   final String phoneNumber;
-  final int? leadId;
+  final int leadId;
 
   @override
   _QuickEditModalState createState() => _QuickEditModalState();
@@ -29,18 +32,21 @@ class _QuickEditModalState extends State<QuickEditModal>
   DateTime? fromDate;
   DateTime? toDate;
   String? selectedStatus;
+  String? selectedStatusId;
   String? selectedProject;
+  String? selectedProjectId;
   String? selectedProfession;
   String? selectedCountry;
+  String? selectedCountryId;
   String? selectedAge;
   TextEditingController altNumberController = TextEditingController();
   TextEditingController cityController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
   bool noteValidate = false;
 
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
-
     Provider.of<LeadController>(context, listen: false)
         .fetchLeadSourceList(context);
     Provider.of<LeadController>(context, listen: false)
@@ -51,6 +57,7 @@ class _QuickEditModalState extends State<QuickEditModal>
         .fetchProfessionsList(context);
     Provider.of<LeadController>(context, listen: false).fetchCountries(context);
     Provider.of<LeadController>(context, listen: false).fetchAgeList(context);
+    fetchNotes();
     super.initState();
   }
 
@@ -87,8 +94,9 @@ class _QuickEditModalState extends State<QuickEditModal>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      insetPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 24.h),
+      insetPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 26.h),
       child: Container(
+        height: 580.h,
         width: 600.w,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -97,7 +105,6 @@ class _QuickEditModalState extends State<QuickEditModal>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with close button
             Padding(
               padding: const EdgeInsets.only(left: 18, right: 18, top: 10),
               child: Row(
@@ -280,6 +287,12 @@ class _QuickEditModalState extends State<QuickEditModal>
                                       onChanged: (value) {
                                         setState(() {
                                           selectedStatus = value;
+                                          selectedStatusId = statusController
+                                              .statusListModel.crmStatus
+                                              ?.firstWhere((status) =>
+                                                  status.name == value)
+                                              .id
+                                              .toString();
                                         });
                                       },
                                     ),
@@ -316,6 +329,12 @@ class _QuickEditModalState extends State<QuickEditModal>
                                       onChanged: (value) {
                                         setState(() {
                                           selectedProject = value;
+                                          selectedProjectId = leadController
+                                              .projectListModel.projects
+                                              ?.firstWhere((project) =>
+                                                  project.name == value)
+                                              .id
+                                              .toString();
                                         });
                                       },
                                     ),
@@ -403,6 +422,12 @@ class _QuickEditModalState extends State<QuickEditModal>
                                           onChanged: (value) {
                                             setState(() {
                                               selectedCountry = value;
+                                              selectedCountryId = leadController
+                                                  .countriesList
+                                                  .firstWhere((country) =>
+                                                      country.name == value)
+                                                  .id
+                                                  .toString();
                                             });
                                           },
                                         );
@@ -512,7 +537,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                               Expanded(
                                 child: SizedBox(
                                   width: double.infinity,
-                                  height: 52.h,
+                                  height: 45.h,
                                   child: OutlinedButton(
                                     onPressed: () {
                                       Navigator.of(context).pop();
@@ -541,9 +566,36 @@ class _QuickEditModalState extends State<QuickEditModal>
                               Expanded(
                                 child: SizedBox(
                                   width: double.infinity,
-                                  height: 52.h,
+                                  height: 45.h,
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      int? countryId = selectedCountryId != null
+                                          ? int.tryParse(
+                                              selectedCountryId.toString())
+                                          : null;
+                                      int? statusId = selectedStatusId != null
+                                          ? int.tryParse(
+                                              selectedStatusId.toString())
+                                          : null;
+                                      int? projectId = selectedProjectId != null
+                                          ? int.tryParse(
+                                              selectedProjectId.toString())
+                                          : null;
+
+                                      Provider.of<LeadController>(context,
+                                              listen: false)
+                                          .quickEdit(
+                                        widget.leadId,
+                                        altNumberController.text,
+                                        cityController.text,
+                                        toDate.toString(),
+                                        selectedAge,
+                                        countryId,
+                                        statusId,
+                                        projectId,
+                                        context,
+                                      );
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 12),

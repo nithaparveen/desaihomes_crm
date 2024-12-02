@@ -38,6 +38,11 @@ class LoginController extends ChangeNotifier {
     String storeData = jsonEncode(loginReceivedData);
     sharedPreferences.setString(AppConfig.loginData, storeData);
     sharedPreferences.setBool(AppConfig.loggedIn, true);
+    if (loginReceivedData["user"] != null &&
+        loginReceivedData["user"]['name'] != null) {
+      sharedPreferences.setString(
+          'name', loginReceivedData["user"]['name']);
+    }
   }
 
   void storeUserToken(resData) async {

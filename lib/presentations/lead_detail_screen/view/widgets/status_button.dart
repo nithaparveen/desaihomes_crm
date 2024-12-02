@@ -31,7 +31,6 @@ class _StatusButtonState extends State<StatusButton> {
   Widget build(BuildContext context) {
     return Consumer<LeadDetailController>(
       builder: (context, controller, _) {
-        // Retrieve the currently selected status details
         final currentStatus = controller.leadDetailModel.lead?.crmStatusDetails;
         final currentDummyStatus =
             DummyStatusList.getStatusDetails(currentStatus?.name ?? '');

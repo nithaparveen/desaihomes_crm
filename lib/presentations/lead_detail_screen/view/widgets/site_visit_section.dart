@@ -105,7 +105,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
               alignment: Alignment.centerRight,
               child: SizedBox(
                 width: 137.w,
-                height: 52.h,
+                height: 45.h,
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -241,7 +241,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                 ),
                                                 SizedBox(height: 8.h),
                                                 Text(
-                                                  'Edit Note',
+                                                  'Edit Remark',
                                                   style:
                                                       GLTextStyles.manropeStyle(
                                                     color: ColorTheme.black,
@@ -279,6 +279,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                             ),
                                             actions: [
                                               CustomButton(
+                                                
                                                 borderColor:
                                                     ColorTheme.desaiGreen,
                                                 backgroundColor:

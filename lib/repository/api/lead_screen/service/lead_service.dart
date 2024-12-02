@@ -156,6 +156,20 @@ class LeadService {
     }
   }
 
+  static Future<dynamic> quickEdit(leadId, altPhNo, city, countryId, statusId,
+      date, ageRange, projectId) async {
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint:
+            "quick-update?id=$leadId&alt_phone_number=$altPhNo&city=$city&country_id=$countryId&crm_status=$statusId&follow_up_date=$date&age_range=$ageRange&preferred_project_id=$projectId",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
   static Future<dynamic> fetchLeads({required int page}) async {
     try {
       var nextPageUrl = "http://www.desaihomes.com/api/leads-list?page=$page";

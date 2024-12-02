@@ -238,6 +238,28 @@ class LeadController extends ChangeNotifier {
     });
   }
 
+  quickEdit(
+      int? leadId,
+      String? altPhNo,
+      String? city,
+      String? date,
+      String? ageRange,
+      int? countryId,
+      int? statusId,
+      int? projectId,
+      context) async {
+    LeadService.quickEdit(leadId, altPhNo, city, countryId, statusId, date,
+            ageRange, projectId)
+        .then((value) {
+      if (value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
+
   Future<void> loadMoreData(BuildContext context) async {
     if (!_isLoadingMore && hasMoreData) {
       _isLoadingMore = true;

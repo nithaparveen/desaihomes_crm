@@ -135,24 +135,29 @@ class DetailCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8.0),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Phone Number",
-                                  style: GLTextStyles.interStyle(
-                                      size: 12,
-                                      weight: FontWeight.w400,
-                                      color: ColorTheme.lightgrey),
-                                ),
-                                Text(
-                                  phone!,
-                                  style: GLTextStyles.interStyle(
-                                      size: 14,
-                                      weight: FontWeight.w400,
-                                      color: ColorTheme.black),
-                                ),
-                              ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Phone Number",
+                                    style: GLTextStyles.interStyle(
+                                        size: 12,
+                                        weight: FontWeight.w400,
+                                        color: ColorTheme.lightgrey),
+                                  ),
+                                  Text(
+                                    phone!,
+                                    style: GLTextStyles.interStyle(
+                                        size: 14,
+                                        weight: FontWeight.w400,
+                                        color: ColorTheme.black),
+                                    overflow: TextOverflow
+                                        .ellipsis, 
+                                    maxLines: 1, 
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

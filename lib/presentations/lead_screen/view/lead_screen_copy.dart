@@ -1,7 +1,9 @@
+import 'dart:convert';
+
+import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/logout_button.dart';
-import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/filter_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
@@ -10,7 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:get_time_ago/get_time_ago.dart';
-import '../../lead_detail_screen/view/lead_detail_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LeadScreenCopy extends StatefulWidget {
   const LeadScreenCopy({super.key});
@@ -108,39 +110,53 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: ColorTheme.desaiGreen,
-          title: Row(
-            children: [
-              Container(
-                width: 35,
-                height: 35,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 202, 158, 208),
-                  shape: BoxShape.circle,
-                  border: Border.all(width: 2.5, color: Colors.white),
-                ),
-                child: Center(
-                  child: Text(
-                    "AJ",
-                    style: GLTextStyles.robotoStyle(
-                      color: ColorTheme.blue,
-                      size: 13,
+          foregroundColor: ColorTheme.desaiGreen,
+          title: FutureBuilder<String?>(
+            future: getUserName(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snapshot.hasError || !snapshot.hasData) {
+                return const Text("Unknown User");
+              }
+              String userName = snapshot.data ?? "Unknown User";
+              return Row(
+                children: [
+                  Container(
+                    width: 35,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 202, 158, 208),
+                      shape: BoxShape.circle,
+                      border: Border.all(width: 2.5, color: Colors.white),
+                    ),
+                    child: Center(
+                      child: Text(
+                        userName.substring(0, 2).toUpperCase(),
+                        style: GLTextStyles.robotoStyle(
+                          color: ColorTheme.blue,
+                          size: 13,
+                          weight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Text(
+                    userName,
+                    style: GLTextStyles.manropeStyle(
+                      color: ColorTheme.white,
+                      size: 14,
                       weight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Text(
-                "Akhil Joy",
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.white,
-                  size: 14,
-                  weight: FontWeight.w600,
-                ),
-              )
-            ],
+                ],
+              );
+            },
           ),
           actions: const [LogoutButton()],
           automaticallyImplyLeading: false,
@@ -215,8 +231,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                           ),
                         ),
                         Container(
-                          width: 45,
-                          height: 45,
+                          width: 48.w,
+                          height: 48.h,
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 255, 255, 255),
                             borderRadius: BorderRadius.circular(7.38),
@@ -296,49 +312,36 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                         final lead = controller.leadModel.leads?.data?[index];
                         final projectName = lead?.project?.name.toString();
                         final sourceName = lead?.source.toString();
-                        final id = lead?.id?.toInt();
                         final leadId = '${lead?.id}';
 
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LeadDetailScreenCopy(
-                                  leadId: id,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 15, right: 15),
-                            child: LeadCard(
-                              name: '${lead?.name}',
-                              location: projectName != null
-                                  ? removeClassName(projectName)
-                                  : '',
-                              platform: sourceName != null
-                                  ? removeClassName(sourceName)
-                                  : '',
-                              timeAgo: GetTimeAgo.parse(
-                                DateTime.parse("${lead?.updatedAt}"),
-                              ),
-                              initials: getInitials(lead?.name),
-                              status: '${lead?.crmStatusDetails?.name}',
-                              users: controller.userListModel.users
-                                      ?.map((user) => user.name ?? '')
-                                      .toList() ??
-                                  [],
-                              leadId: leadId,
-                              userId: index <
-                                      (controller.userListModel.users?.length ??
-                                          0)
-                                  ? '${controller.userListModel.users?[index].id}'
-                                  : '',
-                              selectedUser: selectedUsers[leadId],
-                              onUserSelected: updateSelectedUser,
-                              index: index,
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 15, right: 15),
+                          child: LeadCard(
+                            name: '${lead?.name}',
+                            location: projectName != null
+                                ? removeClassName(projectName)
+                                : '',
+                            platform: sourceName != null
+                                ? removeClassName(sourceName)
+                                : '',
+                            timeAgo: GetTimeAgo.parse(
+                              DateTime.parse("${lead?.updatedAt}"),
                             ),
+                            initials: getInitials(lead?.name),
+                            status: '${lead?.crmStatusDetails?.name}',
+                            users: controller.userListModel.users
+                                    ?.map((user) => user.name ?? '')
+                                    .toList() ??
+                                [],
+                            leadId: leadId,
+                            userId: index <
+                                    (controller.userListModel.users?.length ??
+                                        0)
+                                ? '${controller.userListModel.users?[index].id}'
+                                : '',
+                            selectedUser: selectedUsers[leadId],
+                            onUserSelected: updateSelectedUser,
+                            index: index,
                           ),
                         );
                       },
@@ -357,4 +360,17 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
       ),
     );
   }
+}
+
+Future<String?> getUserName() async {
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  String? storedData = sharedPreferences.getString(AppConfig.loginData);
+
+  if (storedData != null) {
+    var loginData = jsonDecode(storedData);
+    if (loginData["user"] != null && loginData["user"]['name'] != null) {
+      return loginData["user"]['name'];
+    }
+  }
+  return null;
 }

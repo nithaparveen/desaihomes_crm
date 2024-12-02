@@ -45,6 +45,24 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
     }
   }
 
+  Future<void> fetchNotes() async {
+    await Provider.of<LeadDetailController>(context, listen: false)
+        .fetchNotes(widget.leadId, context);
+  }
+
+  @override
+  void initState() {
+    fetchNotes();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    notesController.dispose();
+    dateController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final leadDetailController = Provider.of<LeadDetailController>(context);
@@ -105,7 +123,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
               alignment: Alignment.centerRight,
               child: SizedBox(
                 width: 137.w,
-                height: 52.h,
+                height: 45.h,
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -154,7 +172,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                   return Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(3),
-                        border: Border.all(color: Color(0xffD5D7DA))),
+                        border: Border.all(color: const Color(0xffD5D7DA))),
                     child: Padding(
                       padding: const EdgeInsets.only(
                           top: 6, bottom: 12, left: 6, right: 6),
@@ -166,7 +184,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Iconsax.layer, size: 16),
+                                  const Icon(Iconsax.layer, size: 16),
                                   SizedBox(
                                     width: 8.w,
                                   ),
@@ -177,7 +195,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                     style: GLTextStyles.interStyle(
                                         size: 14,
                                         weight: FontWeight.w400,
-                                        color: Color(0xff57595B)),
+                                        color: const Color(0xff57595B)),
                                   ),
                                 ],
                               ),
@@ -211,16 +229,14 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                   width: 50.w,
                                                   height: 50.h,
                                                   decoration: BoxDecoration(
-                                                    color: Color.fromARGB(
+                                                    color: const Color.fromARGB(
                                                         255, 196, 229, 217),
                                                     shape: BoxShape.circle,
                                                     border: Border.all(
                                                         width: 4.5,
-                                                        color: Color.fromARGB(
-                                                            255,
-                                                            231,
-                                                            251,
-                                                            244)),
+                                                        color: const Color
+                                                            .fromARGB(255, 231,
+                                                            251, 244)),
                                                   ),
                                                   child: Center(
                                                       child: Icon(
@@ -345,7 +361,8 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                 child: Center(
                                                     child: Icon(
                                                   Iconsax.trash,
-                                                  color: Color(0xffF9A7A4),
+                                                  color:
+                                                      const Color(0xffF9A7A4),
                                                   size: 18.sp,
                                                 )),
                                               ),
@@ -419,7 +436,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                   style: GLTextStyles.interStyle(
                                       size: 14,
                                       weight: FontWeight.w400,
-                                      color: Color(0xff170e2b)),
+                                      color: const Color(0xff170e2b)),
                                 ),
                               ),
                             ],

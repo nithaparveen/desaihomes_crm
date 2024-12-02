@@ -1,30 +1,84 @@
-import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/status_button.dart';
-import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
+import 'dart:convert';
+
+import 'package:desaihomes_crm_application/app_config/app_config.dart';
+import 'package:desaihomes_crm_application/core/constants/colors.dart';
+import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/global_widgets/logout_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FollowUpScreen extends StatelessWidget {
   const FollowUpScreen({super.key});
 
+  Future<String?> getUserName() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String? storedData = sharedPreferences.getString(AppConfig.loginData);
+
+    if (storedData != null) {
+      var loginData = jsonDecode(storedData);
+      if (loginData["user"] != null && loginData["user"]['name'] != null) {
+        return loginData["user"]['name'];
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // StatusButton(),
-          // Padding(
-          //   padding: EdgeInsets.all(15.0),
-          //   child: 
-          //   LeadCard(
-          //     name: 'Jishnu Ambadi',
-          //     location: 'DD Queens square',
-          //     platform: 'Facebook',
-          //     timeAgo: '6 hours ago',
-          //     initials: 'JA', status: 'Booked',
-          //   ),
-          // )
-        ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: ColorTheme.desaiGreen,
+        foregroundColor: ColorTheme.desaiGreen,
+        title: FutureBuilder<String?>(
+          future: getUserName(), 
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator(); 
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return const Text("Unknown User");
+            }
+            String userName = snapshot.data ?? "Unknown User";
+            return Row(
+              children: [
+                Container(
+                  width: 35,
+                  height: 35,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 202, 158, 208),
+                    shape: BoxShape.circle,
+                    border: Border.all(width: 2.5, color: Colors.white),
+                  ),
+                  child: Center(
+                    child: Text(
+                      userName.substring(0, 2).toUpperCase(), 
+                      style: GLTextStyles.robotoStyle(
+                        color: ColorTheme.blue,
+                        size: 13,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  userName,
+                  style: GLTextStyles.manropeStyle(
+                    color: ColorTheme.white,
+                    size: 14,
+                    weight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: const [LogoutButton()],
+        automaticallyImplyLeading: false,
       ),
     );
   }
 }
+

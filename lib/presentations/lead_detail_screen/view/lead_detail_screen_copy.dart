@@ -30,7 +30,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
   final TextEditingController dateController = TextEditingController();
   bool remarkValidate = false;
   bool noteValidate = false;
-  late TabController _tabController;
+  late TabController tabController;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
       fetchNotes();
       fetchSiteVisits();
     });
-    _tabController = TabController(length: 4, vsync: this);
+    tabController = TabController(length: 4, vsync: this);
     super.initState();
   }
 
@@ -48,7 +48,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
     noteController.dispose();
     siteVisitController.dispose();
     dateController.dispose();
-    _tabController.dispose();
+    tabController.dispose();
     super.dispose();
   }
 
@@ -120,9 +120,9 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                         ),
                       ),
                       TabBar(
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        controller: _tabController,
+                        // isScrollable: true,
+                        tabAlignment: TabAlignment.fill,
+                        controller: tabController,
                         labelStyle: GLTextStyles.manropeStyle(
                             size: 14, weight: FontWeight.w500),
                         unselectedLabelStyle: GLTextStyles.manropeStyle(
@@ -140,7 +140,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                       const SizedBox(height: 16),
                       Expanded(
                         child: TabBarView(
-                          controller: _tabController,
+                          controller: tabController,
                           children: [
                             SingleChildScrollView(
                               child: Center(
@@ -148,11 +148,12 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                 children: [
                                   DetailCard(
                                     name: controller.leadDetailModel.lead?.name,
-                                    email: controller.leadDetailModel.lead?.email,
+                                    email:
+                                        controller.leadDetailModel.lead?.email,
                                     phone: controller
                                         .leadDetailModel.lead?.phoneNumber,
-                                    age:
-                                        controller.leadDetailModel.lead?.ageRange,
+                                    age: controller
+                                        .leadDetailModel.lead?.ageRange,
                                     detailTexts: [
                                       DetailText(
                                         text: 'Project',
@@ -174,8 +175,8 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                       ),
                                       DetailText(
                                         text: 'Lead Type',
-                                        value: controller
-                                                .leadDetailModel.lead?.leadType ??
+                                        value: controller.leadDetailModel.lead
+                                                ?.leadType ??
                                             "",
                                       ),
                                       DetailText(
@@ -193,8 +194,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                 ],
                               )),
                             ),
-                            Center(
-                                child: DetailCard(
+                            DetailCard(
                               detailTexts: [
                                 DetailText(
                                   text: 'Landing Page URL',
@@ -251,9 +251,8 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                       "",
                                 ),
                               ],
-                            )),
-                            Center(
-                                child: DetailCard(
+                            ),
+                            DetailCard(
                               detailTexts: [
                                 DetailText(
                                   text: 'Source',
@@ -300,7 +299,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                       "",
                                 ),
                               ],
-                            )),
+                            ),
                             SiteVisitSection(
                                 fetchSiteVisits: fetchSiteVisits,
                                 leadId: widget.leadId.toString(),

@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/global_widgets/dummy_status_list.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/quick_edit_modal.dart';
 import 'package:flutter/material.dart';
@@ -70,8 +71,20 @@ class LeadCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLeadDetails() {
-    return Expanded(
+Widget _buildLeadDetails(BuildContext context) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: () {
+        // Navigate to the LeadDetailScreenCopy on tapping the details section
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LeadDetailScreenCopy(
+              leadId: int.tryParse(leadId) ?? 0,
+            ),
+          ),
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -112,8 +125,10 @@ class LeadCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildActions(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -250,6 +265,8 @@ class LeadCard extends StatelessWidget {
                       phoneNumber: leadController
                               .leadModel.leads?.data?[index].phoneNumber ??
                           "",
+                      leadId:
+                          leadController.leadModel.leads?.data?[index].id ?? 0,
                     );
                   },
                 );
@@ -292,7 +309,7 @@ class LeadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white,  
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: Colors.grey.withOpacity(0.2),
@@ -305,7 +322,7 @@ class LeadCard extends StatelessWidget {
         children: [
           _buildAvatar(initials, index),
           const SizedBox(width: 16),
-          _buildLeadDetails(),
+          _buildLeadDetails(context),
           _buildActions(context),
         ],
       ),
