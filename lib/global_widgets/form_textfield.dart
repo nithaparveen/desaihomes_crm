@@ -52,21 +52,21 @@ class FormTextField extends StatelessWidget {
             suffixIcon: suffixIcon != null
                 ? Icon(
                     suffixIcon,
-                    size: 15,
+                    size: 15.sp,
                   )
                 : null,
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                 EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: Color(0xffD5D7DA)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: Color(0xffD5D7DA)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: Colors.grey),
             ),
           ),

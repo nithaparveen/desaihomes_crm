@@ -67,8 +67,8 @@ class LogoutButton extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 50.w,
-                height: 50.h,
+                width: (50 / ScreenUtil().screenWidth).sw,
+                height: (50 / ScreenUtil().screenHeight).sh,
                 decoration: BoxDecoration(
                   color: const Color(0xffFEE4E2),
                   shape: BoxShape.circle,
@@ -108,14 +108,14 @@ class LogoutButton extends StatelessWidget {
               text: "Cancel",
               textColor: ColorTheme.logoutRed,
               onPressed: () => Navigator.of(context).pop(),
-              width: 120.w,
+              width: (110 / ScreenUtil().screenWidth).sw,
             ),
             CustomButton(
               borderColor: ColorTheme.white,
               backgroundColor: ColorTheme.logoutRed,
               text: "Confirm",
               textColor: Colors.white,
-              width: 120.w,
+              width: (110 / ScreenUtil().screenWidth).sw,
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _logout(context);

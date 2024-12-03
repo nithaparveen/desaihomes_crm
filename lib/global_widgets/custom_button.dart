@@ -43,7 +43,7 @@ class CustomButton extends StatelessWidget {
           elevation: MaterialStateProperty.all(elevation),
           side: MaterialStateProperty.all(
             BorderSide(
-              width: 1,
+              width: 1.w,
               color: borderColor,
             ),
           ),

@@ -19,7 +19,9 @@ class _StatusButtonState extends State<StatusButton> {
   @override
   void initState() {
     super.initState();
-    fetchData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchData();
+    });
   }
 
   void fetchData() async {
@@ -42,9 +44,9 @@ class _StatusButtonState extends State<StatusButton> {
           elevation: 0,
           position: PopupMenuPosition.under,
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(
-            minWidth: 140,
-            maxWidth: 140,
+          constraints: BoxConstraints(
+            minWidth: (140 / ScreenUtil().screenWidth).sw,
+            maxWidth: (140 / ScreenUtil().screenWidth).sw,
           ),
           onSelected: (selectedValue) async {
             final selectedStatus = controller.statusListModel.crmStatus
@@ -76,19 +78,17 @@ class _StatusButtonState extends State<StatusButton> {
                     DummyStatusList.getStatusDetails(status?.name ?? '');
 
                 return PopupMenuItem<String>(
-                  height: 40,
+                  height: 40.h,
                   padding: EdgeInsets.zero,
                   value: status?.name,
                   child: Container(
-                    width: 140.w,
-                    height: 45.h,
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.all(8.0),
+                    margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                     decoration: BoxDecoration(
                       color: Color(int.parse(
                           'FF${dummyStatus['bgColor']?.replaceFirst('#', '') ?? 'FFFFFF'}',
                           radix: 16)),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(4.r),
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -107,14 +107,14 @@ class _StatusButtonState extends State<StatusButton> {
             );
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: currentStatus?.bgColor != null
                   ? Color(int.parse(
                       'FF${currentDummyStatus['bgColor']?.replaceFirst('#', '') ?? 'FFFFFF'}',
                       radix: 16))
                   : const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(5.5),
+              borderRadius: BorderRadius.circular(5.5.r),
             ),
             child: Row(
               children: [
@@ -131,9 +131,9 @@ class _StatusButtonState extends State<StatusButton> {
                   ),
                 ),
                 SizedBox(width: 4.w),
-                const Icon(
+                Icon(
                   Icons.keyboard_arrow_down,
-                  size: 16,
+                  size: 16.sp,
                   color: Color(0xFFB5BEC6),
                 )
               ],

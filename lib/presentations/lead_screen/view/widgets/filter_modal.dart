@@ -49,8 +49,6 @@ class _FilterModalState extends State<FilterModal> {
   @override
   Widget build(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
-
-    // Prepare lead source dropdown items
     final leadSourceItems = leadController.leadSourceModel.data
             ?.map((item) => item.source ?? '')
             .toList() ??
@@ -58,17 +56,17 @@ class _FilterModalState extends State<FilterModal> {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
       child: SingleChildScrollView(
         child: Container(
-          width: 600.w,
+          width: (600 / ScreenUtil().screenWidth).sw,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(15.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +90,7 @@ class _FilterModalState extends State<FilterModal> {
                   ),
                 ],
               ),
-              const SizedBox(height: 15),
+              SizedBox(height: 15.h),
               Row(
                 children: [
                   Expanded(
@@ -103,11 +101,11 @@ class _FilterModalState extends State<FilterModal> {
                           'From',
                           style: GLTextStyles.manropeStyle(
                             color: ColorTheme.blue,
-                            size: 14,
+                            size: 14.sp,
                             weight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         CustomDatePicker(
                           onDateSelected: (DateTime date) {
                             setState(() {
@@ -118,7 +116,7 @@ class _FilterModalState extends State<FilterModal> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,11 +125,11 @@ class _FilterModalState extends State<FilterModal> {
                           'To',
                           style: GLTextStyles.manropeStyle(
                             color: ColorTheme.blue,
-                            size: 14,
+                            size: 14.sp,
                             weight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         CustomDatePicker(
                           onDateSelected: (DateTime date) {
                             setState(() {
@@ -144,39 +142,39 @@ class _FilterModalState extends State<FilterModal> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Text(
                 'Project',
                 style: GLTextStyles.manropeStyle(
                   color: ColorTheme.blue,
-                  size: 14,
+                  size: 14.sp,
                   weight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               DropdownButtonFormField<String>(
                 value: selectedProject,
-                icon: const Icon(Iconsax.arrow_down_1, size: 15),
+                icon: Icon(Iconsax.arrow_down_1, size: 15.sp),
                 style: GLTextStyles.manropeStyle(
                   weight: FontWeight.w400,
-                  size: 15,
+                  size: 15.sp,
                   color: const Color.fromARGB(255, 87, 87, 87),
                 ),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Color(0xffD5D7DA)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Color(0xffD5D7DA)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                 ),
@@ -187,7 +185,7 @@ class _FilterModalState extends State<FilterModal> {
                             item.name ?? '',
                             style: GLTextStyles.manropeStyle(
                               weight: FontWeight.w400,
-                              size: 15,
+                              size: 15.sp,
                               color: const Color.fromARGB(255, 87, 87, 87),
                             ),
                           ),
@@ -199,16 +197,16 @@ class _FilterModalState extends State<FilterModal> {
                   });
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Text(
                 'Lead source',
                 style: GLTextStyles.manropeStyle(
                   color: ColorTheme.blue,
-                  size: 14,
+                  size: 14.sp,
                   weight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               MultiDropdown<String>(
                 // searchDecoration: SearchFieldDecoration(
                 //   border: OutlineInputBorder(
@@ -225,32 +223,32 @@ class _FilterModalState extends State<FilterModal> {
                 controller: leadSourceController,
                 enabled: true,
                 // searchEnabled: true,
-                chipDecoration: const ChipDecoration(
-                  backgroundColor: Color(0xffECEEFF),
-                  deleteIcon: Icon(Iconsax.close_circle, size: 15),
+                chipDecoration: ChipDecoration(
+                  backgroundColor: const Color(0xffECEEFF),
+                  deleteIcon: Icon(Iconsax.close_circle, size: 15.sp),
                   wrap: true,
                   runSpacing: 2,
                   spacing: 10,
                 ),
                 fieldDecoration: FieldDecoration(
                   hintText: "",
-                  suffixIcon: const Icon(Iconsax.arrow_down_1, size: 15),
+                  suffixIcon: Icon(Iconsax.arrow_down_1, size: 15.sp),
                   showClearIcon: true,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Color(0xffD5D7DA)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                 ),
-                dropdownDecoration: const DropdownDecoration(
+                dropdownDecoration: DropdownDecoration(
                   marginTop: 2,
-                  maxHeight: 300,
+                  maxHeight: (300 / ScreenUtil().screenHeight).sh,
                 ),
-                dropdownItemDecoration: const DropdownItemDecoration(
-                  selectedIcon: Icon(Iconsax.tick_square, size: 18),
+                dropdownItemDecoration: DropdownItemDecoration(
+                  selectedIcon: Icon(Iconsax.tick_square, size: 18.sp),
                 ),
                 onSelectionChange: (selectedItems) {
                   setState(() {
@@ -259,35 +257,33 @@ class _FilterModalState extends State<FilterModal> {
                   });
                 },
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: 22.h),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _clearFilters,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
                         side: const BorderSide(color: Color(0xffD5D7DA)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       child: Text(
                         'Clear',
                         style: GLTextStyles.manropeStyle(
                           color: ColorTheme.blue,
-                          size: 15,
+                          size: 15.sp,
                           weight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        log("Button Pressed -> projectId: $selectedProject, fromDate: $fromDate, toDate: $toDate, leadSources: $selectedLeadSources");
-
                         Provider.of<LeadController>(context, listen: false)
                             .fetchFilterData(
                           projectId: selectedProject,
@@ -300,17 +296,17 @@ class _FilterModalState extends State<FilterModal> {
                         Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
                         backgroundColor: const Color(0xFF3E9E7C),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       child: Text(
                         'Apply',
                         style: GLTextStyles.manropeStyle(
                           color: ColorTheme.white,
-                          size: 15,
+                          size: 15.sp,
                           weight: FontWeight.w600,
                         ),
                       ),

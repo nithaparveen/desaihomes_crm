@@ -43,13 +43,14 @@ class DetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 15),
+        padding:
+            EdgeInsets.only(left: 15.w, right: 15.w, top: 5.h, bottom: 15.h),
         child: Container(
           decoration: BoxDecoration(
               color: const Color(0xffF5F3FF),
               borderRadius: BorderRadius.circular(6)),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,16 +68,15 @@ class DetailCard extends StatelessWidget {
                             Row(
                               children: [
                                 Container(
-                                  width: 40,
-                                  height: 41,
+                                  padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                       color: const Color(0xff93FAB4),
                                       borderRadius: BorderRadius.circular(4)),
-                                  child: const Center(
+                                  child: Center(
                                       child: Icon(
                                     Iconsax.user,
-                                    size: 18,
-                                    color: Color(0xff0B0D23),
+                                    size: 18.sp,
+                                    color: const Color(0xff0B0D23),
                                   )),
                                 ),
                                 SizedBox(
@@ -84,7 +84,7 @@ class DetailCard extends StatelessWidget {
                                 ),
                                 Text(name!,
                                     style: GLTextStyles.interStyle(
-                                        size: 16,
+                                        size: 16.sp,
                                         weight: FontWeight.w500,
                                         color: ColorTheme.black)),
                               ],
@@ -95,7 +95,7 @@ class DetailCard extends StatelessWidget {
                                 Text(
                                   "Age",
                                   style: GLTextStyles.interStyle(
-                                      size: 12,
+                                      size: 12.sp,
                                       weight: FontWeight.w400,
                                       color: ColorTheme.lightgrey),
                                 ),
@@ -104,14 +104,14 @@ class DetailCard extends StatelessWidget {
                                 ),
                                 Text(age!,
                                     style: GLTextStyles.interStyle(
-                                        size: 14,
+                                        size: 14.sp,
                                         weight: FontWeight.w600,
                                         color: ColorTheme.black)),
                               ],
                             ),
                         ],
                       ),
-                      const SizedBox(height: 16.0),
+                      SizedBox(height: 16.h),
                       if (phone != null)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -120,21 +120,35 @@ class DetailCard extends StatelessWidget {
                               onTap: () {
                                 makePhoneCall(phone!);
                               },
-                              child: const Card(
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5))),
+                              child: Container(
+                                padding: EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5.r)),
+                                  border: Border.all(
+                                    color: const Color(0xFFECECEE),
+                                    width: 0.91,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x14000000),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 6,
+                                      spreadRadius: -2,
+                                    ),
+                                  ],
+                                ),
                                 child: Padding(
-                                  padding: EdgeInsets.all(6.0),
+                                  padding: EdgeInsets.all(6.w),
                                   child: Icon(
                                     Iconsax.call,
-                                    size: 20,
+                                    size: 20.sp,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8.0),
+                            SizedBox(width: 9.w),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,26 +156,25 @@ class DetailCard extends StatelessWidget {
                                   Text(
                                     "Phone Number",
                                     style: GLTextStyles.interStyle(
-                                        size: 12,
+                                        size: 12.sp,
                                         weight: FontWeight.w400,
                                         color: ColorTheme.lightgrey),
                                   ),
                                   Text(
                                     phone!,
                                     style: GLTextStyles.interStyle(
-                                        size: 14,
+                                        size: 14.sp,
                                         weight: FontWeight.w400,
                                         color: ColorTheme.black),
-                                    overflow: TextOverflow
-                                        .ellipsis, 
-                                    maxLines: 1, 
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                      const SizedBox(height: 16.0),
+                      SizedBox(height: 16.h),
                       if (email != null)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -170,35 +183,49 @@ class DetailCard extends StatelessWidget {
                               onTap: () {
                                 makeEmail(email!);
                               },
-                              child: const Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5))),
-                                elevation: 2,
+                              child: Container(
+                                padding: EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5.r)),
+                                  border: Border.all(
+                                    color: const Color(0xFFECECEE),
+                                    width: 0.91,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x14000000),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 8,
+                                      spreadRadius: -4,
+                                    ),
+                                  ],
+                                ),
                                 child: Padding(
-                                  padding: EdgeInsets.all(6.0),
+                                  padding: EdgeInsets.all(6.w),
                                   child: Icon(
                                     Iconsax.sms,
-                                    size: 20,
+                                    size: 20.sp,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8.0),
+                            SizedBox(width: 9.w),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   "Email",
                                   style: GLTextStyles.interStyle(
-                                      size: 12,
+                                      size: 12.sp,
                                       weight: FontWeight.w400,
                                       color: ColorTheme.lightgrey),
                                 ),
                                 Text(
                                   email!,
                                   style: GLTextStyles.interStyle(
-                                      size: 14,
+                                      size: 14.sp,
                                       weight: FontWeight.w400,
                                       color: ColorTheme.black),
                                 ),
@@ -248,12 +275,14 @@ class DetailText extends StatelessWidget {
         Text(
           text,
           style: GLTextStyles.interStyle(
-              size: 12, weight: FontWeight.w400, color: ColorTheme.lightgrey),
+              size: 12.sp,
+              weight: FontWeight.w400,
+              color: ColorTheme.lightgrey),
         ),
         Text(
           value,
           style: GLTextStyles.interStyle(
-              size: 14,
+              size: 14.sp,
               weight: FontWeight.w400,
               color: const Color(0xff170e2b)),
         ),

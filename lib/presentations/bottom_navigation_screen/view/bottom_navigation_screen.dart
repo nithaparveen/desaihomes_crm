@@ -3,7 +3,9 @@ import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/presentations/follow_ups_screen/view/follow_ups_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/lead_screen_copy.dart';
+import 'package:desaihomes_crm_application/presentations/reports_screen/view/reports_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import '../controller/bottom_navigation_controller.dart';
@@ -39,7 +41,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             children: const [
               LeadScreenCopy(),
               FollowUpScreen(),
-              FollowUpScreen(),
+              ReportsScreen(),
             ],
           );
         },
@@ -48,33 +50,40 @@ class _BottomNavBarState extends State<BottomNavBar> {
         builder: (context, controller, _) {
           return AnimatedNotchBottomBar(
             notchBottomBarController: notchBottomBarController,
-            kIconSize: 24.0,
-            kBottomRadius: 28.0,
+            kIconSize: 20,
+            kBottomRadius: 30.r,
             color: const Color(0xff001524),
             showLabel: true,
             notchColor: ColorTheme.desaiGreen,
             durationInMilliSeconds: 300,
             itemLabelStyle: GLTextStyles.manropeStyle(
               color: ColorTheme.white,
-              size: 12,
+              size: 12.sp,
               weight: FontWeight.w400,
             ),
             bottomBarItems: [
               BottomBarItem(
-                inActiveItem:
-                    const Icon(Iconsax.convertshape_2, color: Colors.white),
-                activeItem:
-                    Icon(Iconsax.convertshape_2, color: ColorTheme.white),
+                inActiveItem: Icon(
+                  Iconsax.convertshape_2,
+                  color: Colors.white,
+                  size: 22.sp,
+                ),
+                activeItem: Icon(Iconsax.convertshape_2,
+                    color: ColorTheme.white, size: 22.sp),
                 itemLabel: "Leads",
               ),
               BottomBarItem(
-                inActiveItem: const Icon(Iconsax.grid_5, color: Colors.white),
-                activeItem: Icon(Iconsax.grid_5, color: ColorTheme.white),
-                itemLabel: "Follow-Ups",
+                inActiveItem:
+                    Icon(Iconsax.grid_5, color: Colors.white, size: 22.sp),
+                activeItem:
+                    Icon(Iconsax.grid_5, color: ColorTheme.white, size: 22.sp),
+                itemLabel: "Followups",
               ),
               BottomBarItem(
-                inActiveItem: const Icon(Iconsax.chart_2, color: Colors.white),
-                activeItem: Icon(Iconsax.chart_2, color: ColorTheme.white),
+                inActiveItem:
+                    Icon(Iconsax.chart_2, color: Colors.white, size: 22.sp),
+                activeItem:
+                    Icon(Iconsax.chart_2, color: ColorTheme.white, size: 22.sp),
                 itemLabel: "Reports",
               ),
             ],

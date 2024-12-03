@@ -12,17 +12,15 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Set up the 10-second timer
-  //   Future.delayed(const Duration(seconds: 10), () {
-  //     // Navigate only if still on the SplashScreen
-  //     if (mounted) {
-  //       _navigateToNextScreen();
-  //     }
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted) {
+        _navigateToNextScreen();
+      }
+    });
+  }
 
   void _navigateToNextScreen() {
     Navigator.pushReplacement(
@@ -47,8 +45,8 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Container(
-              height: 0.58.sh, // 55% of screen height
-              width: 0.7.sw, // 65% of screen width
+              height: 0.58.sh, 
+              width: 0.7.sw, 
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage("assets/images/Group 427320606.png"),
@@ -64,13 +62,13 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Text(
                 "Desai Lead Management",
                 style: GLTextStyles.manropeStyle(
-                    size: 32.sp), // Scalable font size
+                    size: 32.sp), 
                 textAlign: TextAlign.center,
               ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: 17.w,
+                horizontal: 16.w,
                 vertical: 12.h,
               ),
               child: Text(
@@ -84,11 +82,11 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             SizedBox(
-              height: 0.05.sw, // 5% of screen width
+              height: 0.05.sw, 
             ),
             SizedBox(
-              height: 0.15.sw, // 15% of screen width
-              width: 0.8.sw, // 80% of screen width
+              height: (56 / ScreenUtil().screenHeight).sh, 
+              width: 0.81.sw, 
               child: ElevatedButton(
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all(
@@ -100,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ColorTheme.desaiGreen,
                   ),
                 ),
-                onPressed: _navigateToNextScreen, // Button triggers navigation
+                onPressed: _navigateToNextScreen, 
                 child: Text(
                   "Get Started",
                   style: GLTextStyles.manropeStyle(

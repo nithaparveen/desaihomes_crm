@@ -45,36 +45,33 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
-            Color(0xFF3E9E7C),
-            Color(0xFF060C0A),
+            const Color(0xFF24116B),
+            ColorTheme.desaiGreen,
           ],
-          stops: [0.2628, 2.0],
+          stops: const [0.00008, 2.0],
         ),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: GestureDetector(
           onTap: () {
-            // Unfocus text fields when tapping outside
             FocusScope.of(context).unfocus();
           },
           child: SingleChildScrollView(
             child: Container(
-              height:
-                  MediaQuery.of(context).size.height, // Fill full screen height
+              height: MediaQuery.of(context).size.height,
               padding: EdgeInsets.symmetric(
                 horizontal: 10.w,
                 vertical: 12.h,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment:
-                    MainAxisAlignment.end, // Align content to bottom
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Center(
                     child: Container(
@@ -148,12 +145,12 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                           Consumer<LoginController>(
                             builder: (context, controller, _) {
                               return CustomTextField(
-                                prefixIcon: const Icon(
+                                prefixIcon:  Icon(
                                   Iconsax.lock,
-                                  size: 15,
+                                  size: 15.sp,
                                 ),
                                 isPasswordField: true,
-                                obscureText:  controller
+                                obscureText: controller
                                     .visibility, 
                                 suffixIcon: IconButton(
                                   onPressed: () {
@@ -163,8 +160,9 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                                   icon: Icon(
                                     controller.visibility
                                         ? Iconsax.eye_slash
-                                        : Iconsax.eye,
-                                    size: 15,
+                                        : Iconsax
+                                            .eye, 
+                                    size: 15.sp,
                                   ),
                                 ),
                                 hintText: "Enter password",

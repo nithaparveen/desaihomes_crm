@@ -10,6 +10,7 @@ import 'package:desaihomes_crm_application/presentations/lead_screen/view/widget
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -113,12 +114,14 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: ColorTheme.desaiGreen,
-          foregroundColor: ColorTheme.desaiGreen,
           title: FutureBuilder<String?>(
             future: getUserName(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+                return LoadingAnimationWidget.staggeredDotsWave(
+                  color: ColorTheme.desaiGreen,
+                  size: 32,
+                );
               }
               if (snapshot.hasError || !snapshot.hasData) {
                 return const Text("Unknown User");
@@ -127,8 +130,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
               return Row(
                 children: [
                   Container(
-                    width: 35,
-                    height: 35,
+                    width: (35 / ScreenUtil().screenWidth).sw,
+                    height: (35 / ScreenUtil().screenHeight).sh,
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(255, 202, 158, 208),
                       shape: BoxShape.circle,
@@ -139,7 +142,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                         userName.substring(0, 2).toUpperCase(),
                         style: GLTextStyles.robotoStyle(
                           color: ColorTheme.blue,
-                          size: 13,
+                          size: 13.sp,
                           weight: FontWeight.w600,
                         ),
                       ),
@@ -150,7 +153,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                     userName,
                     style: GLTextStyles.manropeStyle(
                       color: ColorTheme.white,
-                      size: 14,
+                      size: 14.sp,
                       weight: FontWeight.w600,
                     ),
                   ),
@@ -160,6 +163,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
           ),
           actions: const [LogoutButton()],
           automaticallyImplyLeading: false,
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,26 +176,24 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                   width: 1.sw,
                   decoration: BoxDecoration(
                     color: ColorTheme.desaiGreen,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30.r),
+                      bottomRight: Radius.circular(30.r),
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(
-                          width: 0.75.sw,
-                          height: 0.13.sw,
+                  child: Row(
+                    children: [
+                      SizedBox(width: 15.w),
+                      Flexible(
+                        child: SizedBox(
+                          height: 44.h,
                           child: SearchBar(
                             padding: MaterialStatePropertyAll(
-                                EdgeInsets.only(left: 15)),
+                                EdgeInsets.only(left: 15.w)),
                             hintText: "Search ...",
                             hintStyle: MaterialStatePropertyAll(
                               GLTextStyles.manropeStyle(
-                                size: 13,
+                                size: 13.sp,
                                 weight: FontWeight.w400,
                                 color: const Color.fromARGB(255, 132, 132, 132),
                               ),
@@ -198,15 +201,15 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                             elevation: const MaterialStatePropertyAll(0),
                             surfaceTintColor:
                                 const MaterialStatePropertyAll(Colors.white),
-                            leading: const Icon(
+                            leading: Icon(
                               Iconsax.search_normal_1,
-                              size: 18,
-                              color: Color.fromARGB(255, 132, 132, 132),
+                              size: 18.sp,
+                              color: const Color.fromARGB(255, 132, 132, 132),
                             ),
                             textStyle: MaterialStatePropertyAll(
                               GLTextStyles.manropeStyle(
                                 weight: FontWeight.w400,
-                                size: 15,
+                                size: 15.sp,
                                 color: const Color.fromARGB(255, 87, 87, 87),
                               ),
                             ),
@@ -230,43 +233,47 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                             },
                           ),
                         ),
-                        Container(
-                          width: 48.w,
-                          height: 48.h,
+                      ),
+                      SizedBox(width: 10.w),
+                      SizedBox(
+                        height: 44.h,
+                        child: Container(
+                          width: 44.w,
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 255, 255, 255),
-                            borderRadius: BorderRadius.circular(7.38),
+                            borderRadius: BorderRadius.circular(7.38.r),
                           ),
                           child: Center(
-                              child: IconButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return const FilterModal();
-                                },
-                              );
-                            },
-                            icon: const Icon(
-                              Iconsax.setting_5,
-                              size: 18,
-                              color: Color.fromARGB(255, 132, 132, 132),
+                            child: IconButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return const FilterModal();
+                                  },
+                                );
+                              },
+                              icon: Icon(
+                                Iconsax.setting_5,
+                                size: 18.sp,
+                                color: const Color.fromARGB(255, 132, 132, 132),
+                              ),
                             ),
-                          )),
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(width: 15.w),
+                    ],
                   ),
                 )
               ],
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Text(
                 "Leads",
                 style: GLTextStyles.manropeStyle(
-                  size: 18,
+                  size: 18.sp,
                   weight: FontWeight.w600,
                   color: const Color(0xff120e2b),
                 ),
@@ -276,7 +283,15 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
               child: Consumer<LeadController>(
                 builder: (context, controller, _) {
                   if (controller.leadModel.leads?.data == null) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: LoadingAnimationWidget.staggeredDotsWave(
+                          color: ColorTheme.desaiGreen,
+                          size: 32,
+                        ),
+                      ),
+                    );
                   }
                   final leads = controller.leadModel.leads?.data ?? [];
 
@@ -285,7 +300,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                       child: Text(
                         "No Leads Found",
                         style: GLTextStyles.manropeStyle(
-                          size: 16,
+                          size: 16.sp,
                           weight: FontWeight.w400,
                           color: Colors.grey,
                         ),
@@ -301,10 +316,13 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                       controller: scrollController,
                       itemBuilder: (context, index) {
                         if (index >= controller.leadModel.leads!.data!.length) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              backgroundColor: Colors.white,
-                              color: Colors.grey,
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: LoadingAnimationWidget.staggeredDotsWave(
+                                color: ColorTheme.desaiGreen,
+                                size: 32,
+                              ),
                             ),
                           );
                         }
@@ -315,7 +333,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                         final leadId = '${lead?.id}';
 
                         return Padding(
-                          padding: const EdgeInsets.only(left: 15, right: 15),
+                          padding: EdgeInsets.only(left: 15.w, right: 15.w),
                           child: LeadCard(
                             name: '${lead?.name}',
                             location: projectName != null

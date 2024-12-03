@@ -1,6 +1,7 @@
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
@@ -10,11 +11,11 @@ class CustomDatePicker extends StatefulWidget {
   final TextEditingController? controller;
 
   const CustomDatePicker({
-    Key? key,
+    super.key,
     this.labelText,
     this.onDateSelected,
     this.controller,
-  }) : super(key: key);
+  });
 
   @override
   _CustomDatePickerState createState() => _CustomDatePickerState();
@@ -47,28 +48,30 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
-          contentPadding: const EdgeInsets.all(10),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 10.w,
+            vertical: 8.h,
+          ),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Container(
-                width: 300,
-                height: 300, // Increased height to accommodate day headers
+                width: 400.w,
+                height: 380.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 10),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 15.h, horizontal: 10.w),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon:
-                                const Icon(Iconsax.arrow_circle_left, size: 20),
+                            icon: Icon(Iconsax.arrow_circle_left, size: 20.sp),
                             onPressed: () {
                               setState(() {
                                 _currentDate = DateTime(
@@ -78,10 +81,9 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                           ),
                           Text(DateFormat('MMMM yyyy').format(_currentDate),
                               style: GLTextStyles.manropeStyle(
-                                  size: 16, weight: FontWeight.w400)),
+                                  size: 16.sp, weight: FontWeight.w400)),
                           IconButton(
-                            icon: const Icon(Iconsax.arrow_circle_right,
-                                size: 20),
+                            icon: Icon(Iconsax.arrow_circle_right, size: 20.sp),
                             onPressed: () {
                               setState(() {
                                 _currentDate = DateTime(
@@ -92,9 +94,8 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                         ],
                       ),
                     ),
-                    // Day headers
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: Row(
                         children: _dayHeaders
                             .map((day) => Expanded(
@@ -102,7 +103,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                                     child: Text(
                                       day.toUpperCase(),
                                       style: GLTextStyles.manropeStyle(
-                                          size: 12,
+                                          size: 12.sp,
                                           weight: FontWeight.w500,
                                           color: Colors.grey[600]),
                                     ),
@@ -111,7 +112,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                             .toList(),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10.h),
                     GridView.builder(
                       shrinkWrap: true,
                       gridDelegate:
@@ -149,7 +150,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                                   fontWeight: _isToday(dateTime)
                                       ? FontWeight.w600
                                       : FontWeight.w500,
-                                  fontSize: 16),
+                                  fontSize: 16.sp),
                             ),
                           ),
                         );
@@ -187,28 +188,28 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       readOnly: true,
       style: GLTextStyles.manropeStyle(
         weight: FontWeight.w400,
-        size: 15,
-        color: Color.fromARGB(255, 87, 87, 87),
+        size: 15.sp,
+        color: const Color.fromARGB(255, 87, 87, 87),
       ),
       decoration: InputDecoration(
         labelText: widget.labelText,
         suffixIcon: IconButton(
-          icon: const Icon(Iconsax.calendar_1, size: 20),
+          icon: Icon(Iconsax.calendar_1, size: 20.sp),
           onPressed: () => _selectDate(context),
         ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           borderSide: const BorderSide(color: Color(0xffD5D7DA)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           borderSide: const BorderSide(color: Color(0xffD5D7DA)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           borderSide: const BorderSide(color: Colors.grey),
         ),
       ),

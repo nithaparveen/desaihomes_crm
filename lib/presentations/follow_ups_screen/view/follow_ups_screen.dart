@@ -32,10 +32,10 @@ class FollowUpScreen extends StatelessWidget {
         backgroundColor: ColorTheme.desaiGreen,
         foregroundColor: ColorTheme.desaiGreen,
         title: FutureBuilder<String?>(
-          future: getUserName(), 
+          future: getUserName(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator(); 
+              return const CircularProgressIndicator();
             }
             if (snapshot.hasError || !snapshot.hasData) {
               return const Text("Unknown User");
@@ -53,10 +53,10 @@ class FollowUpScreen extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      userName.substring(0, 2).toUpperCase(), 
+                      userName.substring(0, 2).toUpperCase(),
                       style: GLTextStyles.robotoStyle(
                         color: ColorTheme.blue,
-                        size: 13,
+                        size: 13.sp,
                         weight: FontWeight.w600,
                       ),
                     ),
@@ -67,7 +67,7 @@ class FollowUpScreen extends StatelessWidget {
                   userName,
                   style: GLTextStyles.manropeStyle(
                     color: ColorTheme.white,
-                    size: 14,
+                    size: 14.sp,
                     weight: FontWeight.w600,
                   ),
                 ),
@@ -77,8 +77,14 @@ class FollowUpScreen extends StatelessWidget {
         ),
         actions: const [LogoutButton()],
         automaticallyImplyLeading: false,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+      ),
+      body: Column(
+        children: [
+          
+        ],
       ),
     );
   }
 }
-

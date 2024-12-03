@@ -60,7 +60,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
             Text(
               "Remarks",
               style: GLTextStyles.manropeStyle(
-                size: 18,
+                size: 18.sp,
                 weight: FontWeight.w600,
                 color: const Color(0xff170e2b),
               ),
@@ -79,7 +79,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                 ),
                 SizedBox(height: 6.h),
                 SizedBox(
-                  height: 35,
+                  height: (35 / ScreenUtil().screenHeight).sh,
                   width: double.infinity,
                   child: CustomDatePicker(
                     onDateSelected: (DateTime date) {
@@ -104,8 +104,8 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
             Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
-                width: 137.w,
-                height: 45.h,
+                width: (137 / ScreenUtil().screenWidth).sw,
+                height: (45 / ScreenUtil().screenHeight).sh,
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -126,7 +126,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                     widget.fetchSiteVisits();
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    // padding: const EdgeInsets.symmetric(vertical: 12),
                     backgroundColor: const Color(0xFF3E9E7C),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -143,7 +143,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                 ),
               ),
             ),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             Flexible(
               fit: FlexFit.loose,
               child: ListView.separated(
@@ -159,11 +159,11 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
 
                   return Container(
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(3.r),
                         border: Border.all(color: const Color(0xffD5D7DA))),
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 6, bottom: 12, left: 6, right: 6),
+                      padding: EdgeInsets.only(
+                          top: 6.h, bottom: 12.h, left: 6.w, right: 6.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -172,7 +172,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Iconsax.layer, size: 16),
+                                  Icon(Iconsax.layer, size: 16.sp),
                                   SizedBox(
                                     width: 8.w,
                                   ),
@@ -181,7 +181,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                       siteVisit.siteVisitDate ?? DateTime.now(),
                                     ),
                                     style: GLTextStyles.interStyle(
-                                        size: 14,
+                                        size: 14.sp,
                                         weight: FontWeight.w400,
                                         color: const Color(0xff57595B)),
                                   ),
@@ -219,8 +219,14 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Container(
-                                                  width: 50.w,
-                                                  height: 50.h,
+                                                  width: (50 /
+                                                          ScreenUtil()
+                                                              .screenWidth)
+                                                      .sw,
+                                                  height: (50 /
+                                                          ScreenUtil()
+                                                              .screenHeight)
+                                                      .sh,
                                                   decoration: BoxDecoration(
                                                     color: const Color.fromARGB(
                                                         255, 196, 229, 217),
@@ -239,7 +245,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                     size: 18.sp,
                                                   )),
                                                 ),
-                                                SizedBox(height: 8.h),
+                                                SizedBox(width: 8.w),
                                                 Text(
                                                   'Edit Remark',
                                                   style:
@@ -268,7 +274,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                       });
                                                     },
                                                   ),
-                                                  const SizedBox(height: 15),
+                                                  SizedBox(height: 15.h),
                                                   FormTextField(
                                                     controller:
                                                         editSiteVisitController,
@@ -279,7 +285,6 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                             ),
                                             actions: [
                                               CustomButton(
-                                                
                                                 borderColor:
                                                     ColorTheme.desaiGreen,
                                                 backgroundColor:
@@ -289,7 +294,10 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                     ColorTheme.desaiGreen,
                                                 onPressed: () =>
                                                     Navigator.of(context).pop(),
-                                                width: 120.w,
+                                                width: (110 /
+                                                        ScreenUtil()
+                                                            .screenWidth)
+                                                    .sw,
                                               ),
                                               CustomButton(
                                                 borderColor: ColorTheme.white,
@@ -297,7 +305,10 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                     ColorTheme.desaiGreen,
                                                 text: "Save",
                                                 textColor: Colors.white,
-                                                width: 120.w,
+                                                width: (110 /
+                                                        ScreenUtil()
+                                                            .screenWidth)
+                                                    .sw,
                                                 onPressed: () async {
                                                   final updatedRemark =
                                                       editSiteVisitController
@@ -326,8 +337,8 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                     },
                                     icon: Icon(
                                       Iconsax.edit_2,
-                                      size: 18,
-                                      color: ColorTheme.lightBlue,
+                                      size: 18.sp,
+                                      color: ColorTheme.grey,
                                     ),
                                   ),
                                   IconButton(
@@ -337,7 +348,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                         builder: (context) => AlertDialog(
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(4),
+                                                BorderRadius.circular(4.r),
                                           ),
                                           surfaceTintColor: Colors.white,
                                           title: Column(
@@ -347,8 +358,14 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Container(
-                                                width: 50.w,
-                                                height: 50.h,
+                                                width: (50 /
+                                                        ScreenUtil()
+                                                            .screenWidth)
+                                                    .sw,
+                                                height: (50 /
+                                                        ScreenUtil()
+                                                            .screenHeight)
+                                                    .sh,
                                                 decoration: BoxDecoration(
                                                   color:
                                                       const Color(0xffFEE4E2),
@@ -394,7 +411,9 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                               textColor: ColorTheme.logoutRed,
                                               onPressed: () =>
                                                   Navigator.of(context).pop(),
-                                              width: 120.w,
+                                              width: (110 /
+                                                      ScreenUtil().screenWidth)
+                                                  .sw,
                                             ),
                                             CustomButton(
                                               borderColor: ColorTheme.white,
@@ -402,7 +421,9 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                                   ColorTheme.logoutRed,
                                               text: "Confirm",
                                               textColor: Colors.white,
-                                              width: 120.w,
+                                              width: (110 /
+                                                      ScreenUtil().screenWidth)
+                                                  .sw,
                                               onPressed: () async {
                                                 Navigator.of(context).pop();
                                                 await leadDetailController
@@ -419,8 +440,8 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                     },
                                     icon: Icon(
                                       Iconsax.trash,
-                                      size: 18,
-                                      color: ColorTheme.red,
+                                      size: 18.sp,
+                                      color: ColorTheme.grey,
                                     ),
                                   ),
                                 ],
@@ -434,7 +455,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                 child: Text(
                                   siteVisit.siteVisitRemarks ?? '',
                                   style: GLTextStyles.interStyle(
-                                      size: 14,
+                                      size: 14.sp,
                                       weight: FontWeight.w400,
                                       color: const Color(0xff170e2b)),
                                 ),

@@ -14,16 +14,16 @@ class DropdownFormTextField extends StatelessWidget {
   final String? initialValue;
 
   const DropdownFormTextField({
-    Key? key,
+    super.key,
     this.hintText,
-    this.icon = Iconsax.arrow_down_1, // Default dropdown arrow icon
+    this.icon = Iconsax.arrow_down_1,
     this.textStyle,
     this.onChanged,
     required this.items,
     this.height = 35.0,
     this.width = double.infinity,
     this.initialValue,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,17 +38,17 @@ class DropdownFormTextField extends StatelessWidget {
           fillColor: Colors.white,
           hintText: hintText,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+               EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             borderSide: const BorderSide(color: Color(0xffD5D7DA)),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             borderSide: const BorderSide(color: Color(0xffD5D7DA)),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             borderSide: const BorderSide(color: Colors.grey),
           ),
         ),
@@ -58,7 +58,7 @@ class DropdownFormTextField extends StatelessWidget {
               size: 14.sp,
               color: const Color.fromARGB(255, 87, 87, 87),
             ),
-        icon: Icon(icon, size: 15),
+        icon: Icon(icon, size: 15.sp),
         items: items.map((item) {
           return DropdownMenuItem<String>(
             value: item,

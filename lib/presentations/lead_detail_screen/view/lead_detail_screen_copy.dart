@@ -6,11 +6,10 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/site_visit_section.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/status_button.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/textstyles.dart';
 
@@ -93,24 +92,27 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
         child: Consumer<LeadDetailController>(
           builder: (context, controller, _) {
             return controller.isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.white,
-                      color: Colors.grey,
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: LoadingAnimationWidget.staggeredDotsWave(
+                        color: ColorTheme.desaiGreen,
+                        size: 32,
+                      ),
                     ),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        padding: EdgeInsets.symmetric(horizontal: 15.w),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               "Lead Details",
                               style: GLTextStyles.manropeStyle(
-                                size: 18,
+                                size: 18.sp,
                                 weight: FontWeight.w600,
                                 color: const Color(0xff120e2b),
                               ),
@@ -120,13 +122,12 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                         ),
                       ),
                       TabBar(
-                        // isScrollable: true,
                         tabAlignment: TabAlignment.fill,
                         controller: tabController,
                         labelStyle: GLTextStyles.manropeStyle(
-                            size: 14, weight: FontWeight.w500),
+                            size: 14.sp, weight: FontWeight.w500),
                         unselectedLabelStyle: GLTextStyles.manropeStyle(
-                            size: 14, weight: FontWeight.w500),
+                            size: 14.sp, weight: FontWeight.w500),
                         labelColor: ColorTheme.lightBlue,
                         unselectedLabelColor: const Color(0xff909090),
                         indicatorColor: ColorTheme.lightBlue,
@@ -137,7 +138,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                           Tab(text: "Site Visits"),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       Expanded(
                         child: TabBarView(
                           controller: tabController,

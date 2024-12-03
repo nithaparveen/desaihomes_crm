@@ -41,7 +41,7 @@ class LeadCard extends StatelessWidget {
     required this.index,
   });
 
-  Widget _buildAvatar(String initials, int index) {
+  Widget buildAvatar(String initials, int index) {
     final List<Color> colors = [
       const Color(0xFFBCFFBE),
       const Color(0xFFD9BCFF),
@@ -52,8 +52,8 @@ class LeadCard extends StatelessWidget {
     final Color backgroundColor = colors[index % colors.length];
 
     return Container(
-      width: 45,
-      height: 45,
+      width: (45 / ScreenUtil().screenWidth).sw,
+      height: (45 / ScreenUtil().screenHeight).sh,
       decoration: BoxDecoration(
         color: backgroundColor,
         shape: BoxShape.circle,
@@ -63,7 +63,7 @@ class LeadCard extends StatelessWidget {
           initials,
           style: GLTextStyles.robotoStyle(
             color: ColorTheme.blue,
-            size: 20,
+            size: 20.sp,
             weight: FontWeight.w600,
           ),
         ),
@@ -71,67 +71,64 @@ class LeadCard extends StatelessWidget {
     );
   }
 
-Widget _buildLeadDetails(BuildContext context) {
-  return Expanded(
-    child: GestureDetector(
-      onTap: () {
-        // Navigate to the LeadDetailScreenCopy on tapping the details section
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LeadDetailScreenCopy(
-              leadId: int.tryParse(leadId) ?? 0,
-            ),
-          ),
-        );
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: GLTextStyles.manropeStyle(
-              color: const Color(0xff120e2b),
-              size: 14,
-              weight: FontWeight.w700,
-            ),
-          ),
-          if (location != "null")
-            Text(
-              location,
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.grey,
-                size: 14,
-                weight: FontWeight.w500,
+  Widget buildLeadDetails(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LeadDetailScreenCopy(
+                leadId: int.tryParse(leadId) ?? 0,
               ),
             ),
-          const SizedBox(height: 4),
-          if (platform != "null")
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              platform,
+              name,
               style: GLTextStyles.manropeStyle(
-                color: ColorTheme.black,
-                size: 14,
-                weight: FontWeight.w500,
+                color: const Color(0xff120e2b),
+                size: 14.sp,
+                weight: FontWeight.w700,
               ),
             ),
-          Text(
-            timeAgo,
-            style: GLTextStyles.manropeStyle(
-              color: ColorTheme.lightBlue,
-              size: 12.5,
-              weight: FontWeight.w600,
+            if (location != "null")
+              Text(
+                location,
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.grey,
+                  size: 14.sp,
+                  weight: FontWeight.w500,
+                ),
+              ),
+             SizedBox(height: 4.h),
+            if (platform != "null")
+              Text(
+                platform,
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.black,
+                  size: 14.sp,
+                  weight: FontWeight.w500,
+                ),
+              ),
+            Text(
+              timeAgo,
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.lightBlue,
+                size: 12.5.sp,
+                weight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  Widget _buildActions(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+  Widget buildActions(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
     final dummyStatus = DummyStatusList.getStatusDetails(status);
 
@@ -153,8 +150,8 @@ Widget _buildLeadDetails(BuildContext context) {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      height: size.width * .75,
-                      width: size.width * .4,
+                      height: .45.sh,
+                      width: .4.sw,
                       child: Scrollbar(
                         thickness: 2,
                         radius: const Radius.circular(15),
@@ -168,7 +165,7 @@ Widget _buildLeadDetails(BuildContext context) {
                                 users[index],
                                 style: GLTextStyles.manropeStyle(
                                   color: ColorTheme.black,
-                                  size: 14,
+                                  size: 14.sp,
                                   weight: FontWeight.w500,
                                 ),
                               ),
@@ -199,13 +196,13 @@ Widget _buildLeadDetails(BuildContext context) {
                                 await leadController.fetchData(context);
 
                                 Flushbar(
-                                  maxWidth: size.width * .55,
+                                  maxWidth: .55.sw,
                                   backgroundColor: Colors.grey.shade100,
                                   messageColor: ColorTheme.black,
                                   icon: Icon(
                                     Iconsax.profile_tick,
                                     color: ColorTheme.green,
-                                    size: 20,
+                                    size: 20.sp,
                                   ),
                                   message: 'Assign Successful',
                                   duration: const Duration(seconds: 3),
@@ -222,20 +219,20 @@ Widget _buildLeadDetails(BuildContext context) {
               },
               elevation: 0,
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding:  EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: const Color(0xffD8D8D8),
                     width: 0.4,
                   ),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
                 child:
                     leadController.leadModel.leads?.data?[index].assignedTo ==
                             null
-                        ? const Icon(
+                        ?  Icon(
                             Iconsax.profile_add,
-                            size: 22,
+                            size: 22.sp,
                             color: Colors.black87,
                           )
                         : Text(
@@ -246,7 +243,7 @@ Widget _buildLeadDetails(BuildContext context) {
                                 .toUpperCase(),
                             style: GLTextStyles.robotoStyle(
                               color: ColorTheme.lightBlue,
-                              size: 16,
+                              size: 16.sp,
                               weight: FontWeight.bold,
                             ),
                           ),
@@ -278,9 +275,9 @@ Widget _buildLeadDetails(BuildContext context) {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+         SizedBox(height: 16.h),
         Container(
-          width: 95,
+          width: (95 / ScreenUtil().screenWidth).sw,
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
           decoration: BoxDecoration(
             color: Color(int.parse(
@@ -295,7 +292,7 @@ Widget _buildLeadDetails(BuildContext context) {
                 color: Color(int.parse(
                     'FF${dummyStatus['textColor']?.replaceFirst('#', '')}',
                     radix: 16)),
-                size: 10,
+                size: 10.sp,
                 weight: FontWeight.w600,
               ),
             ),
@@ -309,21 +306,21 @@ Widget _buildLeadDetails(BuildContext context) {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,  
-        borderRadius: BorderRadius.circular(4),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4.r),
         border: Border.all(
           color: Colors.grey.withOpacity(0.2),
           width: 1,
         ),
       ),
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
+      padding:  EdgeInsets.only(left: 16.w, right: 16.w, top: 20.h, bottom: 20.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildAvatar(initials, index),
-          const SizedBox(width: 16),
-          _buildLeadDetails(context),
-          _buildActions(context),
+          buildAvatar(initials, index),
+          SizedBox(width: 16.w),
+          buildLeadDetails(context),
+          buildActions(context),
         ],
       ),
     );

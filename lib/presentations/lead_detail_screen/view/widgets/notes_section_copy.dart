@@ -68,7 +68,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
     final leadDetailController = Provider.of<LeadDetailController>(context);
 
     return Padding(
-      padding: const EdgeInsets.only(left: 18, right: 18, top: 5, bottom: 15),
+      padding: EdgeInsets.only(left: 18.w, right: 18.w, top: 5.h, bottom: 15.h),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -78,7 +78,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
             Text(
               "Notes",
               style: GLTextStyles.manropeStyle(
-                size: 18,
+                size: 18.sp,
                 weight: FontWeight.w600,
                 color: const Color(0xff170e2b),
               ),
@@ -91,13 +91,13 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                   'Date',
                   style: GLTextStyles.manropeStyle(
                     color: ColorTheme.blue,
-                    size: 14,
+                    size: 14.sp,
                     weight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(height: 6.h),
                 SizedBox(
-                  height: 35,
+                  height: (35 / ScreenUtil().screenHeight).sh,
                   width: double.infinity,
                   child: CustomDatePicker(
                     onDateSelected: (DateTime date) {
@@ -122,8 +122,8 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
             Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
-                width: 137.w,
-                height: 45.h,
+                width: (137 / ScreenUtil().screenWidth).sw,
+                height: (45 / ScreenUtil().screenHeight).sh,
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -140,10 +140,10 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                     widget.fetchNotes();
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    // padding: EdgeInsets.symmetric(vertical: 12.h),
                     backgroundColor: const Color(0xFF3E9E7C),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
                   child: Text(
@@ -157,7 +157,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                 ),
               ),
             ),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             Flexible(
               fit: FlexFit.loose,
               child: ListView.separated(
@@ -171,11 +171,11 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
 
                   return Container(
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(3.r),
                         border: Border.all(color: const Color(0xffD5D7DA))),
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 6, bottom: 12, left: 6, right: 6),
+                      padding: EdgeInsets.only(
+                          top: 6.h, bottom: 12.h, left: 6.w, right: 6.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -184,7 +184,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Iconsax.layer, size: 16),
+                                  Icon(Iconsax.layer, size: 16.sp),
                                   SizedBox(
                                     width: 8.w,
                                   ),
@@ -193,7 +193,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                       note.createdAt ?? DateTime.now(),
                                     ),
                                     style: GLTextStyles.interStyle(
-                                        size: 14,
+                                        size: 14.sp,
                                         weight: FontWeight.w400,
                                         color: const Color(0xff57595B)),
                                   ),
@@ -226,8 +226,14 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Container(
-                                                  width: 50.w,
-                                                  height: 50.h,
+                                                  width: (50 /
+                                                          ScreenUtil()
+                                                              .screenWidth)
+                                                      .sw,
+                                                  height: (50 /
+                                                          ScreenUtil()
+                                                              .screenHeight)
+                                                      .sh,
                                                   decoration: BoxDecoration(
                                                     color: const Color.fromARGB(
                                                         255, 196, 229, 217),
@@ -275,7 +281,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                       });
                                                     },
                                                   ),
-                                                  const SizedBox(height: 15),
+                                                  SizedBox(height: 15.h),
                                                   FormTextField(
                                                     controller:
                                                         editNoteController,
@@ -295,7 +301,10 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                     ColorTheme.desaiGreen,
                                                 onPressed: () =>
                                                     Navigator.of(context).pop(),
-                                                width: 120.w,
+                                                width: (110 /
+                                                        ScreenUtil()
+                                                            .screenWidth)
+                                                    .sw,
                                               ),
                                               CustomButton(
                                                 borderColor: ColorTheme.white,
@@ -303,7 +312,10 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                     ColorTheme.desaiGreen,
                                                 text: "Save",
                                                 textColor: Colors.white,
-                                                width: 120.w,
+                                                width: (110 /
+                                                        ScreenUtil()
+                                                            .screenWidth)
+                                                    .sw,
                                                 onPressed: () async {
                                                   final updatedNote =
                                                       editNoteController.text;
@@ -330,7 +342,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                     },
                                     icon: Icon(
                                       Iconsax.edit_2,
-                                      size: 18,
+                                      size: 18.sp,
                                       color: ColorTheme.lightBlue,
                                     ),
                                   ),
@@ -347,8 +359,14 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Container(
-                                                width: 50.w,
-                                                height: 50.h,
+                                                width: (50 /
+                                                        ScreenUtil()
+                                                            .screenWidth)
+                                                    .sw,
+                                                height: (50 /
+                                                        ScreenUtil()
+                                                            .screenHeight)
+                                                    .sh,
                                                 decoration: BoxDecoration(
                                                   color:
                                                       const Color(0xffFEE4E2),
@@ -394,7 +412,9 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                               textColor: ColorTheme.logoutRed,
                                               onPressed: () =>
                                                   Navigator.of(context).pop(),
-                                              width: 120.w,
+                                              width: (110 /
+                                                      ScreenUtil().screenWidth)
+                                                  .sw,
                                             ),
                                             CustomButton(
                                               borderColor: ColorTheme.white,
@@ -402,7 +422,9 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                                   ColorTheme.logoutRed,
                                               text: "Confirm",
                                               textColor: Colors.white,
-                                              width: 120.w,
+                                              width: (110 /
+                                                      ScreenUtil().screenWidth)
+                                                  .sw,
                                               onPressed: () async {
                                                 Navigator.of(context).pop();
                                                 await leadDetailController
@@ -419,7 +441,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                     },
                                     icon: Icon(
                                       Iconsax.trash,
-                                      size: 18,
+                                      size: 18.sp,
                                       color: ColorTheme.red,
                                     ),
                                   ),
@@ -434,7 +456,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                 child: Text(
                                   note.notes ?? '',
                                   style: GLTextStyles.interStyle(
-                                      size: 14,
+                                      size: 14.sp,
                                       weight: FontWeight.w400,
                                       color: const Color(0xff170e2b)),
                                 ),
