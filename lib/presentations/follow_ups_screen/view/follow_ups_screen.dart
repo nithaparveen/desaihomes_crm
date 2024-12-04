@@ -28,62 +28,69 @@ class FollowUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: ColorTheme.desaiGreen,
-        foregroundColor: ColorTheme.desaiGreen,
-        title: FutureBuilder<String?>(
-          future: getUserName(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            if (snapshot.hasError || !snapshot.hasData) {
-              return const Text("Unknown User");
-            }
-            String userName = snapshot.data ?? "Unknown User";
-            return Row(
-              children: [
-                Container(
-                  width: 35,
-                  height: 35,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 158, 208),
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 2.5, color: Colors.white),
-                  ),
-                  child: Center(
-                    child: Text(
-                      userName.substring(0, 2).toUpperCase(),
-                      style: GLTextStyles.robotoStyle(
-                        color: ColorTheme.blue,
-                        size: 13.sp,
-                        weight: FontWeight.w600,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(90.h),
+        child: AppBar(
+          backgroundColor: ColorTheme.desaiGreen,
+          foregroundColor: ColorTheme.desaiGreen,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20.r),
+              bottomRight: Radius.circular(20.r),
+            ),
+          ),
+          title: FutureBuilder<String?>(
+            future: getUserName(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snapshot.hasError || !snapshot.hasData) {
+                return const Text("Unknown User");
+              }
+              String userName = snapshot.data ?? "Unknown User";
+              return Row(
+                children: [
+                  Container(
+                    width: 35,
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 202, 158, 208),
+                      shape: BoxShape.circle,
+                      border: Border.all(width: 2.5, color: Colors.white),
+                    ),
+                    child: Center(
+                      child: Text(
+                        userName.substring(0, 2).toUpperCase(),
+                        style: GLTextStyles.robotoStyle(
+                          color: ColorTheme.blue,
+                          size: 13.sp,
+                          weight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: 10.w),
-                Text(
-                  userName,
-                  style: GLTextStyles.manropeStyle(
-                    color: ColorTheme.white,
-                    size: 14.sp,
-                    weight: FontWeight.w600,
+                  SizedBox(width: 10.w),
+                  Text(
+                    userName,
+                    style: GLTextStyles.manropeStyle(
+                      color: ColorTheme.white,
+                      size: 14.sp,
+                      weight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
+          actions: const [LogoutButton()],
+          automaticallyImplyLeading: false,
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
         ),
-        actions: const [LogoutButton()],
-        automaticallyImplyLeading: false,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
       ),
       body: Column(
-        children: [
-          
-        ],
+        children: [],
       ),
     );
   }
