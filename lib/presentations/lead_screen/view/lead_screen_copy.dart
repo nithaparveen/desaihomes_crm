@@ -206,6 +206,26 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                               size: 18.sp,
                               color: const Color.fromARGB(255, 132, 132, 132),
                             ),
+                            trailing: [
+                              IconButton(
+                                icon: Icon(
+                                  Iconsax.close_circle,
+                                  size: 18.sp,
+                                  color:
+                                      const Color.fromARGB(255, 132, 132, 132),
+                                ),
+                                onPressed: () {
+                                  Provider.of<LeadController>(context,
+                                          listen: false)
+                                      .searchController
+                                      .clear();
+
+                                  Provider.of<LeadController>(context,
+                                          listen: false)
+                                      .searchLeads(context);
+                                },
+                              ),
+                            ],
                             textStyle: MaterialStatePropertyAll(
                               GLTextStyles.manropeStyle(
                                 weight: FontWeight.w400,

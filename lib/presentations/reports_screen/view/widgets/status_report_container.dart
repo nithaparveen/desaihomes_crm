@@ -18,7 +18,7 @@ class StatusReportContainer extends StatelessWidget {
   final Color shadowColor;
   final Color iconColor;
   final IconData icon;
-  final String count;
+  final int count;
   final String statusType;
 
   @override
@@ -32,10 +32,12 @@ class StatusReportContainer extends StatelessWidget {
             topRight: Radius.circular(60.43.r)),
         color: color,
       ),
-      child: Padding(
+      child: 
+      Padding(
         padding:
             EdgeInsets.only(right: 33.w, top: 10.h, left: 12.w, bottom: 17.h),
-        child: Column(
+        child: 
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
@@ -64,7 +66,7 @@ class StatusReportContainer extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              count,
+              count.toString(),
               style: GLTextStyles.manropeStyle(
                   size: 15.35.sp, weight: FontWeight.w700, color: Colors.black),
             ),

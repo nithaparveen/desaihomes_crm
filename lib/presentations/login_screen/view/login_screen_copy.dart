@@ -105,7 +105,7 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                           height: 10.h,
                         ),
                         Text(
-                          "Log in to unlock smarter lead management track, and convert prospects efficiently",
+                          "Log in to unlock smarter lead management track",
                           style: GLTextStyles.manropeStyle(
                               size: 14.sp,
                               weight: FontWeight.w400,

@@ -2,10 +2,12 @@ import 'dart:developer';
 import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/controller/bottom_navigation_controller.dart';
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
+import 'package:desaihomes_crm_application/presentations/follow_ups_screen/controller/follow_up_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen.dart';
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
+import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:desaihomes_crm_application/presentations/splash_screen/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,6 +26,8 @@ void main() async {
         ChangeNotifierProvider(create: (context) => LeadDetailController()),
         ChangeNotifierProvider(
             create: (context) => BottomNavigationController()),
+        ChangeNotifierProvider(create: (context) => ReportsController()),
+        ChangeNotifierProvider(create: (context) => FollowUpController()),
       ],
       child: MyApp(
         isLoggedIn: loggedIn ?? false,

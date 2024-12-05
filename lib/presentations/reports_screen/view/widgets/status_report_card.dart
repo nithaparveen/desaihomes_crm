@@ -25,7 +25,7 @@ class StatusReportCard extends StatelessWidget {
       child: Center(
         child: Padding(
           padding:
-              EdgeInsets.only(right: 10.w, top: 20.h, left: 10.w, bottom: 20.h),
+              EdgeInsets.only(right: 10.w, top: 15.h, left: 10.w, bottom: 15.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -33,7 +33,7 @@ class StatusReportCard extends StatelessWidget {
                 width: (35 / ScreenUtil().screenWidth).sw,
                 height: (35 / ScreenUtil().screenHeight).sh,
                 decoration: const BoxDecoration(
-                  color: const Color(0xffF6F7FE),
+                  color: Color(0xffF6F7FE),
                   shape: BoxShape.circle,
                 ),
                 child: Center(

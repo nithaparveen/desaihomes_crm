@@ -1,11 +1,9 @@
-import 'dart:developer';
-
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
+import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
@@ -41,14 +39,16 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
   void initState() {
     Provider.of<LeadController>(context, listen: false)
         .fetchLeadSourceList(context);
-    Provider.of<LeadController>(context, listen: false)
-        .fetchProjectList(context);
+    Provider.of<ReportsController>(context, listen: false)
+        .fetchCampaignList(context);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
+    final reportController =
+        Provider.of<ReportsController>(context, listen: false);
     final leadSourceItems = leadController.leadSourceModel.data
             ?.map((item) => item.source ?? '')
             .toList() ??
@@ -153,6 +153,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
               ),
               SizedBox(height: 8.h),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: selectedCampaign,
                 icon: Icon(Iconsax.arrow_down_1, size: 15.sp),
                 style: GLTextStyles.manropeStyle(
@@ -178,11 +179,13 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                 ),
-                items: leadController.projectListModel.projects
+                items: reportController.campaignListModel.data
                     ?.map((item) => DropdownMenuItem(
-                          value: item.id.toString(),
+                          value: item.name,
                           child: Text(
                             item.name ?? '',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                             style: GLTextStyles.manropeStyle(
                               weight: FontWeight.w400,
                               size: 15.sp,
@@ -284,9 +287,9 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Provider.of<LeadController>(context, listen: false)
+                        Provider.of<ReportsController>(context, listen: false)
                             .fetchFilterData(
-                          projectId: selectedCampaign,
+                          campaignName: selectedCampaign,
                           fromDate: fromDate?.toIso8601String(),
                           toDate: toDate?.toIso8601String(),
                           leadSources: selectedLeadSources,

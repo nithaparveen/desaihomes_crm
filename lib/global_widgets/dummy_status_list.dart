@@ -19,10 +19,10 @@ class DummyStatusList {
       'slug': 'lost'
     },
     {
-      'name': 'In Follow Up',
+      'name': 'In Followup',
       'bgColor': '#ECEEFF',
       'textColor': '#941492',
-      'slug': 'in-follow-up'
+      'slug': 'in-followup'
     },
     {
       'name': 'Casual Enquiry',
@@ -31,10 +31,10 @@ class DummyStatusList {
       'slug': 'casual-enquiry'
     },
     {
-      'name': 'No Response',
+      'name': 'No Responce',
       'bgColor': '#FFF6D8',
       'textColor': '#C8A015',
-      'slug': 'no-response'
+      'slug': 'no-responce'
     },
     {
       'name': 'Repeated Lead',
