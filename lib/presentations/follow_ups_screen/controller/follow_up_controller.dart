@@ -11,11 +11,14 @@ class FollowUpController extends ChangeNotifier {
   UserListModel userListModel = UserListModel();
   bool isLoading = false;
   bool isUserListLoading = false;
+  bool isMoreLoading = false;
+  int currentPage = 1;
 
   fetchData(context) async {
     isLoading = true;
+    currentPage = 1;
     notifyListeners();
-    FollowUpService.fetchData().then((value) {
+    FollowUpService.fetchData(page: currentPage).then((value) {
       if (value["status"] == true) {
         leadModel = LeadModel.fromJson(value);
         isLoading = false;
@@ -40,5 +43,37 @@ class FollowUpController extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  Future<void> fetchMoreData(BuildContext context) async {
+    if (isMoreLoading) return;
+
+    isMoreLoading = true;
+    notifyListeners();
+
+    try {
+      currentPage++;
+
+      final response = await FollowUpService.fetchData(page: currentPage);
+      if (response["status"] == true) {
+        final newLeads = LeadModel.fromJson(response);
+        if (newLeads.leads?.data != null) {
+          leadModel.leads?.data?.addAll(newLeads.leads!.data!);
+        }
+
+        isMoreLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar(
+          "Unable to fetch more data",
+          context: context,
+          bgColor: ColorTheme.red,
+        );
+      }
+    } catch (error) {
+      print("Error fetching more data: $error");
+    } finally {
+      isMoreLoading = false;
+      notifyListeners();
+    }
   }
 }

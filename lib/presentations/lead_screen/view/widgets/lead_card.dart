@@ -104,7 +104,7 @@ class LeadCard extends StatelessWidget {
                   weight: FontWeight.w500,
                 ),
               ),
-             SizedBox(height: 4.h),
+            SizedBox(height: 4.h),
             if (platform != "null")
               Text(
                 platform,
@@ -219,7 +219,7 @@ class LeadCard extends StatelessWidget {
               },
               elevation: 0,
               child: Container(
-                padding:  EdgeInsets.all(4.w),
+                padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: const Color(0xffD8D8D8),
@@ -227,12 +227,14 @@ class LeadCard extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
-                child:
-                    leadController.leadModel.leads?.data?[index].assignedTo ==
+                child: leadController.leadModel.leads?.data != null &&
+                        index < leadController.leadModel.leads!.data!.length
+                    ? (leadController
+                                .leadModel.leads?.data?[index].assignedTo ==
                             null
-                        ?  Icon(
+                        ? Icon(
                             Iconsax.profile_add,
-                            size: 22.sp,
+                            size: 22.sp, 
                             color: Colors.black87,
                           )
                         : Text(
@@ -246,7 +248,12 @@ class LeadCard extends StatelessWidget {
                               size: 16.sp,
                               weight: FontWeight.bold,
                             ),
-                          ),
+                          ))
+                    : Icon(
+                        Iconsax.profile_add,
+                        size: 22.sp,
+                        color: Colors.black87,
+                      ),
               ),
             ),
             SizedBox(width: 15.w),
@@ -256,12 +263,21 @@ class LeadCard extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return QuickEditModal(
-                      email:
-                          leadController.leadModel.leads?.data?[index].email ??
-                              "",
-                      phoneNumber: leadController
-                              .leadModel.leads?.data?[index].phoneNumber ??
-                          "",
+                      email: leadController.leadModel.leads?.data != null &&
+                              index <
+                                  leadController.leadModel.leads!.data!.length
+                          ? (leadController
+                                  .leadModel.leads?.data?[index].email ??
+                              "")
+                          : "",
+                      phoneNumber: leadController.leadModel.leads?.data !=
+                                  null &&
+                              index <
+                                  leadController.leadModel.leads!.data!.length
+                          ? (leadController
+                                  .leadModel.leads?.data?[index].phoneNumber ??
+                              "")
+                          : "",
                       leadId:
                           leadController.leadModel.leads?.data?[index].id ?? 0,
                     );
@@ -275,7 +291,7 @@ class LeadCard extends StatelessWidget {
             ),
           ],
         ),
-         SizedBox(height: 16.h),
+        SizedBox(height: 16.h),
         Container(
           width: (95 / ScreenUtil().screenWidth).sw,
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
@@ -313,7 +329,8 @@ class LeadCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      padding:  EdgeInsets.only(left: 16.w, right: 16.w, top: 20.h, bottom: 20.h),
+      padding:
+          EdgeInsets.only(left: 16.w, right: 16.w, top: 20.h, bottom: 20.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

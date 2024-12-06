@@ -36,10 +36,12 @@ class _FilterModalState extends State<FilterModal> {
 
   @override
   void initState() {
-    Provider.of<LeadController>(context, listen: false)
-        .fetchLeadSourceList(context);
-    Provider.of<LeadController>(context, listen: false)
-        .fetchProjectList(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LeadController>(context, listen: false)
+          .fetchLeadSourceList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchProjectList(context);
+    });
     super.initState();
   }
 

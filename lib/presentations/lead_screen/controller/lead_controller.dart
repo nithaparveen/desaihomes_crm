@@ -38,14 +38,33 @@ class LeadController extends ChangeNotifier {
 
   bool get isLoadingMore => _isLoadingMore;
 
-  fetchData(context) async {
-    isLoading = true;
-    currentPage = 1;
-    hasMoreData = true;
+  String? _currentSearchKeyword;
+  String? _currentProjectId;
+  String? _currentFromDate;
+  String? _currentToDate;
+  List<String>? _currentLeadSources;
+
+  Future<void> fetchData(context, {int page = 1}) async {
+    isLoading = page == 1;
+    _currentSearchKeyword = null;
+    _currentProjectId = null;
+    _currentFromDate = null;
+    _currentToDate = null;
+    _currentLeadSources = null;
+
+    currentPage = page;
     notifyListeners();
-    LeadService.fetchData().then((value) {
+
+    LeadService.fetchData(page: page).then((value) {
       if (value["status"] == true) {
-        leadModel = LeadModel.fromJson(value);
+        if (page == 1) {
+          leadModel = LeadModel.fromJson(value);
+        } else {
+          var fetchedData = LeadModel.fromJson(value);
+          leadModel.leads?.data?.addAll(fetchedData.leads?.data ?? []);
+        }
+
+        hasMoreData = leadModel.leads?.data?.isNotEmpty ?? false;
         isLoading = false;
       } else {
         AppUtils.oneTimeSnackBar("Unable to fetch Data",
@@ -118,23 +137,31 @@ class LeadController extends ChangeNotifier {
     notifyListeners();
   }
 
-  searchLeads(BuildContext context) async {
+  searchLeads(BuildContext context, {int page = 1}) async {
     String keyword = searchController.text.trim();
 
     if (keyword.isEmpty) {
-      // If search is empty, revert to original data fetch
       fetchData(context);
       return;
     }
 
-    isLoading = true;
+    isLoading = page == 1;
+    _currentSearchKeyword = keyword;
+    currentPage = page;
     notifyListeners();
 
     try {
-      var result = await LeadService.searchLead(keyword);
+      var result = await LeadService.searchLead(keyword, page: page);
 
       if (result != null && result['status'] == true) {
-        leadModel = LeadModel.fromJson(result);
+        if (page == 1) {
+          leadModel = LeadModel.fromJson(result);
+        } else {
+          var fetchedData = LeadModel.fromJson(result);
+          leadModel.leads?.data?.addAll(fetchedData.leads?.data ?? []);
+        }
+
+        hasMoreData = leadModel.leads?.data?.isNotEmpty ?? false;
         isLoading = false;
       } else {
         AppUtils.oneTimeSnackBar("No results found",
@@ -156,10 +183,15 @@ class LeadController extends ChangeNotifier {
     String? toDate,
     List<String>? leadSources,
     required BuildContext context,
+    int page = 1,
   }) async {
-    isFilterLoading = true;
-    currentPage = 1;
-    hasMoreData = true;
+    isFilterLoading = page == 1;
+    _currentProjectId = projectId;
+    _currentFromDate = fromDate;
+    _currentToDate = toDate;
+    _currentLeadSources = leadSources;
+
+    currentPage = page;
     notifyListeners();
 
     LeadService.filterData(
@@ -167,9 +199,17 @@ class LeadController extends ChangeNotifier {
       fromDate: fromDate,
       toDate: toDate,
       leadSources: leadSources,
+      page: page,
     ).then((value) {
       if (value["status"] == true) {
-        leadModel = LeadModel.fromJson(value);
+        if (page == 1) {
+          leadModel = LeadModel.fromJson(value);
+        } else {
+          var fetchedData = LeadModel.fromJson(value);
+          leadModel.leads?.data?.addAll(fetchedData.leads?.data ?? []);
+        }
+
+        hasMoreData = leadModel.leads?.data?.isNotEmpty ?? false;
         isFilterLoading = false;
       } else {
         AppUtils.oneTimeSnackBar(
@@ -247,44 +287,70 @@ class LeadController extends ChangeNotifier {
       int? countryId,
       int? statusId,
       int? projectId,
-      context) async {
-    LeadService.quickEdit(leadId, altPhNo, city, countryId, statusId, date,
-            ageRange, projectId)
-        .then((value) {
-      if (value["status"] == true) {
-        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      BuildContext context) async {
+    try {
+      var response = await LeadService.quickEdit(
+        leadId: leadId,
+        altPhNo: altPhNo,
+        city: city,
+        countryId: countryId,
+        statusId: statusId,
+        date: date,
+        ageRange: ageRange,
+        projectId: projectId,
+      );
+
+      if (response != null && response["status"] == true) {
+        // AppUtils.oneTimeSnackBar(response["message"], context: context, textStyle: TextStyle(fontSize: 18));
       } else {
-        AppUtils.oneTimeSnackBar(value["message"],
-            context: context, bgColor: Colors.redAccent);
+        AppUtils.oneTimeSnackBar(
+          response?["message"] ?? "An unknown error occurred.",
+          context: context,
+          bgColor: Colors.redAccent,
+        );
       }
-    });
+    } catch (e) {
+      AppUtils.oneTimeSnackBar(
+        "An error occurred: $e",
+        context: context,
+        bgColor: Colors.redAccent,
+      );
+      log("quickEdit error: $e");
+    }
   }
 
   Future<void> loadMoreData(BuildContext context) async {
-    if (!_isLoadingMore && hasMoreData) {
+    if (!isLoadingMore && hasMoreData) {
       _isLoadingMore = true;
       currentPage++;
       notifyListeners();
+
       try {
-        var response = await LeadService.fetchLeads(page: currentPage);
-        if (response != null && response["status"] == true) {
-          var newData = LeadModel.fromJson(response);
-          if (newData.leads?.data?.isNotEmpty ?? false) {
-            leadModel.leads?.data?.addAll(newData.leads?.data ?? []);
-          } else {
-            hasMoreData = false;
-          }
+        // Determine which method to call based on current state
+        if (_currentSearchKeyword != null) {
+          await searchLeads(context, page: currentPage);
+        } else if (_currentProjectId != null ||
+            _currentFromDate != null ||
+            _currentToDate != null ||
+            _currentLeadSources != null) {
+          await fetchFilterData(
+              projectId: _currentProjectId,
+              fromDate: _currentFromDate,
+              toDate: _currentToDate,
+              leadSources: _currentLeadSources,
+              context: context,
+              page: currentPage);
         } else {
-          AppUtils.oneTimeSnackBar("error", context: context);
+          await fetchData(context, page: currentPage);
         }
       } catch (e) {
-        log("$e");
+        log("LoadMoreData error: $e");
+        AppUtils.oneTimeSnackBar("Error loading more data",
+            context: context, bgColor: ColorTheme.red);
       } finally {
         _isLoadingMore = false;
         notifyListeners();
       }
     }
   }
-
-  void searchLead(String keyword) {}
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
@@ -22,6 +21,7 @@ class FollowUpScreen extends StatefulWidget {
 
 class _FollowUpScreenState extends State<FollowUpScreen> {
   final Map<String, String?> selectedUsers = {};
+  final ScrollController scrollController = ScrollController();
 
   Future<String?> getUserName() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -39,9 +39,24 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
   @override
   void initState() {
     super.initState();
+    scrollController.addListener(scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchData();
     });
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(scrollListener);
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void scrollListener() {
+    if (scrollController.position.pixels ==
+        scrollController.position.maxScrollExtent) {
+      fetchMoreData();
+    }
   }
 
   void fetchData() async {
@@ -50,6 +65,11 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
     Provider.of<FollowUpController>(context, listen: false)
         .fetchUserList(context);
     setState(() {});
+  }
+
+  void fetchMoreData() async {
+    await Provider.of<FollowUpController>(context, listen: false)
+        .fetchMoreData(context);
   }
 
   void updateSelectedUser(String leadId, String? user) {
@@ -194,6 +214,7 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
                   color: ColorTheme.desaiGreen,
                   onRefresh: _refreshData,
                   child: ListView.separated(
+                    controller: scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       if (index >= controller.leadModel.leads!.data!.length) {
@@ -233,9 +254,10 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
                                   .toList() ??
                               [],
                           leadId: leadId,
-                          userId: index <
-                                  (controller.userListModel.users?.length ?? 0)
-                              ? '${controller.userListModel.users?[index].id}'
+                          userId: (controller.userListModel.users != null &&
+                                  index <
+                                      controller.userListModel.users!.length)
+                              ? '${controller.userListModel.users![index].id}'
                               : '',
                           selectedUser: selectedUsers[leadId],
                           onUserSelected: updateSelectedUser,

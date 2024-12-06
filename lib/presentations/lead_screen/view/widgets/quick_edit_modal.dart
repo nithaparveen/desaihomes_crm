@@ -46,17 +46,20 @@ class _QuickEditModalState extends State<QuickEditModal>
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
-    Provider.of<LeadController>(context, listen: false)
-        .fetchLeadSourceList(context);
-    Provider.of<LeadController>(context, listen: false)
-        .fetchProjectList(context);
-    Provider.of<LeadDetailController>(context, listen: false)
-        .fetchStatusList(context);
-    Provider.of<LeadController>(context, listen: false)
-        .fetchProfessionsList(context);
-    Provider.of<LeadController>(context, listen: false).fetchCountries(context);
-    Provider.of<LeadController>(context, listen: false).fetchAgeList(context);
-    fetchNotes();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LeadController>(context, listen: false)
+          .fetchLeadSourceList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchProjectList(context);
+      Provider.of<LeadDetailController>(context, listen: false)
+          .fetchStatusList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchProfessionsList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchCountries(context);
+      Provider.of<LeadController>(context, listen: false).fetchAgeList(context);
+      fetchNotes();
+    });
     super.initState();
   }
 
@@ -251,7 +254,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Alternative number',
@@ -271,7 +275,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                                 SizedBox(width: 15.w),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Status',
@@ -314,7 +319,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Preferred project',
@@ -351,7 +357,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                                 SizedBox(width: 15.w),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Profession',
@@ -372,7 +379,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                               onChanged: null,
                                             );
                                           }
-        
+
                                           return DropdownFormTextField(
                                             initialValue: selectedProfession,
                                             items: leadController.professionList
@@ -398,7 +405,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Country',
@@ -419,7 +427,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                               onChanged: null,
                                             );
                                           }
-        
+
                                           return DropdownFormTextField(
                                             initialValue: selectedCountry,
                                             items: leadController.countriesList
@@ -429,12 +437,14 @@ class _QuickEditModalState extends State<QuickEditModal>
                                             onChanged: (value) {
                                               setState(() {
                                                 selectedCountry = value;
-                                                selectedCountryId = leadController
-                                                    .countriesList
-                                                    .firstWhere((country) =>
-                                                        country.name == value)
-                                                    .id
-                                                    .toString();
+                                                selectedCountryId =
+                                                    leadController.countriesList
+                                                        .firstWhere(
+                                                            (country) =>
+                                                                country.name ==
+                                                                value)
+                                                        .id
+                                                        .toString();
                                               });
                                             },
                                           );
@@ -446,7 +456,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                                 SizedBox(width: 15.w),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'City',
@@ -471,7 +482,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Age',
@@ -491,7 +503,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                               onChanged: null,
                                             );
                                           }
-        
+
                                           return DropdownFormTextField(
                                             initialValue: selectedAge,
                                             items: leadController.ageList
@@ -511,7 +523,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                                 SizedBox(width: 15.w),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Next followup date',
@@ -576,7 +589,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                                     height: (45 / ScreenUtil().screenHeight).sh,
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        int? countryId = selectedCountryId != null
+                                        int? countryId = selectedCountryId !=
+                                                null
                                             ? int.tryParse(
                                                 selectedCountryId.toString())
                                             : null;
@@ -584,11 +598,12 @@ class _QuickEditModalState extends State<QuickEditModal>
                                             ? int.tryParse(
                                                 selectedStatusId.toString())
                                             : null;
-                                        int? projectId = selectedProjectId != null
+                                        int? projectId = selectedProjectId !=
+                                                null
                                             ? int.tryParse(
                                                 selectedProjectId.toString())
                                             : null;
-        
+
                                         Provider.of<LeadController>(context,
                                                 listen: false)
                                             .quickEdit(
@@ -606,7 +621,8 @@ class _QuickEditModalState extends State<QuickEditModal>
                                       style: ElevatedButton.styleFrom(
                                         // padding:
                                         //     EdgeInsets.symmetric(vertical: 12.h),
-                                        backgroundColor: const Color(0xFF3E9E7C),
+                                        backgroundColor:
+                                            const Color(0xFF3E9E7C),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8.r),

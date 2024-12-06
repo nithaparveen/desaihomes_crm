@@ -5,10 +5,10 @@ import '../../../../core/utils/app_utils.dart';
 import '../../../helper/api_helper.dart';
 
 class LeadService {
-  static Future<dynamic> fetchData() async {
+  static Future<dynamic> fetchData({int page = 1}) async {
     try {
       var decodedData = await ApiHelper.getData(
-        endPoint: "leads-list",
+        endPoint: "leads-list?page=$page",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -16,15 +16,15 @@ class LeadService {
       log("$e");
     }
   }
-
-  static Future<dynamic> filterData({
+    static Future<dynamic> filterData({
     String? projectId,
     String? fromDate,
     String? toDate,
     List<String>? leadSources,
+    int page = 1,
   }) async {
     try {
-      String queryString = "leads-list?";
+      String queryString = "leads-list?page=$page&";
 
       if (projectId != null) {
         queryString += "project_id=$projectId&";
@@ -63,9 +63,12 @@ class LeadService {
     }
   }
 
-  static Future<Map<String, dynamic>?> searchLead(String keyword) async {
+  static Future<Map<String, dynamic>?> searchLead(
+    String keyword, {
+    int page = 1,
+  }) async {
     var decodedData = await ApiHelper.getData(
-      endPoint: "leads-list?filter=$keyword",
+      endPoint: "leads-list?filter=$keyword&page=$page",
       header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
     );
     return decodedData is Map<String, dynamic> ? decodedData : null;
@@ -156,19 +159,45 @@ class LeadService {
     }
   }
 
-  static Future<dynamic> quickEdit(leadId, altPhNo, city, countryId, statusId,
-      date, ageRange, projectId) async {
-    try {
-      var decodedData = await ApiHelper.postData(
-        endPoint:
-            "quick-update?id=$leadId&alt_phone_number=$altPhNo&city=$city&country_id=$countryId&crm_status=$statusId&follow_up_date=$date&age_range=$ageRange&preferred_project_id=$projectId",
-        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
-      );
-      return decodedData;
-    } catch (e) {
-      log("$e");
-    }
+  static Future<dynamic> quickEdit({
+  required int? leadId,
+  String? altPhNo,
+  String? city,
+  int? countryId,
+  int? statusId,
+  String? date,
+  String? ageRange,
+  int? projectId,
+}) async {
+  try {
+    String? formattedDate = date == null ? "" : date;
+
+    final uri = Uri(
+      scheme: 'http',
+      host: 'www.desaihomes.com',
+      path: '/api/quick-update',
+      queryParameters: {
+        'id': leadId?.toString(),
+        'alt_phone_number': altPhNo ?? "",
+        'city': city ?? "",
+        'country_id': countryId?.toString() ?? "",
+        'crm_status': statusId?.toString() ?? "",
+        'follow_up_date': formattedDate,
+        'age_range': ageRange ?? "",
+        'preferred_project_id': projectId?.toString() ?? "",
+      }..removeWhere((key, value) => value == null || value == ""),
+    );
+
+    var decodedData = await ApiHelper.postDataWObaseUrl(
+      endPoint: uri.toString(),
+      header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+    );
+    return decodedData;
+  } catch (e) {
+    log("Error in LeadService.quickEdit: $e");
+    return null; 
   }
+}
 
   static Future<dynamic> fetchLeads({required int page}) async {
     try {
