@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
@@ -8,6 +9,7 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
 class QuickEditModal extends StatefulWidget {
@@ -589,6 +591,14 @@ class _QuickEditModalState extends State<QuickEditModal>
                                     height: (45 / ScreenUtil().screenHeight).sh,
                                     child: ElevatedButton(
                                       onPressed: () {
+                                        // Convert selectedDate to a specific format before passing
+                                        String? formattedDate;
+                                        if (selectedDate != null) {
+                                          // Use a consistent date format, typically YYYY-MM-DD
+                                          formattedDate =
+                                              "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+                                        }
+
                                         int? countryId = selectedCountryId !=
                                                 null
                                             ? int.tryParse(
@@ -610,7 +620,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                           widget.leadId,
                                           altNumberController.text,
                                           cityController.text,
-                                          selectedDate.toString(),
+                                          formattedDate, 
                                           selectedAge,
                                           countryId,
                                           statusId,

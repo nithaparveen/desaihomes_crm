@@ -3,9 +3,9 @@ import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/controller/bottom_navigation_controller.dart';
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/presentations/follow_ups_screen/controller/follow_up_controller.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
-import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen.dart';
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:desaihomes_crm_application/presentations/splash_screen/view/splash_screen.dart';
@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
       if (leadId != null) {
         navigatorKey.currentState?.push(
           MaterialPageRoute(
-            builder: (context) => LeadDetailScreen(
+            builder: (context) => LeadDetailScreenCopy(
               leadId: leadId,
             ),
           ),

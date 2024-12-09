@@ -16,7 +16,8 @@ class LeadService {
       log("$e");
     }
   }
-    static Future<dynamic> filterData({
+
+  static Future<dynamic> filterData({
     String? projectId,
     String? fromDate,
     String? toDate,
@@ -160,44 +161,62 @@ class LeadService {
   }
 
   static Future<dynamic> quickEdit({
-  required int? leadId,
-  String? altPhNo,
-  String? city,
-  int? countryId,
-  int? statusId,
-  String? date,
-  String? ageRange,
-  int? projectId,
-}) async {
-  try {
-    String? formattedDate = date == null ? "" : date;
+    required int? leadId,
+    String? altPhNo,
+    String? city,
+    int? countryId,
+    int? statusId,
+    String? date,
+    String? ageRange,
+    int? projectId,
+  }) async {
+    try {
+      // Create a map with only non-null and non-empty values
+      final queryParams = <String, String>{};
 
-    final uri = Uri(
-      scheme: 'http',
-      host: 'www.desaihomes.com',
-      path: '/api/quick-update',
-      queryParameters: {
-        'id': leadId?.toString(),
-        'alt_phone_number': altPhNo ?? "",
-        'city': city ?? "",
-        'country_id': countryId?.toString() ?? "",
-        'crm_status': statusId?.toString() ?? "",
-        'follow_up_date': formattedDate,
-        'age_range': ageRange ?? "",
-        'preferred_project_id': projectId?.toString() ?? "",
-      }..removeWhere((key, value) => value == null || value == ""),
-    );
+      // Add parameters conditionally
+      if (leadId != null) {
+        queryParams['id'] = leadId.toString();
+      }
+      if (altPhNo != null && altPhNo.isNotEmpty) {
+        queryParams['alt_phone_number'] = altPhNo;
+      }
+      if (city != null && city.isNotEmpty) {
+        queryParams['city'] = city;
+      }
+      if (countryId != null) {
+        queryParams['country_id'] = countryId.toString();
+      }
+      if (statusId != null) {
+        queryParams['crm_status'] = statusId.toString();
+      }
+      if (date != null && date.isNotEmpty) {
+        queryParams['follow_up_date'] = date;
+      }
+      if (ageRange != null && ageRange.isNotEmpty) {
+        queryParams['age_range'] = ageRange;
+      }
+      if (projectId != null) {
+        queryParams['preferred_project_id'] = projectId.toString();
+      }
 
-    var decodedData = await ApiHelper.postDataWObaseUrl(
-      endPoint: uri.toString(),
-      header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
-    );
-    return decodedData;
-  } catch (e) {
-    log("Error in LeadService.quickEdit: $e");
-    return null; 
+      final uri = Uri(
+        scheme: 'http',
+        host: 'www.desaihomes.com',
+        path: '/api/quick-update',
+        queryParameters: queryParams,
+      );
+
+      var decodedData = await ApiHelper.postDataWObaseUrl(
+        endPoint: uri.toString(),
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("Error in LeadService.quickEdit: $e");
+      return null;
+    }
   }
-}
 
   static Future<dynamic> fetchLeads({required int page}) async {
     try {

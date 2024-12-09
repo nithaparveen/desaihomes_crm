@@ -1,6 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/global_widgets/dummy_status_list.dart';
-import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/quick_edit_modal.dart';
@@ -187,7 +186,7 @@ class LeadCard extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => LeadDetailScreen(
+                                    builder: (context) => LeadDetailScreenCopy(
                                       leadId: int.tryParse(leadId),
                                     ),
                                   ),

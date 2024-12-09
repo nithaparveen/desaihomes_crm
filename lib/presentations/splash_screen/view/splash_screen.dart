@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 0.81.sw, 
               child: ElevatedButton(
                 style: ButtonStyle(
-                  shape: MaterialStateProperty.all(
+                  shape:MaterialStatePropertyAll(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),

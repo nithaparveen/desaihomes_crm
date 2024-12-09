@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
@@ -28,6 +27,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   bool isLoadingMore = false;
   final Map<String, String?> selectedUsers = {};
   final FocusNode _searchFocusNode = FocusNode();
+  bool _isFilterApplied = false;
 
   @override
   void initState() {
@@ -67,6 +67,18 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   void updateSelectedUser(String leadId, String? user) {
     setState(() {
       selectedUsers[leadId] = user;
+    });
+  }
+
+  void clearFilter() {
+    setState(() {
+      selectedUsers.clear();
+      _isFilterApplied = false;
+      Provider.of<LeadController>(context, listen: false)
+          .searchController
+          .clear();
+      Provider.of<LeadController>(context, listen: false)
+          .fetchData(context); // Refetch original data
     });
   }
 
@@ -186,73 +198,90 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                       SizedBox(width: 15.w),
                       Flexible(
                         child: SizedBox(
-                          height: 44.h,
-                          child: SearchBar(
-                            padding: MaterialStatePropertyAll(
-                                EdgeInsets.only(left: 15.w)),
-                            hintText: "Search ...",
-                            hintStyle: MaterialStatePropertyAll(
-                              GLTextStyles.manropeStyle(
-                                size: 13.sp,
-                                weight: FontWeight.w400,
-                                color: const Color.fromARGB(255, 132, 132, 132),
-                              ),
-                            ),
-                            elevation: const MaterialStatePropertyAll(0),
-                            surfaceTintColor:
-                                const MaterialStatePropertyAll(Colors.white),
-                            leading: Icon(
-                              Iconsax.search_normal_1,
-                              size: 18.sp,
-                              color: const Color.fromARGB(255, 132, 132, 132),
-                            ),
-                            trailing: [
-                              IconButton(
-                                icon: Icon(
-                                  Iconsax.close_circle,
-                                  size: 18.sp,
-                                  color:
-                                      const Color.fromARGB(255, 132, 132, 132),
-                                ),
-                                onPressed: () {
-                                  Provider.of<LeadController>(context,
-                                          listen: false)
-                                      .searchController
-                                      .clear();
+                            height: 44.h,
+                            child: ValueListenableBuilder(
+                              valueListenable: Provider.of<LeadController>(
+                                      context,
+                                      listen: false)
+                                  .searchController,
+                              builder:
+                                  (context, TextEditingValue value, child) {
+                                return SearchBar(
+                                  padding: MaterialStatePropertyAll(
+                                      EdgeInsets.only(left: 15.w)),
+                                  hintText: "Search ...",
+                                  hintStyle: WidgetStatePropertyAll(
+                                    GLTextStyles.manropeStyle(
+                                      size: 13.sp,
+                                      weight: FontWeight.w400,
+                                      color: const Color.fromARGB(
+                                          255, 132, 132, 132),
+                                    ),
+                                  ),
+                                  elevation: const MaterialStatePropertyAll(0),
+                                  surfaceTintColor:
+                                      const MaterialStatePropertyAll(
+                                          Colors.white),
+                                  leading: Icon(
+                                    Iconsax.search_normal_1,
+                                    size: 18.sp,
+                                    color: const Color.fromARGB(
+                                        255, 132, 132, 132),
+                                  ),
+                                  trailing: value.text.isNotEmpty
+                                      ? [
+                                          IconButton(
+                                            icon: Icon(
+                                              Iconsax.close_circle,
+                                              size: 18.sp,
+                                              color: const Color.fromARGB(
+                                                  255, 132, 132, 132),
+                                            ),
+                                            onPressed: () {
+                                              Provider.of<LeadController>(
+                                                      context,
+                                                      listen: false)
+                                                  .searchController
+                                                  .clear();
 
-                                  Provider.of<LeadController>(context,
+                                              Provider.of<LeadController>(
+                                                      context,
+                                                      listen: false)
+                                                  .searchLeads(context);
+                                            },
+                                          ),
+                                        ]
+                                      : null,
+                                  textStyle: WidgetStatePropertyAll(
+                                    GLTextStyles.manropeStyle(
+                                      weight: FontWeight.w400,
+                                      size: 15.sp,
+                                      color:
+                                          const Color.fromARGB(255, 87, 87, 87),
+                                    ),
+                                  ),
+                                  shape: MaterialStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(7.38),
+                                    ),
+                                  ),
+                                  controller: Provider.of<LeadController>(
+                                          context,
                                           listen: false)
-                                      .searchLeads(context);
-                                },
-                              ),
-                            ],
-                            textStyle: MaterialStatePropertyAll(
-                              GLTextStyles.manropeStyle(
-                                weight: FontWeight.w400,
-                                size: 15.sp,
-                                color: const Color.fromARGB(255, 87, 87, 87),
-                              ),
-                            ),
-                            shape: MaterialStatePropertyAll(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(7.38),
-                              ),
-                            ),
-                            controller: Provider.of<LeadController>(context,
-                                    listen: false)
-                                .searchController,
-                            onChanged: (value) {
-                              Provider.of<LeadController>(context,
-                                      listen: false)
-                                  .searchLeads(context);
-                            },
-                            onSubmitted: (value) {
-                              Provider.of<LeadController>(context,
-                                      listen: false)
-                                  .searchLeads(context);
-                            },
-                          ),
-                        ),
+                                      .searchController,
+                                  onChanged: (value) {
+                                    Provider.of<LeadController>(context,
+                                            listen: false)
+                                        .searchLeads(context);
+                                  },
+                                  onSubmitted: (value) {
+                                    Provider.of<LeadController>(context,
+                                            listen: false)
+                                        .searchLeads(context);
+                                  },
+                                );
+                              },
+                            )),
                       ),
                       SizedBox(width: 10.w),
                       SizedBox(
@@ -269,7 +298,14 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return const FilterModal();
+                                    return FilterModal(
+                                      clearFiltersCallback: clearFilter,
+                                      onFilterApplied: () {
+                                        setState(() {
+                                          _isFilterApplied = true;
+                                        });
+                                      },
+                                    );
                                   },
                                 );
                               },
@@ -288,16 +324,50 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                 )
               ],
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              child: Text(
-                "Leads",
-                style: GLTextStyles.manropeStyle(
-                  size: 18.sp,
-                  weight: FontWeight.w600,
-                  color: const Color(0xff120e2b),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  child: Text(
+                    "Leads",
+                    style: GLTextStyles.manropeStyle(
+                      size: 18.sp,
+                      weight: FontWeight.w600,
+                      color: const Color(0xff120e2b),
+                    ),
+                  ),
                 ),
-              ),
+                if (_isFilterApplied)
+                  GestureDetector(
+                    onTap: clearFilter,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAFAFA),
+                        borderRadius: BorderRadius.circular(5.5.r),
+                      ),
+                      child: Row(children: [
+                        Text(
+                          "Remove filter",
+                          style: GLTextStyles.manropeStyle(
+                            color: ColorTheme.grey,
+                            size: 13.sp,
+                            weight: FontWeight.w400,
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Icon(
+                          Iconsax.close_circle,
+                          size: 14.sp,
+                          color: const Color.fromARGB(255, 127, 127, 127),
+                        ),
+                      ]),
+                    ),
+                  ),
+              ],
             ),
             Expanded(
               child: Consumer<LeadController>(

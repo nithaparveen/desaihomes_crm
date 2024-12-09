@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/age_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/countries_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_model.dart';
@@ -9,6 +10,8 @@ import 'package:desaihomes_crm_application/repository/api/lead_screen/model/proj
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/user_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/service/lead_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconsax/iconsax.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
 
@@ -301,20 +304,33 @@ class LeadController extends ChangeNotifier {
       );
 
       if (response != null && response["status"] == true) {
-        // AppUtils.oneTimeSnackBar(response["message"], context: context, textStyle: TextStyle(fontSize: 18));
+        Navigator.pop(context);
+        Flushbar(
+          // maxWidth: .55.sw,
+          backgroundColor: Colors.grey.shade100,
+          messageColor: ColorTheme.black,
+          icon: Icon(
+            Iconsax.save_2,
+            color: ColorTheme.green,
+            size: 20.sp,
+          ),
+          message: 'Lead successfully saved',
+          duration: const Duration(seconds: 3),
+          flushbarPosition: FlushbarPosition.TOP,
+        ).show(context);
       } else {
-        AppUtils.oneTimeSnackBar(
-          response?["message"] ?? "An unknown error occurred.",
-          context: context,
-          bgColor: Colors.redAccent,
-        );
+        // AppUtils.oneTimeSnackBar(
+        //   response?["message"] ?? "An unknown error occurred.",
+        //   context: context,
+        //   bgColor: Colors.redAccent,
+        // );
       }
     } catch (e) {
-      AppUtils.oneTimeSnackBar(
-        "An error occurred: $e",
-        context: context,
-        bgColor: Colors.redAccent,
-      );
+      // AppUtils.oneTimeSnackBar(
+      //   "An error occurred: $e",
+      //   context: context,
+      //   bgColor: Colors.redAccent,
+      // );
       log("quickEdit error: $e");
     }
   }
