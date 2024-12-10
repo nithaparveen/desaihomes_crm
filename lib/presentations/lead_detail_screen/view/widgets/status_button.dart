@@ -38,6 +38,7 @@ class _StatusButtonState extends State<StatusButton> {
             DummyStatusList.getStatusDetails(currentStatus?.name ?? '');
 
         return PopupMenuButton<String>(
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -81,6 +82,7 @@ class _StatusButtonState extends State<StatusButton> {
                   height: 40.h,
                   padding: EdgeInsets.zero,
                   value: status?.name,
+
                   child: Container(
                     padding: const EdgeInsets.all(8.0),
                     margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),

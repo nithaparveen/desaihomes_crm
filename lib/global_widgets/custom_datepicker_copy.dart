@@ -5,12 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
-class CustomDatePicker extends StatefulWidget {
+class CustomDatePickerCopy extends StatefulWidget {
   final String? labelText;
   final Function(DateTime)? onDateSelected;
   final TextEditingController? controller;
 
-  const CustomDatePicker({
+  const CustomDatePickerCopy({
     super.key,
     this.labelText,
     this.onDateSelected,
@@ -18,10 +18,10 @@ class CustomDatePicker extends StatefulWidget {
   });
 
   @override
-  _CustomDatePickerState createState() => _CustomDatePickerState();
+  _CustomDatePickerCopyState createState() => _CustomDatePickerCopyState();
 }
 
-class _CustomDatePickerState extends State<CustomDatePicker> {
+class _CustomDatePickerCopyState extends State<CustomDatePickerCopy> {
   late TextEditingController _dateController;
   DateTime _currentDate = DateTime.now();
 
@@ -34,13 +34,17 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     'SAT',
     'SUN'
   ];
-
   @override
   void initState() {
     super.initState();
+
     _dateController = widget.controller ?? TextEditingController();
-    if (widget.controller != null && widget.controller!.text.isNotEmpty) {
-      _dateController.text = widget.controller!.text;
+    if (_dateController.text.isEmpty) {
+      final today = DateTime.now();
+      final formattedDate = DateFormat('dd-MM-yyyy').format(today);
+      _dateController.text = formattedDate;
+
+      widget.onDateSelected?.call(today);
     }
   }
 

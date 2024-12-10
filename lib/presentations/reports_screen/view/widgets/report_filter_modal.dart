@@ -10,7 +10,10 @@ import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:provider/provider.dart';
 
 class ReportFilterModal extends StatefulWidget {
-  const ReportFilterModal({super.key});
+  const ReportFilterModal(
+      {super.key, required this.clearFiltersCallback, this.onFilterApplied});
+  final VoidCallback clearFiltersCallback;
+  final VoidCallback? onFilterApplied;
 
   @override
   _ReportFilterModalState createState() => _ReportFilterModalState();
@@ -33,6 +36,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
       selectedLeadSources.clear();
       leadSourceController.clearAll();
     });
+    widget.clearFiltersCallback();
   }
 
   @override
@@ -297,6 +301,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                         );
 
                         Navigator.of(context).pop();
+                        widget.onFilterApplied?.call();
                       },
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 12.h),

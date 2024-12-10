@@ -2,6 +2,7 @@ import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_button.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
+import 'package:desaihomes_crm_application/global_widgets/custom_datepicker_copy.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_textfield.dart';
 import 'package:desaihomes_crm_application/global_widgets/form_textfield.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
@@ -82,6 +83,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                   height: (35 / ScreenUtil().screenHeight).sh,
                   width: double.infinity,
                   child: CustomDatePicker(
+                    controller: dateController,
                     onDateSelected: (DateTime date) {
                       setState(() {
                         toDate = date;
@@ -98,7 +100,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
               maxlines: 6,
               border: 3,
               controller: siteVisitController,
-              // errorText: remarkValidate ? "Value can't be empty" : null,
+              errorText: remarkValidate ? "Remarks can't be empty" : null,
             ),
             SizedBox(height: 18.h),
             Align(
@@ -261,7 +263,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  CustomDatePicker(
+                                                  CustomDatePickerCopy(
                                                     controller:
                                                         editDateController,
                                                     onDateSelected:

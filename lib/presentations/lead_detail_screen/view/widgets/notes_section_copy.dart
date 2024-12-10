@@ -2,6 +2,7 @@ import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_button.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
+import 'package:desaihomes_crm_application/global_widgets/custom_datepicker_copy.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_textfield.dart';
 import 'package:desaihomes_crm_application/global_widgets/form_textfield.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
@@ -100,6 +101,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                   height: (35 / ScreenUtil().screenHeight).sh,
                   width: double.infinity,
                   child: CustomDatePicker(
+                    controller: dateController,
                     onDateSelected: (DateTime date) {
                       setState(() {
                         toDate = date;
@@ -116,7 +118,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
               maxlines: 6,
               border: 3,
               controller: notesController,
-              // errorText: remarkValidate ? "Value can't be empty" : null,
+              errorText: noteValidate ? 'Note cannot be empty' : null,
             ),
             SizedBox(height: 18.h),
             Align(
@@ -268,7 +270,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  CustomDatePicker(
+                                                  CustomDatePickerCopy(
                                                     controller:
                                                         editDateController,
                                                     onDateSelected:
@@ -343,7 +345,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                     icon: Icon(
                                       Iconsax.edit_2,
                                       size: 18.sp,
-                                      color: ColorTheme.lightBlue,
+                                      color: ColorTheme.grey,
                                     ),
                                   ),
                                   IconButton(
@@ -442,7 +444,7 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
                                     icon: Icon(
                                       Iconsax.trash,
                                       size: 18.sp,
-                                      color: ColorTheme.red,
+                                      color: ColorTheme.grey,
                                     ),
                                   ),
                                 ],

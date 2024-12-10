@@ -75,11 +75,11 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                 children: [
                   Center(
                     child: Container(
-                      height: 0.2.sh,
-                      width: 0.38.sw,
+                      height: 242.h,
+                      width: 242.w,
                       decoration: const BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage("assets/images/rafiki.png"),
+                          image: AssetImage("assets/images/Group 1261155984.png"),
                           fit: BoxFit.fill,
                         ),
                       ),
@@ -88,7 +88,7 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 12.w,
-                      vertical: 40.h,
+                      vertical: 30.h,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

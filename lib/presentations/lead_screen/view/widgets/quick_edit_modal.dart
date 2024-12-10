@@ -1,4 +1,3 @@
-import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
@@ -9,7 +8,8 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class QuickEditModal extends StatefulWidget {
@@ -43,6 +43,7 @@ class _QuickEditModalState extends State<QuickEditModal>
   TextEditingController altNumberController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController ageController = TextEditingController();
+  TextEditingController followUpDateController = TextEditingController();
   bool noteValidate = false;
 
   @override
@@ -60,9 +61,77 @@ class _QuickEditModalState extends State<QuickEditModal>
       Provider.of<LeadController>(context, listen: false)
           .fetchCountries(context);
       Provider.of<LeadController>(context, listen: false).fetchAgeList(context);
+      fetchLeadDetails();
       fetchNotes();
     });
     super.initState();
+  }
+
+  Future<void> fetchLeadDetails() async {
+    final leadDetailController =
+        Provider.of<LeadDetailController>(context, listen: false);
+    await leadDetailController.fetchDetailData(widget.leadId, context);
+
+    final leadDetails = leadDetailController.leadDetailModel;
+
+    if (leadDetails != null) {
+      setState(() {
+        if (leadDetails.lead?.altPhoneNumber != null) {
+          altNumberController.text = leadDetails.lead!.altPhoneNumber!;
+        }
+
+        if (leadDetails.lead?.city != null) {
+          cityController.text = leadDetails.lead!.city!;
+        }
+
+        if (leadDetails.status != null) {
+          selectedStatus = leadDetails.lead?.crmStatusDetails?.name;
+          selectedStatusId = leadDetails.lead?.crmStatusDetails?.name;
+        }
+
+        if (leadDetails.lead?.project?.name != null) {
+          selectedProject = leadDetails.lead?.project?.name;
+          selectedProjectId = leadDetails.lead?.project?.name;
+        }
+
+        if (leadDetails.lead?.profession != null) {
+          selectedProfession = leadDetails.lead?.profession;
+        }
+
+        if (leadDetails.lead?.country?.name != null) {
+          selectedCountry = leadDetails.lead?.country?.name;
+          selectedCountryId = leadDetails.lead?.country?.name;
+        }
+
+        if (leadDetails.lead?.ageRange != null) {
+          selectedAge = leadDetails.lead?.ageRange;
+        }
+
+        if (leadDetails.lead?.followUpDate != null) {
+          try {
+            String? followUpDateString;
+
+            if (leadDetails.lead?.followUpDate is DateTime) {
+              followUpDateString = (leadDetails.lead?.followUpDate as DateTime)
+                  .toIso8601String();
+            } else if (leadDetails.lead?.followUpDate is String) {
+              followUpDateString = leadDetails.lead?.followUpDate as String?;
+            } else {
+              followUpDateString = leadDetails.lead?.followUpDate?.toString();
+            }
+
+            if (followUpDateString != null && followUpDateString.isNotEmpty) {
+              selectedDate = DateTime.tryParse(followUpDateString);
+              followUpDateController.text =
+                  DateFormat('dd-MM-yyyy').format(selectedDate!);
+            }
+          } catch (e) {
+            print('Error parsing follow-up date: $e');
+            selectedDate = null;
+          }
+        }
+      });
+    }
   }
 
   Future<void> fetchNotes() async {
@@ -159,508 +228,594 @@ class _QuickEditModalState extends State<QuickEditModal>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    SingleChildScrollView(
+                    Consumer<LeadDetailController>(
+                        builder: (context, leadDetailController, child) {
+                      return leadDetailController.isLoading
+                          ? Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: LoadingAnimationWidget.staggeredDotsWave(
+                                  color: ColorTheme.desaiGreen,
+                                  size: 28,
+                                ),
+                              ),
+                            )
+                          : SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    left: 18.w,
+                                    right: 18.w,
+                                    top: 10.h,
+                                    bottom: 20.h),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Email',
+                                      style: GLTextStyles.manropeStyle(
+                                        color: ColorTheme.blue,
+                                        size: 14.sp,
+                                        weight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 6.h),
+                                    SizedBox(
+                                      height:
+                                          (35 / ScreenUtil().screenHeight).sh,
+                                      width: double.infinity,
+                                      child: TextField(
+                                        readOnly: true,
+                                        controller: TextEditingController(
+                                            text: widget.email),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14.sp,
+                                          color: const Color(0xff8C8E90),
+                                        ),
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: const Color(0xffF4F4F4),
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 12.w, vertical: 8.h),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 15.h),
+                                    Text(
+                                      'Phone number',
+                                      style: GLTextStyles.manropeStyle(
+                                        color: ColorTheme.blue,
+                                        size: 14.sp,
+                                        weight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 6.h),
+                                    SizedBox(
+                                      height:
+                                          (35 / ScreenUtil().screenHeight).sh,
+                                      width: double.infinity,
+                                      child: TextField(
+                                        readOnly: true,
+                                        controller: TextEditingController(
+                                            text: widget.phoneNumber),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14.sp,
+                                          color: const Color(0xff8C8E90),
+                                        ),
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: const Color(0xffF4F4F4),
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 12.w, vertical: 8.w),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 15.h),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Alternative number',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              FormTextField(
+                                                controller: altNumberController,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 15.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Status',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              DropdownFormTextField(
+                                                initialValue: selectedStatus,
+                                                items: statusController
+                                                        .statusListModel
+                                                        .crmStatus
+                                                        ?.map((status) =>
+                                                            status.name ??
+                                                            "Unnamed Status")
+                                                        .toList() ??
+                                                    [],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    selectedStatus = value;
+                                                    selectedStatusId =
+                                                        statusController
+                                                            .statusListModel
+                                                            .crmStatus
+                                                            ?.firstWhere(
+                                                                (status) =>
+                                                                    status
+                                                                        .name ==
+                                                                    value)
+                                                            .id
+                                                            .toString();
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 15.h),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Preferred project',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              DropdownFormTextField(
+                                                initialValue: selectedProject,
+                                                items: leadController
+                                                        .projectListModel
+                                                        .projects
+                                                        ?.map((project) =>
+                                                            project.name ?? "")
+                                                        .toList() ??
+                                                    [],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    selectedProject = value;
+                                                    selectedProjectId =
+                                                        leadController
+                                                            .projectListModel
+                                                            .projects
+                                                            ?.firstWhere(
+                                                                (project) =>
+                                                                    project
+                                                                        .name ==
+                                                                    value)
+                                                            .id
+                                                            .toString();
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 15.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Profession',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              Consumer<LeadController>(
+                                                builder: (context,
+                                                    leadController, child) {
+                                                  if (leadController
+                                                      .professionList.isEmpty) {
+                                                    return const DropdownFormTextField(
+                                                      items: ['Loading...'],
+                                                      onChanged: null,
+                                                    );
+                                                  }
+
+                                                  return DropdownFormTextField(
+                                                    initialValue:
+                                                        selectedProfession,
+                                                    items: leadController
+                                                        .professionList
+                                                        .map((profession) =>
+                                                            profession.name ??
+                                                            "")
+                                                        .toList(),
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        selectedProfession =
+                                                            value;
+                                                      });
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 15.h),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Country',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              Consumer<LeadController>(
+                                                builder: (context,
+                                                    leadController, child) {
+                                                  if (leadController
+                                                      .countriesList.isEmpty) {
+                                                    return const DropdownFormTextField(
+                                                      items: ['Loading...'],
+                                                      onChanged: null,
+                                                    );
+                                                  }
+
+                                                  return DropdownFormTextField(
+                                                    initialValue:
+                                                        selectedCountry,
+                                                    items: leadController
+                                                        .countriesList
+                                                        .map((country) =>
+                                                            country.name ?? "")
+                                                        .toList(),
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        selectedCountry = value;
+                                                        selectedCountryId =
+                                                            leadController
+                                                                .countriesList
+                                                                .firstWhere(
+                                                                    (country) =>
+                                                                        country
+                                                                            .name ==
+                                                                        value)
+                                                                .id
+                                                                .toString();
+                                                      });
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 15.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'City',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              FormTextField(
+                                                controller: cityController,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 15.h),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Age',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              Consumer<LeadController>(
+                                                builder: (context,
+                                                    leadController, child) {
+                                                  if (leadController
+                                                      .ageList.isEmpty) {
+                                                    return const DropdownFormTextField(
+                                                      items: ['Loading...'],
+                                                      onChanged: null,
+                                                    );
+                                                  }
+
+                                                  return DropdownFormTextField(
+                                                    initialValue: selectedAge,
+                                                    items: leadController
+                                                        .ageList
+                                                        .map((age) =>
+                                                            age.name ?? "")
+                                                        .toList(),
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        selectedAge = value;
+                                                      });
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 15.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Next followup date',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.blue,
+                                                  size: 14.sp,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              SizedBox(
+                                                height: (35 /
+                                                        ScreenUtil()
+                                                            .screenHeight)
+                                                    .sh,
+                                                width: double.infinity,
+                                                child: CustomDatePicker(
+                                                  controller:
+                                                      followUpDateController,
+                                                  onDateSelected:
+                                                      (DateTime date) {
+                                                    setState(() {
+                                                      selectedDate = date;
+                                                      followUpDateController
+                                                          .text = DateFormat(
+                                                              'dd-MM-yyyy')
+                                                          .format(date);
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            height:
+                                                (45 / ScreenUtil().screenHeight)
+                                                    .sh,
+                                            child: OutlinedButton(
+                                              onPressed: clearFilters,
+                                              style: OutlinedButton.styleFrom(
+                                                // padding:
+                                                //     EdgeInsets.symmetric(vertical: 12.h),
+                                                side: BorderSide(
+                                                    color: ColorTheme.red,
+                                                    width: 0.5),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.r),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Clear',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.red,
+                                                  size: 15.sp,
+                                                  weight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 16.w),
+                                        Expanded(
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            height:
+                                                (45 / ScreenUtil().screenHeight)
+                                                    .sh,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                // Convert selectedDate to a specific format before passing
+                                                String? formattedDate;
+                                                if (selectedDate != null) {
+                                                  // Use a consistent date format, typically YYYY-MM-DD
+                                                  formattedDate =
+                                                      "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+                                                }
+
+                                                int? countryId =
+                                                    selectedCountryId != null
+                                                        ? int.tryParse(
+                                                            selectedCountryId
+                                                                .toString())
+                                                        : null;
+                                                int? statusId =
+                                                    selectedStatusId != null
+                                                        ? int.tryParse(
+                                                            selectedStatusId
+                                                                .toString())
+                                                        : null;
+                                                int? projectId =
+                                                    selectedProjectId != null
+                                                        ? int.tryParse(
+                                                            selectedProjectId
+                                                                .toString())
+                                                        : null;
+
+                                                Provider.of<LeadController>(
+                                                        context,
+                                                        listen: false)
+                                                    .quickEdit(
+                                                  widget.leadId,
+                                                  altNumberController.text,
+                                                  cityController.text,
+                                                  formattedDate,
+                                                  selectedAge,
+                                                  countryId,
+                                                  statusId,
+                                                  projectId,
+                                                  context,
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                // padding:
+                                                //     EdgeInsets.symmetric(vertical: 12.h),
+                                                backgroundColor:
+                                                    const Color(0xFF3E9E7C),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.r),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Submit',
+                                                style:
+                                                    GLTextStyles.manropeStyle(
+                                                  color: ColorTheme.white,
+                                                  size: 15.sp,
+                                                  weight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                    }),
+                    RefreshIndicator(
+                      onRefresh: () => fetchNotes(),
+                      color: ColorTheme.desaiGreen,
                       child: Padding(
-                        padding: EdgeInsets.only(
-                            left: 18.w, right: 18.w, top: 10.h, bottom: 20.h),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email',
-                              style: GLTextStyles.manropeStyle(
-                                color: ColorTheme.blue,
-                                size: 14.sp,
-                                weight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 6.h),
-                            SizedBox(
-                              height: (35 / ScreenUtil().screenHeight).sh,
-                              width: double.infinity,
-                              child: TextField(
-                                readOnly: true,
-                                controller:
-                                    TextEditingController(text: widget.email),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color: const Color(0xff8C8E90),
-                                ),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: const Color(0xffF4F4F4),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12.w, vertical: 8.h),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 15.h),
-                            Text(
-                              'Phone number',
-                              style: GLTextStyles.manropeStyle(
-                                color: ColorTheme.blue,
-                                size: 14.sp,
-                                weight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 6.h),
-                            SizedBox(
-                              height: (35 / ScreenUtil().screenHeight).sh,
-                              width: double.infinity,
-                              child: TextField(
-                                readOnly: true,
-                                controller: TextEditingController(
-                                    text: widget.phoneNumber),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color: const Color(0xff8C8E90),
-                                ),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: const Color(0xffF4F4F4),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12.w, vertical: 8.w),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 15.h),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Alternative number',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      FormTextField(
-                                        controller: altNumberController,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 15.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Status',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      DropdownFormTextField(
-                                        initialValue: selectedStatus,
-                                        items: statusController
-                                                .statusListModel.crmStatus
-                                                ?.map((status) =>
-                                                    status.name ??
-                                                    "Unnamed Status")
-                                                .toList() ??
-                                            [],
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedStatus = value;
-                                            selectedStatusId = statusController
-                                                .statusListModel.crmStatus
-                                                ?.firstWhere((status) =>
-                                                    status.name == value)
-                                                .id
-                                                .toString();
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 15.h),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Preferred project',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      DropdownFormTextField(
-                                        initialValue: selectedProject,
-                                        items: leadController
-                                                .projectListModel.projects
-                                                ?.map((project) =>
-                                                    project.name ?? "")
-                                                .toList() ??
-                                            [],
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedProject = value;
-                                            selectedProjectId = leadController
-                                                .projectListModel.projects
-                                                ?.firstWhere((project) =>
-                                                    project.name == value)
-                                                .id
-                                                .toString();
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 15.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Profession',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      Consumer<LeadController>(
-                                        builder:
-                                            (context, leadController, child) {
-                                          if (leadController
-                                              .professionList.isEmpty) {
-                                            return const DropdownFormTextField(
-                                              items: ['Loading...'],
-                                              onChanged: null,
-                                            );
-                                          }
-
-                                          return DropdownFormTextField(
-                                            initialValue: selectedProfession,
-                                            items: leadController.professionList
-                                                .map((profession) =>
-                                                    profession.name ?? "")
-                                                .toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                selectedProfession = value;
-                                              });
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 15.h),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Country',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      Consumer<LeadController>(
-                                        builder:
-                                            (context, leadController, child) {
-                                          if (leadController
-                                              .countriesList.isEmpty) {
-                                            return const DropdownFormTextField(
-                                              items: ['Loading...'],
-                                              onChanged: null,
-                                            );
-                                          }
-
-                                          return DropdownFormTextField(
-                                            initialValue: selectedCountry,
-                                            items: leadController.countriesList
-                                                .map((country) =>
-                                                    country.name ?? "")
-                                                .toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                selectedCountry = value;
-                                                selectedCountryId =
-                                                    leadController.countriesList
-                                                        .firstWhere(
-                                                            (country) =>
-                                                                country.name ==
-                                                                value)
-                                                        .id
-                                                        .toString();
-                                              });
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 15.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'City',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      FormTextField(
-                                        controller: cityController,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 15.h),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Age',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      Consumer<LeadController>(
-                                        builder:
-                                            (context, leadController, child) {
-                                          if (leadController.ageList.isEmpty) {
-                                            return const DropdownFormTextField(
-                                              items: ['Loading...'],
-                                              onChanged: null,
-                                            );
-                                          }
-
-                                          return DropdownFormTextField(
-                                            initialValue: selectedAge,
-                                            items: leadController.ageList
-                                                .map((age) => age.name ?? "")
-                                                .toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                selectedAge = value;
-                                              });
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 15.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Next followup date',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.blue,
-                                          size: 14.sp,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      SizedBox(
-                                        height:
-                                            (35 / ScreenUtil().screenHeight).sh,
-                                        width: double.infinity,
-                                        child: CustomDatePicker(
-                                          onDateSelected: (DateTime date) {
-                                            setState(() {
-                                              selectedDate = date;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.h),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: (45 / ScreenUtil().screenHeight).sh,
-                                    child: OutlinedButton(
-                                      onPressed: clearFilters,
-                                      style: OutlinedButton.styleFrom(
-                                        // padding:
-                                        //     EdgeInsets.symmetric(vertical: 12.h),
-                                        side: BorderSide(
-                                            color: ColorTheme.red, width: 0.5),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Clear',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.red,
-                                          size: 15.sp,
-                                          weight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 16.w),
-                                Expanded(
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: (45 / ScreenUtil().screenHeight).sh,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Convert selectedDate to a specific format before passing
-                                        String? formattedDate;
-                                        if (selectedDate != null) {
-                                          // Use a consistent date format, typically YYYY-MM-DD
-                                          formattedDate =
-                                              "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-                                        }
-
-                                        int? countryId = selectedCountryId !=
-                                                null
-                                            ? int.tryParse(
-                                                selectedCountryId.toString())
-                                            : null;
-                                        int? statusId = selectedStatusId != null
-                                            ? int.tryParse(
-                                                selectedStatusId.toString())
-                                            : null;
-                                        int? projectId = selectedProjectId !=
-                                                null
-                                            ? int.tryParse(
-                                                selectedProjectId.toString())
-                                            : null;
-
-                                        Provider.of<LeadController>(context,
-                                                listen: false)
-                                            .quickEdit(
-                                          widget.leadId,
-                                          altNumberController.text,
-                                          cityController.text,
-                                          formattedDate, 
-                                          selectedAge,
-                                          countryId,
-                                          statusId,
-                                          projectId,
-                                          context,
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        // padding:
-                                        //     EdgeInsets.symmetric(vertical: 12.h),
-                                        backgroundColor:
-                                            const Color(0xFF3E9E7C),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Submit',
-                                        style: GLTextStyles.manropeStyle(
-                                          color: ColorTheme.white,
-                                          size: 15.sp,
-                                          weight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                        padding: EdgeInsets.all(8.0.w),
+                        child: NotesSectionCopy(
+                            fetchNotes: fetchNotes,
+                            leadId: widget.leadId.toString(),
+                            noteValidate: noteValidate),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8.0.w),
-                      child: NotesSectionCopy(
-                          fetchNotes: fetchNotes,
-                          leadId: widget.leadId.toString(),
-                          noteValidate: noteValidate),
                     )
                   ],
                 ),

@@ -23,6 +23,7 @@ class CustomTextField extends StatelessWidget {
   final double? border;
   final int? maxlines;
   final List<TextInputFormatter>? inputFormatters;
+  final String? errorText;
 
   const CustomTextField({
     super.key,
@@ -44,15 +45,13 @@ class CustomTextField extends StatelessWidget {
     this.border,
     this.maxlines,
     this.icon,
+    this.errorText, // Accept errorText here
   });
 
   @override
   Widget build(BuildContext context) {
-    // Logic to handle password field and multi-line handling
     final bool shouldObscureText = isPasswordField && (maxlines ?? 1) == 1;
-    final int actualMaxLines = isPasswordField
-        ? 1
-        : (maxlines ?? 1); // Ensure maxLines is 1 for password fields
+    final int actualMaxLines = isPasswordField ? 1 : (maxlines ?? 1);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +75,7 @@ class CustomTextField extends StatelessWidget {
             onTap: onTap,
             readOnly: readOnly,
             focusNode: focusNode,
-            maxLines: actualMaxLines, // Dynamic maxLines value
+            maxLines: actualMaxLines,
             decoration: InputDecoration(
               prefixIcon: prefixIcon,
               suffixIcon: suffixIcon,
@@ -122,26 +121,21 @@ class CustomTextField extends StatelessWidget {
             ),
           ),
         ),
-        if (validator != null)
+        // Display the error text if provided
+        if (errorText != null)
           Padding(
             padding: EdgeInsets.only(top: 4.w, left: 8.w),
-            child: Builder(
-              builder: (BuildContext context) {
-                final errorText = validator!(controller?.text ?? '');
-                return errorText != null
-                    ? Text(
-                        errorText,
-                        style: GLTextStyles.manropeStyle(
-                          weight: FontWeight.w400,
-                          size: 12.sp,
-                          color: ColorTheme.red,
-                        ),
-                      )
-                    : const SizedBox.shrink();
-              },
+            child: Text(
+              errorText!,
+              style: GLTextStyles.manropeStyle(
+                weight: FontWeight.w400,
+                size: 12.sp,
+                color: ColorTheme.red,
+              ),
             ),
           ),
       ],
     );
   }
 }
+

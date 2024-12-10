@@ -27,18 +27,22 @@ class DropdownFormTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure initialValue is in items or set it to null
+    final validatedInitialValue =
+        (initialValue != null && items.contains(initialValue))
+            ? initialValue
+            : null;
     return SizedBox(
       height: height,
       width: width,
       child: DropdownButtonFormField<String>(
-        value: initialValue,
+        value: validatedInitialValue,
         isExpanded: true,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
           hintText: hintText,
-          contentPadding:
-               EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
             borderSide: const BorderSide(color: Color(0xffD5D7DA)),

@@ -56,8 +56,10 @@ class MyApp extends StatelessWidget {
         builder: (_, child) {
           return MaterialApp(
             navigatorKey: navigatorKey,
-            theme:
-                ThemeData(appBarTheme: const AppBarTheme(color: Colors.white)),
+            theme: ThemeData(
+                appBarTheme: const AppBarTheme(color: Colors.white),
+                scaffoldBackgroundColor:
+                    const Color.fromARGB(255, 255, 255, 255)),
             debugShowCheckedModeBanner: false,
             home: isLoggedIn ? const BottomNavBar() : const SplashScreen(),
           );

@@ -18,20 +18,32 @@ class LeadDetailController extends ChangeNotifier {
   bool isStatusListLoading = false;
   StatusListModel statusListModel = StatusListModel();
 
-  fetchDetailData(leadId, context) async {
-    isLoading = true;
-    notifyListeners();
-    LeadDetailService.fetchDetailData(leadId).then((value) {
-      if (value["status"] == true) {
-        leadDetailModel = LeadDetailModel.fromJson(value);
-        isLoading = false;
-      } else {
-        AppUtils.oneTimeSnackBar("Unable to fetch Data",
-            context: context, bgColor: ColorTheme.red);
-      }
-      notifyListeners();
-    });
+fetchDetailData(leadId, context) async {
+  isLoading = true;
+  notifyListeners(); // Notify the UI that loading has started
+  try {
+    final value = await LeadDetailService.fetchDetailData(leadId);
+    if (value["status"] == true) {
+      leadDetailModel = LeadDetailModel.fromJson(value);
+    } else {
+      AppUtils.oneTimeSnackBar(
+        "Unable to fetch Data",
+        context: context,
+        bgColor: ColorTheme.red,
+      );
+    }
+  } catch (e) {
+    AppUtils.oneTimeSnackBar(
+      "An error occurred while fetching data",
+      context: context,
+      bgColor: ColorTheme.red,
+    );
+  } finally {
+    isLoading = false; // Ensure loading stops regardless of success or failure
+    notifyListeners(); // Notify the UI that loading has ended
   }
+}
+
 
   fetchNotes(leadId, context) async {
     isNotesLoading = true;

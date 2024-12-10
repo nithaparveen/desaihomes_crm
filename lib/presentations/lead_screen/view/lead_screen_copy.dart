@@ -207,7 +207,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                               builder:
                                   (context, TextEditingValue value, child) {
                                 return SearchBar(
-                                  padding: MaterialStatePropertyAll(
+                                  padding: WidgetStatePropertyAll(
                                       EdgeInsets.only(left: 15.w)),
                                   hintText: "Search ...",
                                   hintStyle: WidgetStatePropertyAll(
@@ -218,9 +218,11 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                                           255, 132, 132, 132),
                                     ),
                                   ),
-                                  elevation: const MaterialStatePropertyAll(0),
+                                  backgroundColor: const WidgetStatePropertyAll(
+                                      Colors.white),
+                                  elevation: const WidgetStatePropertyAll(0),
                                   surfaceTintColor:
-                                      const MaterialStatePropertyAll(
+                                      const WidgetStatePropertyAll(
                                           Colors.white),
                                   leading: Icon(
                                     Iconsax.search_normal_1,
@@ -232,7 +234,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                                       ? [
                                           IconButton(
                                             icon: Icon(
-                                              Iconsax.close_circle,
+                                              Icons.close,
                                               size: 18.sp,
                                               color: const Color.fromARGB(
                                                   255, 132, 132, 132),
@@ -260,7 +262,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                                           const Color.fromARGB(255, 87, 87, 87),
                                     ),
                                   ),
-                                  shape: MaterialStatePropertyAll(
+                                  shape: WidgetStatePropertyAll(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(7.38),
                                     ),
@@ -324,13 +326,12 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                 )
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                  child: Text(
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
                     "Leads",
                     style: GLTextStyles.manropeStyle(
                       size: 18.sp,
@@ -338,36 +339,38 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                       color: const Color(0xff120e2b),
                     ),
                   ),
-                ),
-                if (_isFilterApplied)
-                  GestureDetector(
-                    onTap: clearFilter,
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFAFAFA),
-                        borderRadius: BorderRadius.circular(5.5.r),
-                      ),
-                      child: Row(children: [
-                        Text(
-                          "Remove filter",
-                          style: GLTextStyles.manropeStyle(
-                            color: ColorTheme.grey,
-                            size: 13.sp,
-                            weight: FontWeight.w400,
+                  if (_isFilterApplied)
+                    GestureDetector(
+                      onTap: clearFilter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: const Color(0xff0B0D23),
+                            borderRadius: BorderRadius.circular(5.r)),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              left: 8.w, right: 8.w, bottom: 4.w, top: 4.w),
+                          child: Row(
+                            children: [
+                              Text(
+                                "Remove Filter",
+                                style: GLTextStyles.manropeStyle(
+                                    size: 12.sp,
+                                    weight: FontWeight.w600,
+                                    color: Colors.white),
+                              ),
+                              SizedBox(width: 4.w),
+                              Icon(
+                                Icons.close,
+                                size: 14.sp,
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: 4.w),
-                        Icon(
-                          Iconsax.close_circle,
-                          size: 14.sp,
-                          color: const Color.fromARGB(255, 127, 127, 127),
-                        ),
-                      ]),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             Expanded(
               child: Consumer<LeadController>(

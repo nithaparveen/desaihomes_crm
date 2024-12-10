@@ -23,6 +23,7 @@ class ReportsScreen extends StatefulWidget {
 }
 
 class _ReportsScreenState extends State<ReportsScreen> {
+  bool _isFilterApplied = false;
   Future<String?> getUserName() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String? storedData = sharedPreferences.getString(AppConfig.loginData);
@@ -34,6 +35,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
       }
     }
     return null;
+  }
+
+   void clearFilter() {
+    setState(() {
+      _isFilterApplied = false;
+      Provider.of<ReportsController>(context, listen: false)
+          .fetchData(context); // Refetch original data
+    });
   }
 
   // @override
@@ -138,7 +147,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return const ReportFilterModal();
+                          return ReportFilterModal(
+                            clearFiltersCallback: clearFilter,
+                            onFilterApplied: () {
+                              setState(() {
+                                _isFilterApplied = true;
+                              });
+                            },
+                          );
                         },
                       );
                     },
@@ -173,6 +189,24 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       ]),
                     ),
                   ),
+                  if (_isFilterApplied)
+                    GestureDetector(
+                      onTap: clearFilter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: const Color(0xff0B0D23),
+                            borderRadius: BorderRadius.circular(5.r)),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              left: 8.w, right: 8.w, bottom: 4.w, top: 4.w),
+                          child: Icon(
+                            Icons.close,
+                            size: 16.sp,
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
