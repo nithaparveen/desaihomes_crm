@@ -28,7 +28,7 @@ class NotesSectionCopy extends StatefulWidget {
 }
 
 class _NotesSectionCopyState extends State<NotesSectionCopy> {
-  final TextEditingController dateController = TextEditingController();
+  TextEditingController dateController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
   DateTime? toDate;
   bool noteValidate = false;
@@ -55,6 +55,9 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
   void initState() {
     fetchNotes();
     super.initState();
+    dateController = TextEditingController(
+        text: DateFormat('dd-MM-yyyy').format(DateTime.now()));
+    toDate = DateTime.now();
   }
 
   @override

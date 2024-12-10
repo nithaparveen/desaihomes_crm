@@ -217,6 +217,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         ),
       ),
       onTap: () => _selectDate(context),
+      
     );
   }
 

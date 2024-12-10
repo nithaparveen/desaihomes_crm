@@ -33,6 +33,19 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
   DateTime? toDate;
   bool remarkValidate = false;
 
+  Future<void> fetchSiteVisits() async {
+    await Provider.of<LeadDetailController>(context, listen: false)
+        .fetchSiteVisits(widget.leadId, context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    fetchSiteVisits();
+    toDate = DateTime.now();
+  }
+
   Future<void> selectDate(
       BuildContext context, TextEditingController controller) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -101,6 +114,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
               border: 3,
               controller: siteVisitController,
               errorText: remarkValidate ? "Remarks can't be empty" : null,
+              
             ),
             SizedBox(height: 18.h),
             Align(

@@ -87,230 +87,236 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
           )
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => fetchData(),
-        child: Consumer<LeadDetailController>(
-          builder: (context, controller, _) {
-            return controller.isLoading
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: LoadingAnimationWidget.staggeredDotsWave(
-                        color: ColorTheme.desaiGreen,
-                        size: 32,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: RefreshIndicator(
+          onRefresh: () => fetchData(),
+          child: Consumer<LeadDetailController>(
+            builder: (context, controller, _) {
+              return controller.isLoading
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: LoadingAnimationWidget.staggeredDotsWave(
+                          color: ColorTheme.desaiGreen,
+                          size: 32,
+                        ),
                       ),
-                    ),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15.w),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Lead Details",
-                              style: GLTextStyles.manropeStyle(
-                                size: 18.sp,
-                                weight: FontWeight.w600,
-                                color: const Color(0xff120e2b),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15.w),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Lead Details",
+                                style: GLTextStyles.manropeStyle(
+                                  size: 18.sp,
+                                  weight: FontWeight.w600,
+                                  color: const Color(0xff120e2b),
+                                ),
                               ),
-                            ),
-                            StatusButton(leadId: widget.leadId ?? 0)
-                          ],
+                              StatusButton(leadId: widget.leadId ?? 0)
+                            ],
+                          ),
                         ),
-                      ),
-                      TabBar(
-                        tabAlignment: TabAlignment.fill,
-                        controller: tabController,
-                        labelStyle: GLTextStyles.manropeStyle(
-                            size: 14.sp, weight: FontWeight.w500),
-                        unselectedLabelStyle: GLTextStyles.manropeStyle(
-                            size: 14.sp, weight: FontWeight.w500),
-                        labelColor: ColorTheme.lightBlue,
-                        unselectedLabelColor: const Color(0xff909090),
-                        indicatorColor: ColorTheme.lightBlue,
-                        tabs: const [
-                          Tab(text: "Overview"),
-                          Tab(text: "Source"),
-                          Tab(text: "Extra Data"),
-                          Tab(text: "Site Visits"),
-                        ],
-                      ),
-                      SizedBox(height: 16.h),
-                      Expanded(
-                        child: TabBarView(
+                        TabBar(
+                          tabAlignment: TabAlignment.fill,
                           controller: tabController,
-                          children: [
-                            SingleChildScrollView(
-                              child: Center(
-                                  child: Column(
-                                children: [
-                                  DetailCard(
-                                    name: controller.leadDetailModel.lead?.name,
-                                    email:
-                                        controller.leadDetailModel.lead?.email,
-                                    phone: controller
-                                        .leadDetailModel.lead?.phoneNumber,
-                                    age: controller
-                                        .leadDetailModel.lead?.ageRange,
-                                    detailTexts: [
-                                      DetailText(
-                                        text: 'Project',
-                                        value: controller.leadDetailModel.lead
-                                                ?.project?.name ??
-                                            "",
-                                      ),
-                                      DetailText(
-                                        text: 'Location',
-                                        value: controller
-                                                .leadDetailModel.lead?.city ??
-                                            "",
-                                      ),
-                                      DetailText(
-                                        text: 'Profession',
-                                        value: controller.leadDetailModel.lead
-                                                ?.profession ??
-                                            "",
-                                      ),
-                                      DetailText(
-                                        text: 'Lead Type',
-                                        value: controller.leadDetailModel.lead
-                                                ?.leadType ??
-                                            "",
-                                      ),
-                                      DetailText(
-                                        text: 'Source',
-                                        value: controller
-                                                .leadDetailModel.lead?.source ??
-                                            "",
-                                      ),
-                                    ],
-                                  ),
-                                  NotesSectionCopy(
-                                      fetchNotes: fetchNotes,
-                                      leadId: widget.leadId.toString(),
-                                      noteValidate: noteValidate)
-                                ],
-                              )),
-                            ),
-                            DetailCard(
-                              detailTexts: [
-                                DetailText(
-                                  text: 'Landing Page URL',
-                                  value: controller.leadDetailModel.lead
-                                          ?.landingPageUrl ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Source',
-                                  value:
-                                      controller.leadDetailModel.lead?.source ??
-                                          "",
-                                ),
-                                DetailText(
-                                  text: 'Adset',
-                                  value:
-                                      controller.leadDetailModel.lead?.adset ??
-                                          "",
-                                ),
-                                DetailText(
-                                  text: 'Ad Name',
-                                  value:
-                                      controller.leadDetailModel.lead?.adName ??
-                                          "",
-                                ),
-                                DetailText(
-                                  text: 'Og Source URL',
-                                  value: controller
-                                          .leadDetailModel.lead?.ogSourceUrl ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Utm Source ',
-                                  value: controller
-                                          .leadDetailModel.lead?.utmSource ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'User Agent',
-                                  value: controller
-                                          .leadDetailModel.lead?.userAgent ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Agent',
-                                  value: controller
-                                          .leadDetailModel.lead?.userAgent ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Referred by',
-                                  value: controller
-                                          .leadDetailModel.lead?.referredBy ??
-                                      "",
-                                ),
-                              ],
-                            ),
-                            DetailCard(
-                              detailTexts: [
-                                DetailText(
-                                  text: 'Source',
-                                  value:
-                                      controller.leadDetailModel.lead?.source ??
-                                          "",
-                                ),
-                                DetailText(
-                                  text: 'Campaign Name',
-                                  value: controller
-                                          .leadDetailModel.lead?.campaignName ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Message',
-                                  value: controller
-                                          .leadDetailModel.lead?.message ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'IP Address',
-                                  value: controller
-                                          .leadDetailModel.lead?.ipAddress ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Utm Source ',
-                                  value: controller
-                                          .leadDetailModel.lead?.utmSource ??
-                                      "",
-                                ),
-                                DetailText(
-                                  text: 'Campaign Type ID',
-                                  value: jsonDecode(controller.leadDetailModel
-                                                  .lead?.extraData ??
-                                              '{}')['campaign_type_id']
-                                          ?.toString() ??
-                                      'N/A',
-                                ),
-                                DetailText(
-                                  text: 'Source URL',
-                                  value: controller
-                                          .leadDetailModel.lead?.sourceUrl ??
-                                      "",
-                                ),
-                              ],
-                            ),
-                            SiteVisitSection(
-                                fetchSiteVisits: fetchSiteVisits,
-                                leadId: widget.leadId.toString(),
-                                remarkValidate: remarkValidate)
+                          labelStyle: GLTextStyles.manropeStyle(
+                              size: 14.sp, weight: FontWeight.w500),
+                          unselectedLabelStyle: GLTextStyles.manropeStyle(
+                              size: 14.sp, weight: FontWeight.w500),
+                          labelColor: ColorTheme.lightBlue,
+                          unselectedLabelColor: const Color(0xff909090),
+                          indicatorColor: ColorTheme.lightBlue,
+                          tabs: const [
+                            Tab(text: "Overview"),
+                            Tab(text: "Source"),
+                            Tab(text: "Extra Data"),
+                            Tab(text: "Site Visits"),
                           ],
                         ),
-                      ),
-                    ],
-                  );
-          },
+                        SizedBox(height: 16.h),
+                        Expanded(
+                          child: TabBarView(
+                            controller: tabController,
+                            children: [
+                              SingleChildScrollView(
+                                child: Center(
+                                    child: Column(
+                                      children: [
+                                        DetailCard(
+                                          name:
+                                              controller.leadDetailModel.lead?.name,
+                                          email: controller
+                                              .leadDetailModel.lead?.email,
+                                          phone: controller
+                                              .leadDetailModel.lead?.phoneNumber,
+                                          age: controller
+                                              .leadDetailModel.lead?.ageRange,
+                                          detailTexts: [
+                                            DetailText(
+                                              text: 'Project',
+                                              value: controller.leadDetailModel.lead
+                                                      ?.project?.name ??
+                                                  "",
+                                            ),
+                                            DetailText(
+                                              text: 'Location',
+                                              value: controller
+                                                      .leadDetailModel.lead?.city ??
+                                                  "",
+                                            ),
+                                            DetailText(
+                                              text: 'Profession',
+                                              value: controller.leadDetailModel.lead
+                                                      ?.profession ??
+                                                  "",
+                                            ),
+                                            DetailText(
+                                              text: 'Lead Type',
+                                              value: controller.leadDetailModel.lead
+                                                      ?.leadType ??
+                                                  "",
+                                            ),
+                                            DetailText(
+                                              text: 'Source',
+                                              value: controller.leadDetailModel.lead
+                                                      ?.source ??
+                                                  "",
+                                            ),
+                                          ],
+                                        ),
+                                        NotesSectionCopy(
+                                            fetchNotes: fetchNotes,
+                                            leadId: widget.leadId.toString(),
+                                            noteValidate: noteValidate)
+                                      ],
+                                    )),
+                              ),
+                              DetailCard(
+                                detailTexts: [
+                                  DetailText(
+                                    text: 'Landing Page URL',
+                                    value: controller.leadDetailModel.lead
+                                            ?.landingPageUrl ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Source',
+                                    value:
+                                        controller.leadDetailModel.lead?.source ??
+                                            "",
+                                  ),
+                                  DetailText(
+                                    text: 'Adset',
+                                    value:
+                                        controller.leadDetailModel.lead?.adset ??
+                                            "",
+                                  ),
+                                  DetailText(
+                                    text: 'Ad Name',
+                                    value:
+                                        controller.leadDetailModel.lead?.adName ??
+                                            "",
+                                  ),
+                                  DetailText(
+                                    text: 'Og Source URL',
+                                    value: controller
+                                            .leadDetailModel.lead?.ogSourceUrl ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Utm Source ',
+                                    value: controller
+                                            .leadDetailModel.lead?.utmSource ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'User Agent',
+                                    value: controller
+                                            .leadDetailModel.lead?.userAgent ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Agent',
+                                    value: controller
+                                            .leadDetailModel.lead?.userAgent ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Referred by',
+                                    value: controller
+                                            .leadDetailModel.lead?.referredBy ??
+                                        "",
+                                  ),
+                                ],
+                              ),
+                              DetailCard(
+                                detailTexts: [
+                                  DetailText(
+                                    text: 'Source',
+                                    value:
+                                        controller.leadDetailModel.lead?.source ??
+                                            "",
+                                  ),
+                                  DetailText(
+                                    text: 'Campaign Name',
+                                    value: controller
+                                            .leadDetailModel.lead?.campaignName ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Message',
+                                    value: controller
+                                            .leadDetailModel.lead?.message ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'IP Address',
+                                    value: controller
+                                            .leadDetailModel.lead?.ipAddress ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Utm Source ',
+                                    value: controller
+                                            .leadDetailModel.lead?.utmSource ??
+                                        "",
+                                  ),
+                                  DetailText(
+                                    text: 'Campaign Type ID',
+                                    value: jsonDecode(controller.leadDetailModel
+                                                    .lead?.extraData ??
+                                                '{}')['campaign_type_id']
+                                            ?.toString() ??
+                                        'N/A',
+                                  ),
+                                  DetailText(
+                                    text: 'Source URL',
+                                    value: controller
+                                            .leadDetailModel.lead?.sourceUrl ??
+                                        "",
+                                  ),
+                                ],
+                              ),
+                              SiteVisitSection(
+                                  fetchSiteVisits: fetchSiteVisits,
+                                  leadId: widget.leadId.toString(),
+                                  remarkValidate: remarkValidate)
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+            },
+          ),
         ),
       ),
     );

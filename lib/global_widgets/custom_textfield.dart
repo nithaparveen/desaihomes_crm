@@ -45,7 +45,7 @@ class CustomTextField extends StatelessWidget {
     this.border,
     this.maxlines,
     this.icon,
-    this.errorText, // Accept errorText here
+    this.errorText,
   });
 
   @override
@@ -121,7 +121,6 @@ class CustomTextField extends StatelessWidget {
             ),
           ),
         ),
-        // Display the error text if provided
         if (errorText != null)
           Padding(
             padding: EdgeInsets.only(top: 4.w, left: 8.w),
@@ -138,4 +137,3 @@ class CustomTextField extends StatelessWidget {
     );
   }
 }
-

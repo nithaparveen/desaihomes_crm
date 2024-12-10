@@ -699,49 +699,13 @@ class _QuickEditModalState extends State<QuickEditModal>
                                             height:
                                                 (45 / ScreenUtil().screenHeight)
                                                     .sh,
-                                            child: OutlinedButton(
-                                              onPressed: clearFilters,
-                                              style: OutlinedButton.styleFrom(
-                                                // padding:
-                                                //     EdgeInsets.symmetric(vertical: 12.h),
-                                                side: BorderSide(
-                                                    color: ColorTheme.red,
-                                                    width: 0.5),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.r),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                'Clear',
-                                                style:
-                                                    GLTextStyles.manropeStyle(
-                                                  color: ColorTheme.red,
-                                                  size: 15.sp,
-                                                  weight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 16.w),
-                                        Expanded(
-                                          child: SizedBox(
-                                            width: double.infinity,
-                                            height:
-                                                (45 / ScreenUtil().screenHeight)
-                                                    .sh,
                                             child: ElevatedButton(
                                               onPressed: () {
-                                                // Convert selectedDate to a specific format before passing
                                                 String? formattedDate;
                                                 if (selectedDate != null) {
-                                                  // Use a consistent date format, typically YYYY-MM-DD
                                                   formattedDate =
                                                       "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
                                                 }
-
                                                 int? countryId =
                                                     selectedCountryId != null
                                                         ? int.tryParse(
