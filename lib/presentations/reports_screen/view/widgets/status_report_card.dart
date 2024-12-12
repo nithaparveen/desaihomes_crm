@@ -25,7 +25,7 @@ class StatusReportCard extends StatelessWidget {
       child: Center(
         child: Padding(
           padding:
-              EdgeInsets.only(right: 10.w, top: 15.h, left: 10.w, bottom: 15.h),
+              EdgeInsets.only(right: 10.w, top: 10.h, left: 10.w, bottom: 10.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [

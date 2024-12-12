@@ -26,7 +26,7 @@ class LoginController extends ChangeNotifier {
             MaterialPageRoute(builder: (context) => const BottomNavBar()),
             (route) => false);
         Flushbar(
-          maxWidth: .55.sw,
+          maxWidth: .45.sw,
           backgroundColor: Colors.grey.shade100,
           messageColor: ColorTheme.black,
           icon: Icon(

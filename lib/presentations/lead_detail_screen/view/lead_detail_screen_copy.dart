@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/global_widgets/detail_card.dart';
+import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/call_history_section.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/notes_section_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/site_visit_section.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/status_button.dart';
@@ -33,13 +34,13 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
 
   @override
   void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      tabController = TabController(length: 5, vsync: this);
       fetchData();
       fetchNotes();
       fetchSiteVisits();
     });
-    tabController = TabController(length: 4, vsync: this);
-    super.initState();
   }
 
   @override
@@ -126,8 +127,9 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                           ),
                         ),
                         TabBar(
-                          tabAlignment: TabAlignment.fill,
+                          tabAlignment: TabAlignment.center,
                           controller: tabController,
+                          isScrollable: true,
                           labelStyle: GLTextStyles.manropeStyle(
                               size: 14.sp, weight: FontWeight.w500),
                           unselectedLabelStyle: GLTextStyles.manropeStyle(
@@ -140,6 +142,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                             Tab(text: "Source"),
                             Tab(text: "Extra Data"),
                             Tab(text: "Site Visits"),
+                            Tab(text: "Call Logs"),
                           ],
                         ),
                         SizedBox(height: 16.h),
@@ -150,55 +153,55 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                               SingleChildScrollView(
                                 child: Center(
                                     child: Column(
-                                      children: [
-                                        DetailCard(
-                                          name:
-                                              controller.leadDetailModel.lead?.name,
-                                          email: controller
-                                              .leadDetailModel.lead?.email,
-                                          phone: controller
-                                              .leadDetailModel.lead?.phoneNumber,
-                                          age: controller
-                                              .leadDetailModel.lead?.ageRange,
-                                          detailTexts: [
-                                            DetailText(
-                                              text: 'Project',
-                                              value: controller.leadDetailModel.lead
-                                                      ?.project?.name ??
-                                                  "",
-                                            ),
-                                            DetailText(
-                                              text: 'Location',
-                                              value: controller
-                                                      .leadDetailModel.lead?.city ??
-                                                  "",
-                                            ),
-                                            DetailText(
-                                              text: 'Profession',
-                                              value: controller.leadDetailModel.lead
-                                                      ?.profession ??
-                                                  "",
-                                            ),
-                                            DetailText(
-                                              text: 'Lead Type',
-                                              value: controller.leadDetailModel.lead
-                                                      ?.leadType ??
-                                                  "",
-                                            ),
-                                            DetailText(
-                                              text: 'Source',
-                                              value: controller.leadDetailModel.lead
-                                                      ?.source ??
-                                                  "",
-                                            ),
-                                          ],
+                                  children: [
+                                    DetailCard(
+                                      name:
+                                          controller.leadDetailModel.lead?.name,
+                                      email: controller
+                                          .leadDetailModel.lead?.email,
+                                      phone: controller
+                                          .leadDetailModel.lead?.phoneNumber,
+                                      age: controller
+                                          .leadDetailModel.lead?.ageRange,
+                                      detailTexts: [
+                                        DetailText(
+                                          text: 'Project',
+                                          value: controller.leadDetailModel.lead
+                                                  ?.project?.name ??
+                                              "",
                                         ),
-                                        NotesSectionCopy(
-                                            fetchNotes: fetchNotes,
-                                            leadId: widget.leadId.toString(),
-                                            noteValidate: noteValidate)
+                                        DetailText(
+                                          text: 'Location',
+                                          value: controller
+                                                  .leadDetailModel.lead?.city ??
+                                              "",
+                                        ),
+                                        DetailText(
+                                          text: 'Profession',
+                                          value: controller.leadDetailModel.lead
+                                                  ?.profession ??
+                                              "",
+                                        ),
+                                        DetailText(
+                                          text: 'Lead Type',
+                                          value: controller.leadDetailModel.lead
+                                                  ?.leadType ??
+                                              "",
+                                        ),
+                                        DetailText(
+                                          text: 'Source',
+                                          value: controller.leadDetailModel.lead
+                                                  ?.source ??
+                                              "",
+                                        ),
                                       ],
-                                    )),
+                                    ),
+                                    NotesSectionCopy(
+                                        fetchNotes: fetchNotes,
+                                        leadId: widget.leadId.toString(),
+                                        noteValidate: noteValidate)
+                                  ],
+                                )),
                               ),
                               DetailCard(
                                 detailTexts: [
@@ -210,26 +213,26 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                   ),
                                   DetailText(
                                     text: 'Source',
-                                    value:
-                                        controller.leadDetailModel.lead?.source ??
-                                            "",
+                                    value: controller
+                                            .leadDetailModel.lead?.source ??
+                                        "",
                                   ),
                                   DetailText(
                                     text: 'Adset',
-                                    value:
-                                        controller.leadDetailModel.lead?.adset ??
-                                            "",
+                                    value: controller
+                                            .leadDetailModel.lead?.adset ??
+                                        "",
                                   ),
                                   DetailText(
                                     text: 'Ad Name',
-                                    value:
-                                        controller.leadDetailModel.lead?.adName ??
-                                            "",
+                                    value: controller
+                                            .leadDetailModel.lead?.adName ??
+                                        "",
                                   ),
                                   DetailText(
                                     text: 'Og Source URL',
-                                    value: controller
-                                            .leadDetailModel.lead?.ogSourceUrl ??
+                                    value: controller.leadDetailModel.lead
+                                            ?.ogSourceUrl ??
                                         "",
                                   ),
                                   DetailText(
@@ -262,14 +265,14 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                 detailTexts: [
                                   DetailText(
                                     text: 'Source',
-                                    value:
-                                        controller.leadDetailModel.lead?.source ??
-                                            "",
+                                    value: controller
+                                            .leadDetailModel.lead?.source ??
+                                        "",
                                   ),
                                   DetailText(
                                     text: 'Campaign Name',
-                                    value: controller
-                                            .leadDetailModel.lead?.campaignName ??
+                                    value: controller.leadDetailModel.lead
+                                            ?.campaignName ??
                                         "",
                                   ),
                                   DetailText(
@@ -309,7 +312,12 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                               SiteVisitSection(
                                   fetchSiteVisits: fetchSiteVisits,
                                   leadId: widget.leadId.toString(),
-                                  remarkValidate: remarkValidate)
+                                  remarkValidate: remarkValidate),
+                              CallHistorySection(
+                                leadId: widget.leadId.toString(),
+                                phoneNumber: controller.leadDetailModel.lead?.phoneNumber ?? "",
+                                name: controller.leadDetailModel.lead?.name ?? "",
+                              )
                             ],
                           ),
                         ),

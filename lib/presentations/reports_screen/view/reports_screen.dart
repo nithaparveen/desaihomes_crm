@@ -234,7 +234,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       children: [
                         StatusReportContainer(
                           color: const Color(0xFFFFF1E3),
-                          icon: Iconsax.arrow_up_3,
+                          icon: Iconsax.people,
                           borderColor: const Color(0xFFFFF9C6),
                           shadowColor: const Color(0xFFFCF5B3),
                           count: controller.reportsModel.data?.statusLeadData

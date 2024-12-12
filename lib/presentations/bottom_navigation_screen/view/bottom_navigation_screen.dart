@@ -7,6 +7,7 @@ import 'package:desaihomes_crm_application/presentations/reports_screen/view/rep
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../controller/bottom_navigation_controller.dart';
 
@@ -21,6 +22,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final NotchBottomBarController notchBottomBarController =
       NotchBottomBarController(index: 0);
 
+  Future<void> requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.phone,
+    ].request();
+
+    if (statuses[Permission.phone]!.isGranted) {
+      
+    }
+  }
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -28,6 +39,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           .selectedIndex = 0;
     });
     super.initState();
+    requestPermissions();
   }
 
   @override

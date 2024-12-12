@@ -117,7 +117,7 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                   ),
                   Center(
                     child: Container(
-                      height: 0.48.sh,
+                      height: 340.h,
                       width: 1.sw,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(18),

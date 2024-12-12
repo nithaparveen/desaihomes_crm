@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
@@ -84,7 +83,7 @@ class LogoutButton extends StatelessWidget {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Logout',
+                'Confirm Logout',
                 style: GLTextStyles.manropeStyle(
                   color: ColorTheme.black,
                   size: 18.sp,

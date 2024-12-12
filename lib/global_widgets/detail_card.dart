@@ -47,7 +47,7 @@ class DetailCard extends StatelessWidget {
             EdgeInsets.only(left: 15.w, right: 15.w, top: 5.h, bottom: 15.h),
         child: Container(
           decoration: BoxDecoration(
-              color: const Color(0xffF5F3FF),
+              color: const Color(0xffF5F5F5),
               borderRadius: BorderRadius.circular(6)),
           child: Padding(
             padding: EdgeInsets.all(16.w),
