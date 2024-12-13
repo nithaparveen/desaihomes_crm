@@ -15,15 +15,19 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final double? width;
   final double? height;
+  final double? verticalPadding;
   final void Function(String)? onChanged;
   final VoidCallback? onTap;
   final bool readOnly;
   final String? Function(String?)? validator;
   final FocusNode? focusNode;
   final double? border;
+  final double? hintSize;
+  final BorderSide? borderSide;
   final int? maxlines;
   final List<TextInputFormatter>? inputFormatters;
   final String? errorText;
+  final Color? fillColor;
 
   const CustomTextField({
     super.key,
@@ -46,6 +50,10 @@ class CustomTextField extends StatelessWidget {
     this.maxlines,
     this.icon,
     this.errorText,
+    this.hintSize,
+    this.verticalPadding,
+    this.fillColor,
+    this.borderSide,
   });
 
   @override
@@ -79,29 +87,29 @@ class CustomTextField extends StatelessWidget {
             decoration: InputDecoration(
               prefixIcon: prefixIcon,
               suffixIcon: suffixIcon,
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 12.h, horizontal: 10.w),
+              contentPadding: EdgeInsets.symmetric(
+                  vertical: verticalPadding ?? 12.h, horizontal: 10.w),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(border ?? 8.r),
-                borderSide: BorderSide.none,
+                borderSide: borderSide ?? BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(border ?? 8.r),
-                borderSide: BorderSide.none,
+                borderSide: borderSide ?? BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(border ?? 8.r),
-                borderSide: BorderSide.none,
+                borderSide: borderSide ?? BorderSide.none,
               ),
               focusColor: Colors.transparent,
               hintText: hintText,
               icon: icon,
               hintStyle: GLTextStyles.manropeStyle(
                 weight: FontWeight.w400,
-                size: 12.sp,
-                color: const Color(0xff4E4E4E),
+                size: hintSize ?? 12.sp,
+                color: const Color(0xff8391A1),
               ),
-              fillColor: const Color.fromARGB(26, 161, 161, 161),
+              fillColor: fillColor ?? const Color.fromARGB(26, 161, 161, 161),
               filled: true,
               errorStyle: const TextStyle(height: 0),
               errorBorder: OutlineInputBorder(

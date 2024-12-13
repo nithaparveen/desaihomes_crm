@@ -14,47 +14,68 @@ class LoginController extends ChangeNotifier {
   bool visibility = true;
   late SharedPreferences sharedPreferences;
 
-  Future onLogin(String email, String password, BuildContext context) async {
-    log("loginController -> onLogin() started");
-    LoginService.postLoginData(email, password).then((value) {
-      if (value["status"] == true) {
-        log("token -> ${value["token"]} ");
-        storeLoginData(value);
-        storeUserToken(value["token"]);
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const BottomNavBar()),
-            (route) => false);
-        Flushbar(
-          maxWidth: .45.sw,
-          backgroundColor: Colors.grey.shade100,
-          messageColor: ColorTheme.black,
-          icon: Icon(
-            Iconsax.tick_circle,
-            color: ColorTheme.green,
-            size: 20.sp,
-          ),
-          message: 'Login successful',
-          duration: const Duration(seconds: 3),
-          flushbarPosition: FlushbarPosition.TOP,
-        ).show(context);
-      } else {
-        Flushbar(
-          maxWidth: .55.sw,
-          backgroundColor: Colors.grey.shade100,
-          messageColor: ColorTheme.black,
-          icon: Icon(
-            Iconsax.close_circle,
-            color: ColorTheme.red,
-            size: 20.sp,
-          ),
-          message: 'Invalid credentials',
-          duration: const Duration(seconds: 3),
-          flushbarPosition: FlushbarPosition.TOP,
-        ).show(context);
-      }
-    });
+Future onLogin(String email, String password, BuildContext context) async {
+  log("loginController -> onLogin() started");
+
+  if (email.isEmpty || password.isEmpty) {
+    // Show error if fields are empty
+    Flushbar(
+      maxWidth: .55.sw,
+      backgroundColor: Colors.grey.shade100,
+      messageColor: ColorTheme.black,
+      icon: Icon(
+        Iconsax.info_circle,
+        color: ColorTheme.red,
+        size: 20.sp,
+      ),
+      message: 'Please fill in all fields',
+      duration: const Duration(seconds: 3),
+      flushbarPosition: FlushbarPosition.TOP,
+    ).show(context);
+    return; // Exit the function early
   }
+
+  LoginService.postLoginData(email, password).then((value) {
+    if (value["status"] == true) {
+      log("token -> ${value["token"]}");
+      storeLoginData(value);
+      storeUserToken(value["token"]);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const BottomNavBar()),
+        (route) => false,
+      );
+      Flushbar(
+        maxWidth: .45.sw,
+        backgroundColor: Colors.grey.shade100,
+        messageColor: ColorTheme.black,
+        icon: Icon(
+          Iconsax.tick_circle,
+          color: ColorTheme.green,
+          size: 20.sp,
+        ),
+        message: 'Login successful',
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+      ).show(context);
+    } else {
+      // Show invalid credentials message only if fields are not empty
+      Flushbar(
+        maxWidth: .55.sw,
+        backgroundColor: Colors.grey.shade100,
+        messageColor: ColorTheme.black,
+        icon: Icon(
+          Iconsax.close_circle,
+          color: ColorTheme.red,
+          size: 20.sp,
+        ),
+        message: 'Invalid credentials',
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+      ).show(context);
+    }
+  });
+}
 
   void onPressed() {
     visibility = !visibility;

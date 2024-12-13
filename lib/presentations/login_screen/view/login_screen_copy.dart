@@ -16,103 +16,85 @@ class LoginScreenCopy extends StatefulWidget {
 }
 
 class _LoginScreenCopyState extends State<LoginScreenCopy> {
-  var emailController = TextEditingController();
-  var passwordController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool isLoginPressed = false;
 
   String? validateEmail(String? value) {
-    if (isLoginPressed) {
-      if (value == null || value.isEmpty) {
-        return 'Please enter your email';
-      }
-      final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-      if (!emailRegExp.hasMatch(value)) {
-        return 'Please enter a valid email address';
-      }
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegExp.hasMatch(value)) {
+      return 'Please enter a valid email address';
     }
     return null;
   }
 
   String? validatePassword(String? value) {
-    if (isLoginPressed) {
-      if (value == null || value.isEmpty) {
-        return 'Password is required';
-      }
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
     }
     return null;
   }
 
+  void _onLoginPressed(BuildContext context) {
+    setState(() {
+      isLoginPressed = true;
+    });
+    if (_formKey.currentState?.validate() ?? false) {
+      Provider.of<LoginController>(context, listen: false).onLogin(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+        context,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            const Color(0xFF24116B),
-            ColorTheme.desaiGreen,
-          ],
-          stops: const [0.00008, 2.0],
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: SingleChildScrollView(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              padding: EdgeInsets.symmetric(
-                horizontal: 10.w,
-                vertical: 12.h,
-              ),
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Form(
+              key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  Text(
+                    "Welcome back!",
+                    style: GLTextStyles.manropeStyle(
+                      size: 30.sp,
+                      weight: FontWeight.w700,
+                      color: const Color(0xff1E232C),
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    "Sign in to access your account",
+                    style: GLTextStyles.manropeStyle(
+                      size: 14.sp,
+                      weight: FontWeight.w300,
+                      color: const Color(0xff9B9A9D),
+                    ),
+                  ),
+                  SizedBox(height: 34.h),
                   Center(
                     child: Container(
-                      height: 242.h,
-                      width: 242.w,
+                      height: 280.h,
+                      width: 291.w,
                       decoration: const BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage("assets/images/Group 1261155984.png"),
+                          image: AssetImage("assets/images/LoginImage.png"),
                           fit: BoxFit.fill,
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 30.h,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Sign In",
-                          style: GLTextStyles.manropeStyle(
-                              size: 30.sp,
-                              weight: FontWeight.w600,
-                              color: Colors.white),
-                          textAlign: TextAlign.left,
-                        ),
-                        SizedBox(
-                          height: 10.h,
-                        ),
-                        Text(
-                          "Log in to unlock smarter lead management track",
-                          style: GLTextStyles.manropeStyle(
-                              size: 14.sp,
-                              weight: FontWeight.w400,
-                              color: const Color(0xffF0F0F0)),
-                          textAlign: TextAlign.left,
-                        ),
-                      ],
                     ),
                   ),
                   Center(
@@ -120,87 +102,78 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
                       height: 340.h,
                       width: 1.sw,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          color: Colors.white),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 22.w,
-                        vertical: 12.h,
+                        borderRadius: BorderRadius.circular(18),
+                        color: Colors.white,
                       ),
+                      padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CustomTextField(
-                            prefixIcon: const Icon(
+                            hintSize: 15,
+                            verticalPadding: 17,
+                            borderSide: const BorderSide(color: Color(0xffE8ECF4)),
+                            fillColor: const Color(0xffF7F8F9),
+                            prefixIcon: Icon(
                               Iconsax.sms,
-                              size: 15,
+                              size: 20.sp,
+                              color: const Color(0xff4E4E4E),
                             ),
-                            hintText: "Enter email",
+                            hintText: "Enter your email",
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
                             validator: validateEmail,
                           ),
-                          SizedBox(
-                            height: 15.h,
-                          ),
+                          SizedBox(height: 22.h),
                           Consumer<LoginController>(
                             builder: (context, controller, _) {
                               return CustomTextField(
-                                prefixIcon:  Icon(
+                                hintSize: 15,
+                                verticalPadding: 17,
+                                borderSide: const BorderSide(color: Color(0xffE8ECF4)),
+                                prefixIcon: Icon(
                                   Iconsax.lock,
-                                  size: 15.sp,
+                                  size: 20.sp,
+                                  color: const Color(0xff4E4E4E),
                                 ),
+                                fillColor: const Color(0xffF7F8F9),
                                 isPasswordField: true,
-                                obscureText: controller
-                                    .visibility, 
+                                obscureText: controller.visibility,
                                 suffixIcon: IconButton(
                                   onPressed: () {
-                                    controller
-                                        .onPressed();
+                                    controller.onPressed();
                                   },
                                   icon: Icon(
                                     controller.visibility
                                         ? Iconsax.eye_slash
-                                        : Iconsax
-                                            .eye, 
-                                    size: 15.sp,
+                                        : Iconsax.eye,
+                                    size: 20.sp,
+                                    color: const Color(0xff4E4E4E),
                                   ),
                                 ),
-                                hintText: "Enter password",
+                                hintText: "Enter your password",
                                 controller: passwordController,
                                 validator: validatePassword,
                               );
                             },
                           ),
-                          SizedBox(
-                            height: 30.h,
-                          ),
+                          SizedBox(height: 34.h),
                           SizedBox(
                             height: 0.15.sw,
                             width: 1.sw,
                             child: ElevatedButton(
                               style: ButtonStyle(
-                                shape: MaterialStatePropertyAll(
+                                shape: WidgetStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                 ),
-                                backgroundColor: MaterialStatePropertyAll(
+                                backgroundColor: WidgetStateProperty.all(
                                   ColorTheme.desaiGreen,
                                 ),
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  isLoginPressed = true;
-                                });
-                                Provider.of<LoginController>(context,
-                                        listen: false)
-                                    .onLogin(
-                                        emailController.text.trim(),
-                                        passwordController.text.trim(),
-                                        context);
-                              },
+                              onPressed: () => _onLoginPressed(context),
                               child: Text(
-                                "Sign In",
+                                "Log In",
                                 style: GLTextStyles.manropeStyle(
                                   size: 16.sp,
                                   weight: FontWeight.w500,
@@ -222,3 +195,5 @@ class _LoginScreenCopyState extends State<LoginScreenCopy> {
     );
   }
 }
+
+

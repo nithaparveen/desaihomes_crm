@@ -38,67 +38,80 @@ class _SplashScreenState extends State<SplashScreen> {
         padding: EdgeInsets.only(
           left: 15.w,
           right: 15.w,
-          bottom: 30.h,
+          bottom: 42.h,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Container(
-              height: 464.h, 
-              width:316.11.w, 
+              height: 282.h,
+              width: 347.w,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("assets/images/Group 427320606.png"),
+                  image: AssetImage("assets/images/Buildings.png"),
                   fit: BoxFit.fill,
                 ),
               ),
             ),
+            SizedBox(height: 59.h),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: 15.w,
-                vertical: 12.h,
+                vertical: 10.h,
               ),
-              child: Text(
-                "Desai Lead Management",
-                style: GLTextStyles.manropeStyle(
-                    size: 32.sp), 
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 12.h,
-              ),
-              child: Text(
-                "Empowering Customer Relationships – Streamline interactions, track leads, and deliver excellence ",
-                style: GLTextStyles.manropeStyle(
-                  size: 16.sp,
-                  weight: FontWeight.w300,
-                  color: const Color(0xff909090),
-                ),
-                textAlign: TextAlign.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                      height: 37.h,
+                      width: 34.w,
+                      child: Image.asset("assets/images/logo.png")),
+                  SizedBox(width: 12.w),
+                  Text(
+                    "Desai Homes",
+                    style: GLTextStyles.manropeStyle(size: 32.sp),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
+            Text(
+              "Lead Management",
+              style: GLTextStyles.manropeStyle(
+                size: 18.sp,
+                weight: FontWeight.w500,
+                color: const Color(0xff909090),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 33.h),
+            Text(
+              "Empowering Customer Relationships – Streamline interactions, track leads, and deliver excellence ",
+              style: GLTextStyles.manropeStyle(
+                size: 14.sp,
+                weight: FontWeight.w300,
+                color: const Color(0xff909090),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 93.h),
             SizedBox(
-              height: 0.05.sw, 
-            ),
-            SizedBox(
-              height: (56 / ScreenUtil().screenHeight).sh, 
-              width: 0.81.sw, 
+              height: (56 / ScreenUtil().screenHeight).sh,
+              width: 0.81.sw,
               child: ElevatedButton(
                 style: ButtonStyle(
-                  shape:MaterialStatePropertyAll(
+                  shape: WidgetStatePropertyAll(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
-                  backgroundColor: MaterialStatePropertyAll(
+                  backgroundColor: WidgetStatePropertyAll(
                     ColorTheme.desaiGreen,
                   ),
                 ),
-                onPressed: _navigateToNextScreen, 
+                onPressed: _navigateToNextScreen,
                 child: Text(
                   "Get Started",
                   style: GLTextStyles.manropeStyle(

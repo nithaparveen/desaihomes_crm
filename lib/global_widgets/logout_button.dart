@@ -24,14 +24,14 @@ class LogoutButton extends StatelessWidget {
           children: [
             Icon(
               Icons.logout,
-              color: Colors.white,
+              color: Colors.black,
               size: 16.sp,
             ),
             SizedBox(width: 8.w),
             Text(
               "Logout",
               style: GLTextStyles.manropeStyle(
-                color: ColorTheme.white,
+                color: ColorTheme.black,
                 size: 13.sp,
                 weight: FontWeight.w400,
               ),
