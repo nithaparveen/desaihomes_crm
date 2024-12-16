@@ -4,9 +4,8 @@ import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/global_appbar.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
-import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/lead_chart_card.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/report_filter_modal.dart';
-import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/status_report_card.dart';
+import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/status_report_tile.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/status_report_container.dart';
 import 'package:desaihomes_crm_application/repository/api/reports_screen/model/reports_model.dart';
 import 'package:flutter/material.dart';
@@ -40,16 +39,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   void clearFilter() {
     setState(() {
       _isFilterApplied = false;
-      Provider.of<ReportsController>(context, listen: false)
-          .fetchData(context); // Refetch original data
+      Provider.of<ReportsController>(context, listen: false).fetchData(context);
     });
   }
-
-  // @override
-  // void initState() {
-  //   Provider.of<ReportsController>(context).fetchData(context);
-  //   super.initState();
-  // }
 
   @override
   void didChangeDependencies() {
@@ -65,236 +57,249 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(90.h),
-        child: CustomAppBar(backgroundColor: ColorTheme.desaiGreen),
+        preferredSize: Size.fromHeight(70.h),
+        child: const CustomAppBar(
+          backgroundColor: Color(0xffF0F6FF),
+          hasRadius: false,
+        ),
       ),
-      body: Consumer<ReportsController>(builder: (context, controller, _) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Lead Reports",
-                    style: GLTextStyles.manropeStyle(
-                      size: 18.sp,
-                      weight: FontWeight.w600,
-                      color: const Color(0xff120e2b),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return ReportFilterModal(
-                            clearFiltersCallback: clearFilter,
-                            onFilterApplied: () {
-                              setState(() {
-                                _isFilterApplied = true;
-                              });
-                            },
-                          );
-                        },
-                      );
-                    },
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFAFAFA),
-                        borderRadius: BorderRadius.circular(5.5.r),
-                      ),
-                      child: Row(children: [
-                        Icon(
-                          Iconsax.calendar,
-                          size: 18.sp,
-                          color: Colors.black,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          "Filter Reports",
-                          style: GLTextStyles.manropeStyle(
-                            color: ColorTheme.grey,
-                            size: 13.sp,
-                            weight: FontWeight.w400,
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 16.sp,
-                          color: const Color(0xFFB5BEC6),
-                        )
-                      ]),
-                    ),
-                  ),
-                  if (_isFilterApplied)
-                    GestureDetector(
-                      onTap: clearFilter,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: const Color(0xff0B0D23),
-                            borderRadius: BorderRadius.circular(5.r)),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              left: 8.w, right: 8.w, bottom: 4.w, top: 4.w),
-                          child: Icon(
-                            Icons.close,
-                            size: 16.sp,
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+      body: Consumer<ReportsController>(
+        builder: (context, controller, _) {
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Stack(
                   children: [
-                    LeadChartCard(
-                      totalLeadsCOunt:
-                          controller.reportsModel.data!.totalLeads.toString(),
-                      leadCount: controller.reportsModel.data?.statusLeadData
-                              ?.firstWhere(
-                                (element) => element.statusName == "New Leads",
-                                orElse: () => StatusLeadDatum(leadCount: 0),
-                              )
-                              .leadCount ??
-                          0,
-                    ),
-                    SizedBox(height: 25.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        StatusReportContainer(
-                          color: const Color(0xFFFFF1E3),
-                          icon: Iconsax.people,
-                          borderColor: const Color(0xFFFFF9C6),
-                          shadowColor: const Color(0xFFFCF5B3),
-                          count: controller.reportsModel.data?.statusLeadData
-                                  ?.firstWhere(
-                                    (element) =>
-                                        element.statusName == "New Leads",
-                                    orElse: () => StatusLeadDatum(leadCount: 0),
-                                  )
-                                  .leadCount ??
-                              0,
-                          statusType: "New Leads",
-                          iconColor: const Color(0xffFF8800),
-                        ),
-                        StatusReportContainer(
-                          color: const Color(0xFFE9FFE3),
-                          icon: Iconsax.home,
-                          borderColor: const Color(0xFFC6FFDD),
-                          shadowColor: const Color(0xffa6f083),
-                          count: controller.reportsModel.data?.statusLeadData
-                                  ?.firstWhere(
-                                    (element) => element.statusName == "Booked",
-                                    orElse: () => StatusLeadDatum(leadCount: 0),
-                                  )
-                                  .leadCount ??
-                              0,
-                          statusType: "Booked        ",
-                          iconColor: const Color(0xff52D22E),
-                        ),
-                        StatusReportContainer(
-                          color: const Color(0xFFE3E6FF),
-                          icon: Iconsax.profile_tick,
-                          borderColor: const Color(0xFFC7C6FF),
-                          shadowColor: const Color(0xffb5aeff),
-                          count: controller.reportsModel.data?.statusLeadData
-                                  ?.firstWhere(
-                                    (element) =>
-                                        element.statusName == "In Followup",
-                                    orElse: () => StatusLeadDatum(leadCount: 0),
-                                  )
-                                  .leadCount ??
-                              0,
-                          statusType: "In Followup",
-                          iconColor: const Color(0xff6270F0),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25.h),
-                    Text(
-                      "Lead Performance Overview",
-                      style: GLTextStyles.manropeStyle(
-                        size: 18.sp,
-                        weight: FontWeight.w600,
-                        color: const Color(0xff120e2b),
-                      ),
-                    ),
-                    SizedBox(height: 25.h),
                     Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: const Color(0xffD5D7DA), width: 1.0),
-                        borderRadius: BorderRadius.circular(6.0.r),
+                      height: 225.h,
+                      width: 1.sw,
+                      decoration: const BoxDecoration(
+                        color: Color(0xffF0F6FF),
                       ),
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 1.8,
-                          crossAxisSpacing: 10.0,
-                          mainAxisSpacing: 10.0,
+                    ),
+                    Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                children: [
+                                  Text(
+                                    controller.reportsModel.data!.totalLeads
+                                        .toString(),
+                                    style: GLTextStyles.interStyle(
+                                      size: 42.sp,
+                                      weight: FontWeight.w600,
+                                      color: const Color(0xff181D27),
+                                    ),
+                                  ),
+                                  Text(
+                                    "Total Leads",
+                                    style: GLTextStyles.interStyle(
+                                      size: 16.sp,
+                                      weight: FontWeight.w500,
+                                      color: const Color(0xff181D27),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return ReportFilterModal(
+                                        clearFiltersCallback: clearFilter,
+                                        onFilterApplied: () {
+                                          setState(() {
+                                            _isFilterApplied = true;
+                                          });
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 6.w, vertical: 6.h),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF170E2B),
+                                        borderRadius:
+                                            BorderRadius.circular(4.r),
+                                      ),
+                                      child: Row(children: [
+                                        Icon(
+                                          Iconsax.calendar_2,
+                                          size: 18.sp,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          "Filter Reports",
+                                          style: GLTextStyles.manropeStyle(
+                                            color: ColorTheme.white,
+                                            size: 13.sp,
+                                            weight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Icon(
+                                          Icons.keyboard_arrow_down,
+                                          size: 16.sp,
+                                          color: Colors.white,
+                                        )
+                                      ]),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    if (_isFilterApplied)
+                                      GestureDetector(
+                                        onTap: clearFilter,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 7.w, vertical: 7.h),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 18.sp,
+                                            color: const Color.fromARGB(
+                                                255, 79, 79, 79),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        itemCount: 9,
-                        padding: EdgeInsets.symmetric(
-                            vertical: 21.h, horizontal: 16.w),
-                        itemBuilder: (context, index) {
-                          final statusTypes = [
-                            'Casual Enquiry',
-                            'Lost',
-                            'No Responce',
-                            'Repeated Lead',
-                            'Wrong Lead',
-                            'Fake Lead',
-                            'Wrong Location',
-                            'Unable to Convert',
-                            'Dropped'
-                          ];
-
-                          final count =
-                              controller.reportsModel.data?.statusLeadData
+                        SizedBox(height: 40.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            StatusReportContainer(
+                              color: const Color(0xFFFFF1E3),
+                              icon: Iconsax.people,
+                              borderColor: const Color(0xFFFFF9C6),
+                              shadowColor: const Color(0xFFFCF5B3),
+                              count: controller
+                                      .reportsModel.data?.statusLeadData
                                       ?.firstWhere(
                                         (element) =>
-                                            element.statusName ==
-                                            statusTypes[index],
+                                            element.statusName == "New Leads",
                                         orElse: () =>
                                             StatusLeadDatum(leadCount: 0),
                                       )
                                       .leadCount ??
-                                  0;
-
-                          return StatusReportCard(
-                            icon: ((index ~/ 2) + (index % 2)) % 2 == 0
-                                ? Icons.bar_chart_rounded
-                                : Icons.trending_up_sharp,
-                            count: count.toString(),
-                            statusType: statusTypes[index],
-                          );
-                        },
-                      ),
+                                  0,
+                              statusType: "New Leads",
+                              iconColor: const Color(0xffFF8800),
+                            ),
+                            StatusReportContainer(
+                              color: const Color(0xFFE9FFE3),
+                              icon: Iconsax.home,
+                              borderColor: const Color(0xFFC6FFDD),
+                              shadowColor: const Color(0xffa6f083),
+                              count:
+                                  controller.reportsModel.data?.statusLeadData
+                                          ?.firstWhere(
+                                            (element) =>
+                                                element.statusName == "Booked",
+                                            orElse: () =>
+                                                StatusLeadDatum(leadCount: 0),
+                                          )
+                                          .leadCount ??
+                                      0,
+                              statusType: "Booked        ",
+                              iconColor: const Color(0xff52D22E),
+                            ),
+                            StatusReportContainer(
+                              color: const Color(0xFFE3E6FF),
+                              icon: Iconsax.profile_tick,
+                              borderColor: const Color(0xFFC7C6FF),
+                              shadowColor: const Color(0xffb5aeff),
+                              count: controller
+                                      .reportsModel.data?.statusLeadData
+                                      ?.firstWhere(
+                                        (element) =>
+                                            element.statusName == "In Followup",
+                                        orElse: () =>
+                                            StatusLeadDatum(leadCount: 0),
+                                      )
+                                      .leadCount ??
+                                  0,
+                              statusType: "In Followup",
+                              iconColor: const Color(0xff6270F0),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        );
-      }),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20.h),
+                      Text(
+                        "Lead Performance Overview",
+                        style: GLTextStyles.manropeStyle(
+                          size: 18.sp,
+                          weight: FontWeight.w600,
+                          color: const Color(0xff120e2b),
+                        ),
+                      ),
+                      SizedBox(height: 25.h),
+                    ],
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final statusTypes = [
+                      'Casual Enquiry',
+                      'Lost',
+                      'No Responce',
+                      'Repeated Lead',
+                      'Wrong Lead',
+                      'Fake Lead',
+                      'Wrong Location',
+                      'Unable to Convert',
+                      'Dropped'
+                    ];
+
+                    final count = controller.reportsModel.data?.statusLeadData
+                            ?.firstWhere(
+                              (element) =>
+                                  element.statusName == statusTypes[index],
+                              orElse: () => StatusLeadDatum(leadCount: 0),
+                            )
+                            .leadCount ??
+                        0;
+
+                    return StatusReportTile(
+                      icon: ((index ~/ 1) + (index % 1)) % 2 == 0
+                          ? Icons.bar_chart_rounded
+                          : Icons.trending_up_sharp,
+                      count: count.toString(),
+                      statusType: statusTypes[index],
+                    );
+                  },
+                  childCount: 9,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

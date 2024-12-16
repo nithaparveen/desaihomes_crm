@@ -15,7 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
     required this.backgroundColor,
-    this.hasRadius = true, 
+    this.hasRadius = true,
   });
 
   @override
@@ -29,39 +29,40 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 bottomRight: Radius.circular(20.r),
               ),
             )
-          : null, 
-      actions: [
-        FutureBuilder<String?>(
-          future: getUserName(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Padding(
-                padding: EdgeInsets.only(right: 16.w),
-                child: Center(
-                  child: LoadingAnimationWidget.staggeredDotsWave(
-                    color: Colors.white,
-                    size: 32,
-                  ),
+          : null,
+      title: FutureBuilder<String?>(
+        future: getUserName(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: Colors.white,
+                  size: 32,
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            if (snapshot.hasError || !snapshot.hasData) {
-              return _buildUserIcon(context, "UU");
-            }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return _buildUserIcon(context, "UU");
+          }
 
-            String userName = snapshot.data ?? "Unknown User";
-            return _buildUserIcon(context, userName.substring(0, 2).toUpperCase(), userName);
-          },
-        ),
-      ],
+          String userName = snapshot.data ?? "Unknown User";
+          return _buildUserIcon(
+              context, userName.substring(0, 2).toUpperCase(), userName);
+        },
+      ),
       automaticallyImplyLeading: false,
+      centerTitle: false,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
     );
   }
 
-  Widget _buildUserIcon(BuildContext context, String initials, [String? userName]) {
+  Widget _buildUserIcon(BuildContext context, String initials,
+      [String? userName]) {
     return Padding(
       padding: EdgeInsets.only(right: 16.w),
       child: GestureDetector(
@@ -70,15 +71,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           width: 35.w,
           height: 35.w,
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 202, 158, 208),
+            color: const Color(0xff170E2B),
             shape: BoxShape.circle,
-            border: Border.all(width: 2.5, color: Color(0xffE7E7E7)),
+            border: Border.all(width: 2.5, color: const Color.fromARGB(255, 255, 255, 255)),
           ),
           child: Center(
             child: Text(
               initials,
               style: GLTextStyles.robotoStyle(
-                color: ColorTheme.blue,
+                color: Colors.white,
                 size: 13.sp,
                 weight: FontWeight.w600,
               ),
@@ -89,11 +90,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  void _showUserMenu(BuildContext context, String initials, [String? userName]) {
+  void _showUserMenu(BuildContext context, String initials,
+      [String? userName]) {
     showMenu(
       color: Colors.white,
       context: context,
-      position: RelativeRect.fromLTRB(1000.w, 70.h, 20.w, 0),
+      shadowColor: Colors.transparent,
+      position: RelativeRect.fromLTRB(18.w, 100.h, 1000.w, 0),
       items: [
         PopupMenuItem(
           value: 'user_info',
@@ -103,7 +106,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 width: 35.w,
                 height: 35.w,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 202, 158, 208),
+                  color: const Color(0xff170E2B),
                   shape: BoxShape.circle,
                   border: Border.all(width: 2.5, color: Colors.white),
                 ),
@@ -111,7 +114,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Text(
                     initials,
                     style: GLTextStyles.robotoStyle(
-                      color: ColorTheme.blue,
+                      color: ColorTheme.white,
                       size: 13.sp,
                       weight: FontWeight.w600,
                     ),

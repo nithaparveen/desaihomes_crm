@@ -91,9 +91,8 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(90.h),
-        child: CustomAppBar(backgroundColor: ColorTheme.desaiGreen),
-      ),
+          preferredSize: Size(0, 60.h),
+          child: const CustomAppBar(backgroundColor: Color(0xffF0F6FF))),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

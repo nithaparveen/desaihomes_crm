@@ -75,7 +75,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
           .searchController
           .clear();
       Provider.of<LeadController>(context, listen: false)
-          .fetchData(context); // Refetch original data
+          .fetchData(context); 
     });
   }
 
@@ -121,8 +121,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(
-          backgroundColor: ColorTheme.desaiGreen,
+        appBar: const CustomAppBar(
+          backgroundColor: Color(0xffF0F6FF),
           hasRadius: false,
         ),
         body: Column(
@@ -131,10 +131,10 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
             Stack(
               children: [
                 Container(
-                  height: 0.14.sh,
+                  height: 0.12.sh,
                   width: 1.sw,
                   decoration: BoxDecoration(
-                    color: ColorTheme.desaiGreen,
+                    color: const Color(0xffF0F6FF),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(30.r),
                       bottomRight: Radius.circular(30.r),
@@ -154,6 +154,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                               builder:
                                   (context, TextEditingValue value, child) {
                                 return SearchBar(
+                                  side: const WidgetStatePropertyAll(BorderSide(color: Color(0xffD5D7DA))),
                                   padding: WidgetStatePropertyAll(
                                       EdgeInsets.only(left: 15.w)),
                                   hintText: "Search ...",
@@ -240,6 +241,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 255, 255, 255),
                             borderRadius: BorderRadius.circular(7.38.r),
+                            border: Border.all(color:const Color(0xffD5D7DA),width: 1)
                           ),
                           child: Center(
                             child: IconButton(

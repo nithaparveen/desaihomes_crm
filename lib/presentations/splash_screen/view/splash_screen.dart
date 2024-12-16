@@ -98,8 +98,8 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 93.h),
             SizedBox(
-              height: (56 / ScreenUtil().screenHeight).sh,
-              width: 0.81.sw,
+              height: 56.h,
+              width: 331.w,
               child: ElevatedButton(
                 style: ButtonStyle(
                   shape: WidgetStatePropertyAll(
