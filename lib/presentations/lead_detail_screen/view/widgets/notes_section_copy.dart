@@ -46,19 +46,24 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
     }
   }
 
-  Future<void> fetchNotes() async {
-    await Provider.of<LeadDetailController>(context, listen: false)
-        .fetchNotes(widget.leadId, context);
-  }
-
-  @override
-  void initState() {
+@override
+void initState() {
+  super.initState();
+  
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     fetchNotes();
-    super.initState();
-    dateController = TextEditingController(
-        text: DateFormat('dd-MM-yyyy').format(DateTime.now()));
-    toDate = DateTime.now();
-  }
+  });
+
+  dateController = TextEditingController(
+      text: DateFormat('dd-MM-yyyy').format(DateTime.now()));
+  toDate = DateTime.now();
+}
+
+Future<void> fetchNotes() async {
+  await Provider.of<LeadDetailController>(context, listen: false)
+      .fetchNotes(widget.leadId, context);
+}
+
 
   @override
   void dispose() {

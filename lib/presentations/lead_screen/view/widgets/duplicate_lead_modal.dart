@@ -9,17 +9,16 @@ import 'package:iconsax/iconsax.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:provider/provider.dart';
 
-class FilterModal extends StatefulWidget {
-  const FilterModal(
-      {super.key, required this.clearFiltersCallback, this.onFilterApplied});
-  final VoidCallback clearFiltersCallback;
+class DuplicateLeadModal extends StatefulWidget {
+  const DuplicateLeadModal(
+      {super.key, this.onFilterApplied});
   final VoidCallback? onFilterApplied;
 
   @override
-  _FilterModalState createState() => _FilterModalState();
+  _DuplicateLeadModalState createState() => _DuplicateLeadModalState();
 }
 
-class _FilterModalState extends State<FilterModal> {
+class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
   DateTime? fromDate;
   DateTime? toDate;
   String? selectedProject;
@@ -27,17 +26,6 @@ class _FilterModalState extends State<FilterModal> {
 
   final MultiSelectController<String> leadSourceController =
       MultiSelectController<String>();
-
-  void _clearFilters() {
-    setState(() {
-      fromDate = null;
-      toDate = null;
-      selectedProject = null;
-      selectedLeadSources.clear();
-      leadSourceController.clearAll();
-    });
-    widget.clearFiltersCallback();
-  }
 
   @override
   void initState() {
@@ -79,7 +67,7 @@ class _FilterModalState extends State<FilterModal> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Filter',
+                    'Duplicate Leads',
                     style: GLTextStyles.manropeStyle(
                       color: ColorTheme.blue,
                       size: 20.sp,
@@ -266,7 +254,7 @@ class _FilterModalState extends State<FilterModal> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _clearFilters,
+                      onPressed: (){},
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         side: const BorderSide(color: Color(0xffD5D7DA)),

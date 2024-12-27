@@ -55,7 +55,7 @@ class _CallHistorySectionState extends State<CallHistorySection> {
                 width: (36.12 / ScreenUtil().screenWidth).sw,
                 height: (36.12 / ScreenUtil().screenHeight).sh,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 202, 158, 208),
+                  color: const Color(0xff170E2B),
                   shape: BoxShape.circle,
                   border: Border.all(width: 2.5, color: Colors.white),
                 ),
@@ -63,8 +63,8 @@ class _CallHistorySectionState extends State<CallHistorySection> {
                   child: Text(
                     userName.substring(0, 2).toUpperCase(),
                     style: GLTextStyles.robotoStyle(
-                      color: ColorTheme.blue,
-                      size: 13.sp,
+                      color: ColorTheme.white,
+                      size: 14.sp,
                       weight: FontWeight.w600,
                     ),
                   ),

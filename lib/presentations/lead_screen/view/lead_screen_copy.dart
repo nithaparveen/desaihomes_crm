@@ -402,6 +402,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                             selectedUser: selectedUsers[leadId],
                             onUserSelected: updateSelectedUser,
                             index: index,
+                            duplicateFlag: lead?.duplicateFlag ?? false,
                           ),
                         );
                       },

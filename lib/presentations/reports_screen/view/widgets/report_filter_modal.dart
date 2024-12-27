@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
@@ -291,17 +292,35 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Provider.of<ReportsController>(context, listen: false)
-                            .fetchFilterData(
-                          campaignName: selectedCampaign,
-                          fromDate: fromDate?.toIso8601String(),
-                          toDate: toDate?.toIso8601String(),
-                          leadSources: selectedLeadSources,
-                          context: context,
-                        );
-
-                        Navigator.of(context).pop();
-                        widget.onFilterApplied?.call();
+                        if (fromDate == null &&
+                            toDate == null &&
+                            selectedCampaign == null &&
+                            selectedLeadSources.isEmpty) {
+                          Flushbar(
+                            maxWidth: .55.sw,
+                            backgroundColor: Colors.grey.shade100,
+                            messageColor: ColorTheme.black,
+                            icon: Icon(
+                              Iconsax.info_circle,
+                              color: ColorTheme.red,
+                              size: 20.sp,
+                            ),
+                            message: 'Filters cannot be empty',
+                            duration: const Duration(seconds: 3),
+                            flushbarPosition: FlushbarPosition.TOP,
+                          ).show(context);
+                        } else {
+                          Provider.of<ReportsController>(context, listen: false)
+                              .fetchFilterData(
+                            campaignName: selectedCampaign,
+                            fromDate: fromDate?.toIso8601String(),
+                            toDate: toDate?.toIso8601String(),
+                            leadSources: selectedLeadSources,
+                            context: context,
+                          );
+                          Navigator.of(context).pop();
+                          widget.onFilterApplied?.call();
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 12.h),

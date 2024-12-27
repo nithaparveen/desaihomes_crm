@@ -99,6 +99,18 @@ class LeadService {
     }
   }
 
+    static Future<dynamic> fetchDuplicateLead(leadId) async {
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "lead-log-check/$leadId",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
   static Future<dynamic> fetchCountries() async {
     try {
       var decodedData = await ApiHelper.getData(

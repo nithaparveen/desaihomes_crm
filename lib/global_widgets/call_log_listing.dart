@@ -1,4 +1,4 @@
-import 'package:call_log/call_log.dart';
+import 'package:call_e_log/call_log.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,30 +22,33 @@ class _CallLogListState extends State<CallLogList> {
     fetchFilteredCallLogs();
   }
 
-  Future<void> fetchFilteredCallLogs() async {
-    final permissionStatus = await Permission.phone.status;
-    if (permissionStatus.isGranted) {
-      try {
-        final Iterable<CallLogEntry> callLogs = await CallLog.get();
-        final List<CallLogEntry> filteredLogs = callLogs
-            .where((log) =>
-                log.number != null && log.number!.contains(widget.number))
-            .toList();
+Future<void> fetchFilteredCallLogs() async {
+  final permissionStatus = await Permission.phone.request();
+  if (permissionStatus.isGranted) {
+    try {
+      final Iterable<CallLogEntry> callLogs = await CallLog.get();
+      final List<CallLogEntry> filteredLogs = callLogs
+          .where((log) =>
+              log.number != null && log.number!.contains(widget.number))
+          .toList();
 
-        setState(() {
-          filteredCallLogs = filteredLogs;
-        });
-      } catch (e) {
-        setState(() {
-          filteredCallLogs = [];
-        });
-      }
-    } else {
+      setState(() {
+        filteredCallLogs = filteredLogs;
+      });
+    } catch (e) {
+      debugPrint('Error fetching call logs: $e');
       setState(() {
         filteredCallLogs = [];
       });
     }
+  } else {
+    debugPrint('Phone permission denied');
+    setState(() {
+      filteredCallLogs = [];
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

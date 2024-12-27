@@ -9,16 +9,21 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/cont
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:desaihomes_crm_application/presentations/splash_screen/view/splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool? loggedIn = prefs.getBool(AppConfig.loggedIn);
+  await Firebase.initializeApp();
+  await dotenv.load();
   runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => LoginController()),
@@ -32,12 +37,14 @@ void main() async {
       child: MyApp(
         isLoggedIn: loggedIn ?? false,
       )));
-  initOneSignal();
+  await initOneSignal();
 }
 
 Future<void> initOneSignal() async {
+  final oneSignalKey = dotenv.env['ONESIGNAL_KEY'];
+    log(oneSignalKey!);
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-  OneSignal.initialize("d3a21692-8d73-4542-94f9-bd2759c30d96");
+  OneSignal.initialize(oneSignalKey);
   await OneSignal.Notifications.requestPermission(true);
 }
 

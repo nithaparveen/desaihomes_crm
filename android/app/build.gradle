@@ -3,6 +3,7 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id 'com.google.gms.google-services'
+    id "com.google.firebase.crashlytics"
 }
 
 def localProperties = new Properties()
@@ -26,7 +27,7 @@ if (flutterVersionName == null) {
 android {
     namespace "com.spiderworks.desaihomes_crm_application"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -67,4 +68,6 @@ flutter {
 
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
 }

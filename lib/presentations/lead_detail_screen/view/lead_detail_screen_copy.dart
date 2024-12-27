@@ -35,8 +35,8 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
   @override
   void initState() {
     super.initState();
+    tabController = TabController(length: 5, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      tabController = TabController(length: 5, vsync: this);
       fetchData();
       fetchNotes();
       fetchSiteVisits();

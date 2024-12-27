@@ -11,6 +11,7 @@ import 'package:desaihomes_crm_application/repository/api/reports_screen/model/r
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,13 +66,20 @@ class _ReportsScreenState extends State<ReportsScreen> {
       ),
       body: Consumer<ReportsController>(
         builder: (context, controller, _) {
+          if (controller == null || controller.reportsModel.data == null) {
+            return Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: Colors.white,
+                  size: 32,
+                ));
+          }
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: Stack(
                   children: [
                     Container(
-                      height: 225.h,
+                      height: 218.h,
                       width: 1.sw,
                       decoration: const BoxDecoration(
                         color: Color(0xffF0F6FF),
@@ -87,8 +95,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               Column(
                                 children: [
                                   Text(
-                                    controller.reportsModel.data!.totalLeads
-                                        .toString(),
+                                    controller.reportsModel.data?.totalLeads
+                                        .toString() ?? " ",
                                     style: GLTextStyles.interStyle(
                                       size: 42.sp,
                                       weight: FontWeight.w600,

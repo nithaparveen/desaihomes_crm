@@ -2,6 +2,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/global_widgets/dummy_status_list.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
+import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/duplicate_lead_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/quick_edit_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,6 +24,7 @@ class LeadCard extends StatelessWidget {
   final String? selectedUser;
   final Function(String leadId, String? selectedUser) onUserSelected;
   final int index;
+  final bool? duplicateFlag;
 
   const LeadCard({
     super.key,
@@ -38,6 +40,7 @@ class LeadCard extends StatelessWidget {
     required this.selectedUser,
     required this.onUserSelected,
     required this.index,
+    this.duplicateFlag,
   });
 
   Widget buildAvatar(String initials, int index) {
@@ -86,13 +89,38 @@ class LeadCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              name,
-              style: GLTextStyles.manropeStyle(
-                color: const Color(0xff120e2b),
-                size: 14.sp,
-                weight: FontWeight.w700,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Text(
+                    name,
+                    style: GLTextStyles.manropeStyle(
+                      color: const Color(0xff120e2b),
+                      size: 14.sp,
+                      weight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    softWrap: false,
+                  ),
+                ),
+                if (duplicateFlag == true)
+                  InkWell(
+                    onTap: () => DuplicateLeadModal(),
+                    child: SizedBox(
+                      height: 18.h,width: 40.w,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 10.w),
+                        child: Icon(
+                          Icons.warning_sharp,
+                          size: 16.sp,
+                          color: ColorTheme.yellow,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             if (location != "null")
               Text(
@@ -233,7 +261,7 @@ class LeadCard extends StatelessWidget {
                             null
                         ? Icon(
                             Iconsax.profile_add,
-                            size: 22.sp, 
+                            size: 22.sp,
                             color: Colors.black87,
                           )
                         : Text(

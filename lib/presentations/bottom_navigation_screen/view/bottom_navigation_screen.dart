@@ -4,6 +4,7 @@ import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/presentations/follow_ups_screen/view/follow_ups_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/lead_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/view/reports_screen.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
@@ -21,6 +22,8 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   final NotchBottomBarController notchBottomBarController =
       NotchBottomBarController(index: 0);
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;  
+  static List pageNames = ["LeadScreen","FollowUpScreen","ReportsScreen"];
 
   Future<void> requestPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
@@ -100,6 +103,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
               ),
             ],
             onTap: (index) {
+              analytics.logEvent(name: 'pages_tracked',
+              parameters: {
+                "page_name" : pageNames[index],
+                "page_index" : index
+              }
+              );
               controller.selectedIndex = index;
               notchBottomBarController.index = index;
             },

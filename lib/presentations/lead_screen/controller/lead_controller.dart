@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/age_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/countries_list_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/duplicate_lead_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_source_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/professions_list_model.dart';
@@ -25,6 +26,7 @@ class LeadController extends ChangeNotifier {
   List<CountriesListModel> countriesList = <CountriesListModel>[];
   List<AgeListModel> ageList = <AgeListModel>[];
   List<ProfessionsListModel> professionList = <ProfessionsListModel>[];
+  List<DuplicateLeadModel> duplicateFlag = <DuplicateLeadModel>[];
 
   bool isLoading = false;
   bool isFilterLoading = false;
@@ -34,6 +36,7 @@ class LeadController extends ChangeNotifier {
   bool isProjectListLoading = false;
   bool isSourceLoading = false;
   bool isCountriesLoading = false;
+  bool isduplicateFlagLoading = false;
   bool isAgeLoading = false;
   int currentPage = 1;
   bool _isLoadingMore = false;
@@ -75,6 +78,27 @@ class LeadController extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  Future<void> fetchDuplicatelead(leadId,BuildContext context) async {
+    isduplicateFlagLoading = true;
+    duplicateFlag = [];
+    notifyListeners();
+    
+    final resp = await LeadService.fetchDuplicateLead(leadId);
+
+    if (resp != null) {
+      duplicateFlag = duplicateLeadModelFromJson(jsonEncode(resp));
+    } else {
+      AppUtils.oneTimeSnackBar(
+        "Unable to fetch Data",
+        context: context,
+        bgColor: ColorTheme.red,
+      );
+    }
+
+    isduplicateFlagLoading = false;
+    notifyListeners();
   }
 
   Future<void> fetchCountries(BuildContext context) async {

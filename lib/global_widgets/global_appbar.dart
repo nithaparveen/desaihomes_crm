@@ -34,11 +34,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         future: getUserName(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Padding(
+            return 
+            Padding(
               padding: EdgeInsets.only(right: 16.w),
               child: Center(
                 child: LoadingAnimationWidget.staggeredDotsWave(
-                  color: Colors.white,
+                  color: const Color(0xffF0F6FF),
                   size: 32,
                 ),
               ),
@@ -68,8 +69,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: GestureDetector(
         onTap: () => _showUserMenu(context, initials, userName),
         child: Container(
-          width: 35.w,
-          height: 35.w,
+          width: 36.w,
+          height: 36.w,
           decoration: BoxDecoration(
             color: const Color(0xff170E2B),
             shape: BoxShape.circle,
@@ -80,7 +81,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               initials,
               style: GLTextStyles.robotoStyle(
                 color: Colors.white,
-                size: 13.sp,
+                size: 14.sp,
                 weight: FontWeight.w600,
               ),
             ),
@@ -96,7 +97,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       color: Colors.white,
       context: context,
       shadowColor: Colors.transparent,
-      position: RelativeRect.fromLTRB(18.w, 100.h, 1000.w, 0),
+      position: RelativeRect.fromLTRB(15.w, 70.h, 1000.w, 0),
       items: [
         PopupMenuItem(
           value: 'user_info',
