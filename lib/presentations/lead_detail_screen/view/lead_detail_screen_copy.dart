@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
+import 'package:desaihomes_crm_application/global_widgets/custom_datepicker.dart';
 import 'package:desaihomes_crm_application/global_widgets/detail_card.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/call_history_section.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/widgets/notes_section_copy.dart';
@@ -10,6 +12,7 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/cont
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/textstyles.dart';
@@ -28,9 +31,11 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
   final TextEditingController noteController = TextEditingController();
   final TextEditingController siteVisitController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
+  final TextEditingController followUpDateController = TextEditingController();
   bool remarkValidate = false;
   bool noteValidate = false;
   late TabController tabController;
+  DateTime? selectedDate;
 
   @override
   void initState() {
@@ -55,6 +60,39 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
   Future<void> fetchData() async {
     await Provider.of<LeadDetailController>(context, listen: false)
         .fetchDetailData(widget.leadId, context);
+
+    final leadDetails =
+        Provider.of<LeadDetailController>(context, listen: false)
+            .leadDetailModel;
+
+    if (leadDetails.lead?.followUpDate != null) {
+      try {
+        String? followUpDateString;
+
+        // Check if the follow-up date is a DateTime or String
+        if (leadDetails.lead?.followUpDate is DateTime) {
+          followUpDateString =
+              (leadDetails.lead?.followUpDate as DateTime).toIso8601String();
+        } else if (leadDetails.lead?.followUpDate is String) {
+          followUpDateString = leadDetails.lead?.followUpDate as String?;
+        } else {
+          followUpDateString = leadDetails.lead?.followUpDate?.toString();
+        }
+
+        if (followUpDateString != null && followUpDateString.isNotEmpty) {
+          // Parse the string to DateTime
+          selectedDate = DateTime.tryParse(followUpDateString);
+
+          if (selectedDate != null) {
+            followUpDateController.text =
+                DateFormat('dd-MM-yyyy').format(selectedDate!);
+          }
+        }
+      } catch (e) {
+        print('Error parsing follow-up date: $e');
+        selectedDate = null;
+      }
+    }
   }
 
   Future<void> fetchNotes() async {
@@ -196,6 +234,78 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                         ),
                                       ],
                                     ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 18.w,
+                                          right: 18.w,
+                                          top: 5.h,
+                                          bottom: 15.h),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Next Follow Up date",
+                                            style: GLTextStyles.manropeStyle(
+                                              size: 18.sp,
+                                              weight: FontWeight.w600,
+                                              color: const Color(0xff170e2b),
+                                            ),
+                                          ),
+                                          SizedBox(height: 15.h),
+                                          SizedBox(
+                                            height:
+                                                (35 / ScreenUtil().screenHeight)
+                                                    .sh,
+                                            width: double.infinity,
+                                            child: CustomDatePicker(
+                                              controller:
+                                                  followUpDateController,
+                                              onDateSelected: (DateTime date) {
+                                                setState(() {
+                                                  selectedDate = date;
+                                                  followUpDateController.text =
+                                                      DateFormat('dd-MM-yyyy')
+                                                          .format(date);
+                                                  Provider.of<LeadDetailController>(
+                                                          context,
+                                                          listen: false)
+                                                      .updateFollowupdate(
+                                                          widget.leadId,
+                                                          DateFormat(
+                                                                  'yyyy-MM-dd')
+                                                              .format(date),
+                                                          context);
+                                                  Future.delayed(
+                                                      const Duration(
+                                                          milliseconds: 300),
+                                                      () {
+                                                    Flushbar(
+                                                      maxWidth: .55.sw,
+                                                      backgroundColor:
+                                                          Colors.grey.shade100,
+                                                      messageColor:
+                                                          ColorTheme.black,
+                                                      icon: Icon(
+                                                        Iconsax.calendar_tick,
+                                                        color: ColorTheme.green,
+                                                        size: 20.sp,
+                                                      ),
+                                                      message:
+                                                          'Follow-up Date Updated',
+                                                      duration: const Duration(
+                                                          seconds: 3),
+                                                      flushbarPosition:
+                                                          FlushbarPosition.TOP,
+                                                    ).show(context);
+                                                  });
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                     NotesSectionCopy(
                                         fetchNotes: fetchNotes,
                                         leadId: widget.leadId.toString(),
@@ -315,8 +425,11 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                   remarkValidate: remarkValidate),
                               CallHistorySection(
                                 leadId: widget.leadId.toString(),
-                                phoneNumber: controller.leadDetailModel.lead?.phoneNumber ?? "",
-                                name: controller.leadDetailModel.lead?.name ?? "",
+                                phoneNumber: controller
+                                        .leadDetailModel.lead?.phoneNumber ??
+                                    "",
+                                name:
+                                    controller.leadDetailModel.lead?.name ?? "",
                               )
                             ],
                           ),

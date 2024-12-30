@@ -165,4 +165,14 @@ fetchDetailData(leadId, context) async {
       }
     });
   }
+  updateFollowupdate(leadId, date, context) async {
+    LeadDetailService.updateFollowupdate(leadId, date).then((value) {
+      if (value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
 }

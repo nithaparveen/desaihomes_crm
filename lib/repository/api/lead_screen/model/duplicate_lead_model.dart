@@ -11,7 +11,7 @@ String duplicateLeadModelToJson(List<DuplicateLeadModel> data) => json.encode(Li
 class DuplicateLeadModel {
     Field? field;
     String? project;
-    dynamic assignedTo;
+    String? assignedTo;
     DateTime? logDate;
     OgLead? ogLead;
 

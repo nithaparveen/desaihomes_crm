@@ -330,7 +330,7 @@ class LeadController extends ChangeNotifier {
       if (response != null && response["status"] == true) {
         Navigator.pop(context);
         Flushbar(
-          // maxWidth: .55.sw,
+          maxWidth: .55.sw,
           backgroundColor: Colors.grey.shade100,
           messageColor: ColorTheme.black,
           icon: Icon(

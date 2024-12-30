@@ -18,13 +18,17 @@ class GLTextStyles {
       color: color ?? ColorTheme.black,
     );
   }
-  static manropeStyle({double? size, FontWeight? weight, Color? color}) {
+
+  static manropeStyle(
+      {double? size, FontWeight? weight, Color? color, bool isItalic = false}) {
     return GoogleFonts.manrope(
       fontSize: size ?? 22,
       fontWeight: weight ?? FontWeight.bold,
       color: color ?? ColorTheme.black,
+      fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
     );
   }
+
   static interStyle({double? size, FontWeight? weight, Color? color}) {
     return GoogleFonts.inter(
       fontSize: size ?? 22,

@@ -107,7 +107,17 @@ class LeadCard extends StatelessWidget {
                 ),
                 if (duplicateFlag == true)
                   InkWell(
-                    onTap: () => DuplicateLeadModal(),
+                    onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return DuplicateLeadModal(
+                                 leadId: leadId,
+
+                                );
+                              },
+                            );
+                          },
                     child: SizedBox(
                       height: 18.h,width: 40.w,
                       child: Padding(

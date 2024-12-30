@@ -137,6 +137,17 @@ class LeadDetailService {
       log("$e");
     }
   }
+  static Future<dynamic> updateFollowupdate(int leadId, String date) async {
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "lead/action/update?id=$leadId&follow_up_date=$date",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
 
   static Future<dynamic> fetchStatusList() async {
     log("LeadDetailService -> fetchStatusList() ");
