@@ -47,12 +47,14 @@ class DuplicateLeadCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                duplicateEmail,
-                style: GLTextStyles.manropeStyle(
-                  size: 14.sp,
-                  weight: FontWeight.w500,
-                  color: Colors.black87,
+              Expanded(
+                child: Text(
+                  duplicateEmail,
+                  style: GLTextStyles.manropeStyle(
+                    size: 14.sp,
+                    weight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
               Container(

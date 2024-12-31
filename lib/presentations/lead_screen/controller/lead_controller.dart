@@ -30,6 +30,7 @@ class LeadController extends ChangeNotifier {
 
   bool isLoading = false;
   bool isFilterLoading = false;
+  bool isFollowUpFilterLoading = false;
   bool isAssignLoading = false;
   bool isUserListLoading = false;
   bool isProfessionsLoading = false;

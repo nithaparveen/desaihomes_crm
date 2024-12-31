@@ -64,6 +64,46 @@ class LeadService {
     }
   }
 
+  static Future<dynamic> followUpFilterData({
+    String? projectId,
+    String? fromDate,
+    String? toDate,
+    int page = 1,
+  }) async {
+    try {
+      String queryString = "follow-up-leads?page=$page&";
+
+      if (projectId != null) {
+        queryString += "project_id=$projectId&";
+      }
+
+      if (fromDate != null) {
+        final formattedFromDate =
+            DateFormat('yyyy-MM-dd').format(DateTime.parse(fromDate));
+        queryString += "from=$formattedFromDate&";
+      }
+
+      if (toDate != null) {
+        final formattedToDate =
+            DateFormat('yyyy-MM-dd').format(DateTime.parse(toDate));
+        queryString += "to=$formattedToDate&";
+      }
+
+      if (queryString.endsWith('&')) {
+        queryString = queryString.substring(0, queryString.length - 1);
+      }
+
+      var decodedData = await ApiHelper.getData(
+        endPoint: queryString,
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+      return null;
+    }
+  }
+
   static Future<Map<String, dynamic>?> searchLead(
     String keyword, {
     int page = 1,
@@ -86,6 +126,16 @@ class LeadService {
       log("$e");
     }
   }
+  static Future<Map<String, dynamic>?> searchFollowUpLead(
+    String keyword, {
+    int page = 1,
+  }) async {
+    var decodedData = await ApiHelper.getData(
+      endPoint: "follow-up-leads?filter=$keyword&page=$page",
+      header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+    );
+    return decodedData is Map<String, dynamic> ? decodedData : null;
+  }
 
   static Future<dynamic> fetchLeadSource() async {
     try {
@@ -99,7 +149,7 @@ class LeadService {
     }
   }
 
-    static Future<dynamic> fetchDuplicateLead(leadId) async {
+  static Future<dynamic> fetchDuplicateLead(leadId) async {
     try {
       var decodedData = await ApiHelper.getData(
         endPoint: "lead-log-check/$leadId",

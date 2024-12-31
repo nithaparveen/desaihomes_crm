@@ -11,11 +11,11 @@ import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:provider/provider.dart';
 
-class LeadCard extends StatelessWidget {
+class FollowUpLeadCard extends StatelessWidget {
   final String name;
   final String location;
   final String platform;
-  final String timeAgo;
+  final String followupDate;
   final String initials;
   final String status;
   final List<String> users;
@@ -25,13 +25,14 @@ class LeadCard extends StatelessWidget {
   final Function(String leadId, String? selectedUser) onUserSelected;
   final int index;
   final bool? duplicateFlag;
+  final dynamic leadData; 
 
-  const LeadCard({
+  const FollowUpLeadCard({
     super.key,
     required this.name,
     required this.location,
     required this.platform,
-    required this.timeAgo,
+    required this.followupDate,
     required this.initials,
     required this.status,
     required this.users,
@@ -40,7 +41,7 @@ class LeadCard extends StatelessWidget {
     required this.selectedUser,
     required this.onUserSelected,
     required this.index,
-    this.duplicateFlag,
+    this.duplicateFlag, this.leadData,
   });
 
   Widget buildAvatar(String initials, int index) {
@@ -108,18 +109,18 @@ class LeadCard extends StatelessWidget {
                 if (duplicateFlag == true)
                   InkWell(
                     onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return DuplicateLeadModal(
-                                 leadId: leadId,
-
-                                );
-                              },
-                            );
-                          },
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return DuplicateLeadModal(
+                            leadId: leadId,
+                          );
+                        },
+                      );
+                    },
                     child: SizedBox(
-                      height: 18.h,width: 40.w,
+                      height: 18.h,
+                      width: 40.w,
                       child: Padding(
                         padding: EdgeInsets.only(left: 10.w),
                         child: Icon(
@@ -151,14 +152,15 @@ class LeadCard extends StatelessWidget {
                   weight: FontWeight.w500,
                 ),
               ),
-            Text(
-              timeAgo,
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.lightBlue,
-                size: 12.5.sp,
-                weight: FontWeight.w600,
+            if (followupDate != "null")
+              Text(
+                followupDate,
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.lightBlue,
+                  size: 12.5.sp,
+                  weight: FontWeight.w600,
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -214,7 +216,7 @@ class LeadCard extends StatelessWidget {
                                     '';
 
                                 onUserSelected(leadId, newSelectedUser);
-                                
+
                                 leadController.assignedToTapped(
                                   leadId,
                                   newUserId,
@@ -296,30 +298,18 @@ class LeadCard extends StatelessWidget {
             SizedBox(width: 15.w),
             InkWell(
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return QuickEditModal(
-                      email: leadController.leadModel.leads?.data != null &&
-                              index <
-                                  leadController.leadModel.leads!.data!.length
-                          ? (leadController
-                                  .leadModel.leads?.data?[index].email ??
-                              "")
-                          : "",
-                      phoneNumber: leadController.leadModel.leads?.data !=
-                                  null &&
-                              index <
-                                  leadController.leadModel.leads!.data!.length
-                          ? (leadController
-                                  .leadModel.leads?.data?[index].phoneNumber ??
-                              "")
-                          : "",
-                      leadId:
-                          leadController.leadModel.leads?.data?[index].id ?? 0,
-                    );
-                  },
-                );
+                if (leadData != null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return QuickEditModal(
+                        email: leadData.email ?? "",
+                        phoneNumber: leadData.phoneNumber ?? "",
+                        leadId: leadData.id ?? 0,
+                      );
+                    },
+                  );
+                }
               },
               child: const Icon(
                 Icons.more_vert,

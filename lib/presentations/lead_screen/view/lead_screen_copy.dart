@@ -74,8 +74,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
       Provider.of<LeadController>(context, listen: false)
           .searchController
           .clear();
-      Provider.of<LeadController>(context, listen: false)
-          .fetchData(context); 
+      Provider.of<LeadController>(context, listen: false).fetchData(context);
     });
   }
 
@@ -154,7 +153,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                               builder:
                                   (context, TextEditingValue value, child) {
                                 return SearchBar(
-                                  side: const WidgetStatePropertyAll(BorderSide(color: Color(0xffD5D7DA))),
+                                  side: const WidgetStatePropertyAll(
+                                      BorderSide(color: Color(0xffD5D7DA))),
                                   padding: WidgetStatePropertyAll(
                                       EdgeInsets.only(left: 15.w)),
                                   hintText: "Search ...",
@@ -239,10 +239,10 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                         child: Container(
                           width: 44.w,
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                            borderRadius: BorderRadius.circular(7.38.r),
-                            border: Border.all(color:const Color(0xffD5D7DA),width: 1)
-                          ),
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                              borderRadius: BorderRadius.circular(7.38.r),
+                              border: Border.all(
+                                  color: const Color(0xffD5D7DA), width: 1)),
                           child: Center(
                             child: IconButton(
                               onPressed: () {
