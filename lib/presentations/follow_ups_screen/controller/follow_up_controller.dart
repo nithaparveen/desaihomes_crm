@@ -17,31 +17,41 @@ class FollowUpController extends ChangeNotifier {
   int currentPage = 1;
    bool hasMoreData = true;
    static const int itemsPerPage = 10;
-  
-  // Add filter state variables
   String? _currentSearchKeyword;
   String? _currentProjectId;
   String? _currentFromDate;
   String? _currentToDate;
   bool isFiltered = false;
 
-  fetchData(context) async {
+fetchData(context) async {
+  try {
     isLoading = true;
     currentPage = 1;
-    isFiltered = false; // Reset filter state
+    isFiltered = false;
     notifyListeners();
     
-    FollowUpService.fetchData(page: currentPage).then((value) {
-      if (value["status"] == true) {
-        leadModel = LeadModel.fromJson(value);
-        isLoading = false;
-      } else {
-        AppUtils.oneTimeSnackBar("Unable to fetch Data",
-            context: context, bgColor: ColorTheme.red);
-      }
-      notifyListeners();
-    });
+    final value = await FollowUpService.fetchData(page: currentPage);
+    
+    if (value["status"] == true) {
+      leadModel = LeadModel.fromJson(value);
+    } else {
+      AppUtils.oneTimeSnackBar(
+        "Unable to fetch Data",
+        context: context,
+        bgColor: ColorTheme.red
+      );
+    }
+  } catch (error) {
+    AppUtils.oneTimeSnackBar(
+      "Error fetching data",
+      context: context,
+      bgColor: ColorTheme.red
+    );
+  } finally {
+    isLoading = false;
+    notifyListeners();
   }
+}
 
    searchLeads(BuildContext context, {int page = 1}) async {
     String keyword = searchController.text.trim();

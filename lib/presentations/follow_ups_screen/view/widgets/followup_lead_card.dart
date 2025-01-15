@@ -321,7 +321,7 @@ class FollowUpLeadCard extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         Container(
-          width: (95 / ScreenUtil().screenWidth).sw,
+          width: (100 / ScreenUtil().screenWidth).sw,
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
           decoration: BoxDecoration(
             color: Color(int.parse(

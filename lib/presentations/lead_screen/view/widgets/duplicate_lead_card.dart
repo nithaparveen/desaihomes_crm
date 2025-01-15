@@ -10,7 +10,8 @@ class DuplicateLeadCard extends StatelessWidget {
     required this.duplicateEmail,
     required this.originalProject,
     required this.createdDate,
-    required this.assignedTo, required this.leadId,
+    required this.assignedTo,
+    required this.leadId,
   });
 
   final String duplicateEmail;
@@ -78,16 +79,17 @@ class DuplicateLeadCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 6.h),
-          Text(
-            originalProject,
-            style: GLTextStyles.manropeStyle(
-              size: 13.sp,
-              weight: FontWeight.w400,
-              color: Colors.black54,
+          if (originalProject.isNotEmpty) 
+            Text(
+              originalProject,
+              style: GLTextStyles.manropeStyle(
+                size: 13.sp,
+                weight: FontWeight.w400,
+                color: Colors.black54,
+              ),
             ),
-          ),
-          if (assignedTo.isNotEmpty) SizedBox(height: 6.h),
-          if (assignedTo.isNotEmpty)
+          if (assignedTo.isNotEmpty) ...[ 
+            SizedBox(height: 6.h),
             Row(
               children: [
                 Text(
@@ -111,25 +113,28 @@ class DuplicateLeadCard extends StatelessWidget {
                 ),
               ],
             ),
-          SizedBox(height: 6.h),
-          Row(
-            children: [
-              Icon(
-                Iconsax.calendar_1,
-                size: 16.sp,
-                color: Colors.black87,
-              ),
-              SizedBox(width: 4.w),
-              Text(
-                createdDate,
-                style: GLTextStyles.manropeStyle(
-                  size: 13.sp,
-                  weight: FontWeight.w400,
-                  color: ColorTheme.lightBlue,
+          ],
+          if (createdDate.isNotEmpty) ...[ // Show createdDate if not empty
+            SizedBox(height: 6.h),
+            Row(
+              children: [
+                Icon(
+                  Iconsax.calendar_1,
+                  size: 16.sp,
+                  color: Colors.black87,
                 ),
-              ),
-            ],
-          ),
+                SizedBox(width: 4.w),
+                Text(
+                  createdDate,
+                  style: GLTextStyles.manropeStyle(
+                    size: 13.sp,
+                    weight: FontWeight.w400,
+                    color: ColorTheme.lightBlue,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

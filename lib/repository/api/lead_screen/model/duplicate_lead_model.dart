@@ -13,8 +13,8 @@ class DuplicateLeadModel {
     String? project;
     String? assignedTo;
     DateTime? logDate;
-    OgLead? ogLead;
-
+    dynamic ogLead; 
+    
     DuplicateLeadModel({
         this.field,
         this.project,
@@ -28,7 +28,11 @@ class DuplicateLeadModel {
         project: json["project"],
         assignedTo: json["assigned_to"],
         logDate: json["log_date"] == null ? null : DateTime.parse(json["log_date"]),
-        ogLead: json["og_lead"] == null ? null : OgLead.fromJson(json["og_lead"]),
+        ogLead: json["og_lead"] is String 
+            ? json["og_lead"] 
+            : json["og_lead"] == null 
+                ? null 
+                : OgLead.fromJson(json["og_lead"]),
     );
 
     Map<String, dynamic> toJson() => {
@@ -36,8 +40,8 @@ class DuplicateLeadModel {
         "project": project,
         "assigned_to": assignedTo,
         "log_date": logDate?.toIso8601String(),
-        "og_lead": ogLead?.toJson(),
-    };
+        "og_lead": ogLead is String ? ogLead : (ogLead as OgLead?)?.toJson(),
+   };
 }
 
 class Field {

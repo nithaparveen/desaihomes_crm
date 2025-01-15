@@ -61,6 +61,7 @@ class LogoutButton extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
           title: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -358,19 +358,19 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        // Show loader if at the end of the list and more data is available
-                        if (index >=
-                            (controller.leadModel.leads?.data?.length ?? 0)) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: LoadingAnimationWidget.staggeredDotsWave(
-                                color: ColorTheme.desaiGreen,
-                                size: 32,
-                              ),
-                            ),
-                          );
-                        }
+                        if (index >= (controller.leadModel.leads?.data?.length ?? 0)) {
+    return controller.hasMoreData && controller.isMoreLoading
+        ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: ColorTheme.desaiGreen,
+                size: 32,
+              ),
+            ),
+          )
+        : const SizedBox.shrink();
+  }
 
                         final lead = controller.leadModel.leads?.data?[index];
                         final projectName = lead?.project?.name ?? '';

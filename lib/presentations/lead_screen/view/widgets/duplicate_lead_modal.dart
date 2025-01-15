@@ -3,6 +3,7 @@ import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/duplicate_lead_card.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/duplicate_lead_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -85,13 +86,17 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                     final fieldData = lead.field?.email ??
                         lead.field?.phoneNumber ??
                         "Unknown";
-                    final createdDate = (lead.ogLead?.createdAt is DateTime)
-                        ? DateFormat('dd-MM-yyyy')
-                            .format(lead.ogLead!.createdAt as DateTime)
-                        : lead.ogLead?.createdAt != null
-                            ? DateFormat('dd-MM-yyyy').format(DateTime.parse(
-                                lead.ogLead!.createdAt.toString()))
-                            : "Unknown";
+                    final createdDate = lead.ogLead is String
+                        ? "Not Available"
+                        : (lead.ogLead is OgLead &&
+                                lead.ogLead?.createdAt is DateTime)
+                            ? DateFormat('dd-MM-yyyy')
+                                .format(lead.ogLead!.createdAt as DateTime)
+                            : (lead.ogLead?.createdAt != null
+                                ? DateFormat('dd-MM-yyyy').format(
+                                    DateTime.parse(
+                                        lead.ogLead!.createdAt.toString()))
+                                : "");
 
                     return GestureDetector(
                       onTap: () {
@@ -107,10 +112,15 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                       },
                       child: DuplicateLeadCard(
                         duplicateEmail: fieldData,
-                        originalProject: lead.ogLead?.project ?? "Unknown",
+                        originalProject: lead.ogLead is String
+                            ? "Unknown Project"
+                            : (lead.ogLead as OgLead?)?.project ??
+                                "Unknown Project",
                         createdDate: createdDate,
                         assignedTo: lead.assignedTo ?? '',
-                        leadId: lead.ogLead?.id.toString() ?? "",
+                        leadId: lead.ogLead is String
+                            ? ""
+                            : (lead.ogLead as OgLead?)?.id?.toString() ?? "",
                       ),
                     );
                   }).toList(),
