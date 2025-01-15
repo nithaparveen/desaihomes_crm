@@ -113,13 +113,12 @@ class LeadCard extends StatelessWidget {
                               builder: (BuildContext context) {
                                 return DuplicateLeadModal(
                                  leadId: leadId,
-
                                 );
                               },
                             );
                           },
                     child: SizedBox(
-                      height: 18.h,width: 40.w,
+                      height: 18.h,
                       child: Padding(
                         padding: EdgeInsets.only(left: 10.w),
                         child: Icon(
@@ -175,11 +174,12 @@ class LeadCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            PopupMenuButton<String>(
+            PopupMenuButton<String>(padding: EdgeInsets.zero,
               color: const Color(0xfff5f5f5),
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<String>(
+                    padding: EdgeInsets.zero,
                     value: 'assign_user',
                     child: Container(
                       decoration: ShapeDecoration(
@@ -190,7 +190,7 @@ class LeadCard extends StatelessWidget {
                       height: .45.sh,
                       width: .4.sw,
                       child: Scrollbar(
-                        thickness: 2,
+                        thickness: 1,
                         radius: const Radius.circular(15),
                         child: ListView.builder(
                           padding: const EdgeInsets.only(top: 5),
@@ -202,7 +202,7 @@ class LeadCard extends StatelessWidget {
                                 users[index],
                                 style: GLTextStyles.manropeStyle(
                                   color: ColorTheme.black,
-                                  size: 14.sp,
+                                  size: 13.sp,
                                   weight: FontWeight.w500,
                                 ),
                               ),
@@ -214,7 +214,7 @@ class LeadCard extends StatelessWidget {
                                     '';
 
                                 onUserSelected(leadId, newSelectedUser);
-                                
+
                                 leadController.assignedToTapped(
                                   leadId,
                                   newUserId,

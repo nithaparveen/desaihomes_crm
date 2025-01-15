@@ -9,6 +9,7 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/cont
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:desaihomes_crm_application/presentations/splash_screen/view/splash_screen.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/service/update_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,10 +21,15 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final updateService = UpdateService();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool? loggedIn = prefs.getBool(AppConfig.loggedIn);
   await Firebase.initializeApp();
   await dotenv.load();
+    final hasUpdate = await updateService.checkForUpdate();
+  if (hasUpdate) {
+    await updateService.downloadUpdate();
+  }
   runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => LoginController()),

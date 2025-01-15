@@ -41,7 +41,7 @@ class _CallHistorySectionState extends State<CallHistorySection> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-            "Call Logs",
+            "Call Log",
             style: GLTextStyles.manropeStyle(
               size: 18.sp,
               weight: FontWeight.w600,

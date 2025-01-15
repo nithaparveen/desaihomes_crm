@@ -42,7 +42,9 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
   void initState() {
     super.initState();
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    fetchSiteVisits();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchSiteVisits();
+    });
     toDate = DateTime.now();
   }
 
@@ -114,7 +116,6 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
               border: 3,
               controller: siteVisitController,
               errorText: remarkValidate ? "Remarks can't be empty" : null,
-              
             ),
             SizedBox(height: 18.h),
             Align(

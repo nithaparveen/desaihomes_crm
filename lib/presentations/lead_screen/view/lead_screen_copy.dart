@@ -94,15 +94,20 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
 
   String getInitials(String? name) {
     if (name == null || name.isEmpty) return '';
-
     final words = name.trim().split(RegExp(r'\s+'));
     if (words.length == 1) {
-      return words.first.substring(0, 1).toUpperCase();
+      return words.first.characters.first.toUpperCase();
     }
-    return words
-        .take(2)
-        .map((word) => word.substring(0, 1).toUpperCase())
-        .join();
+    final isLatin = RegExp(r'^[A-Za-z\s]+$').hasMatch(name);
+
+    if (isLatin && words.length >= 2) {
+      return words
+          .take(2)
+          .map((word) => word.substring(0, 1).toUpperCase())
+          .join();
+    }
+
+    return words.first.characters.first.toUpperCase();
   }
 
   Future<void> _refreshData() async {

@@ -142,6 +142,7 @@ class FollowUpLeadCard extends StatelessWidget {
                   weight: FontWeight.w500,
                 ),
               ),
+            if (location != "null" && platform != "null")
             SizedBox(height: 4.h),
             if (platform != "null")
               Text(
