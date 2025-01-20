@@ -74,7 +74,7 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: LoadingAnimationWidget.staggeredDotsWave(
+                    child: LoadingAnimationWidget.fourRotatingDots(
                       color: ColorTheme.desaiGreen,
                       size: 28,
                     ),
@@ -87,7 +87,7 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                         lead.field?.phoneNumber ??
                         "Unknown";
                     final createdDate = lead.ogLead is String
-                        ? "Not Available"
+                        ? "Invalid Date"
                         : (lead.ogLead is OgLead &&
                                 lead.ogLead?.createdAt is DateTime)
                             ? DateFormat('dd-MM-yyyy')
@@ -100,15 +100,23 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
 
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LeadDetailScreenCopy(
-                              leadId: int.tryParse(
-                                  lead.ogLead?.id.toString() ?? ""),
+                        if (lead.ogLead is! String &&
+                            (lead.ogLead as OgLead?)?.id != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LeadDetailScreenCopy(
+                                leadId: int.tryParse(
+                                    (lead.ogLead as OgLead?)?.id.toString() ??
+                                        ""),
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Original lead is missing')),
+                          );
+                        }
                       },
                       child: DuplicateLeadCard(
                         duplicateEmail: fieldData,

@@ -65,7 +65,7 @@ Future<void> fetchFilteredCallLogs() async {
     if (logsByDate.isEmpty) {
       return Center(
           child: Text(
-        "No Call Log",
+        "No Call Logs",
         style: GLTextStyles.manropeStyle(
           size: 15.sp,
           weight: FontWeight.w400,

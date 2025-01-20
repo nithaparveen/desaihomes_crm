@@ -228,6 +228,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                             ),
+                                            backgroundColor: Colors.white,
                                             surfaceTintColor: Colors.white,
                                             title: Row(
                                               mainAxisAlignment:
@@ -365,9 +366,10 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                         builder: (context) => AlertDialog(
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(4.r),
+                                                BorderRadius.circular(12.r),
                                           ),
                                           surfaceTintColor: Colors.white,
+                                          backgroundColor: Colors.white,
                                           title: Column(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
@@ -412,6 +414,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                               ),
                                             ],
                                           ),
+                                          
                                           content: Text(
                                             'Are you sure you want to delete?',
                                             style: GLTextStyles.manropeStyle(
@@ -452,6 +455,7 @@ class _SiteVisitSectionState extends State<SiteVisitSection> {
                                               },
                                             ),
                                           ],
+                                          
                                         ),
                                       );
                                     },

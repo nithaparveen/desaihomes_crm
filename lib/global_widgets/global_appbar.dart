@@ -38,7 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             Padding(
               padding: EdgeInsets.only(right: 16.w),
               child: Center(
-                child: LoadingAnimationWidget.staggeredDotsWave(
+                child: LoadingAnimationWidget.fourRotatingDots(
                   color: const Color(0xffF0F6FF),
                   size: 32,
                 ),

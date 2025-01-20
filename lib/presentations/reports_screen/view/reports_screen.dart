@@ -68,7 +68,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         builder: (context, controller, _) {
           if (controller == null || controller.reportsModel.data == null) {
             return Center(
-                child: LoadingAnimationWidget.staggeredDotsWave(
+                child: LoadingAnimationWidget.fourRotatingDots(
                   color: Colors.white,
                   size: 32,
                 ));

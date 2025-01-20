@@ -4,6 +4,7 @@ import 'package:desaihomes_crm_application/global_widgets/global_appbar.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/filter_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
+import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
@@ -30,6 +31,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+            LoginController()
+          .checkForAppUpdates(context); 
       fetchData();
       scrollController.addListener(scrollListener);
     });
@@ -333,7 +336,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: LoadingAnimationWidget.staggeredDotsWave(
+                        child: LoadingAnimationWidget.fourRotatingDots(
                           color: ColorTheme.desaiGreen,
                           size: 32,
                         ),
@@ -366,7 +369,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
                           return Center(
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: LoadingAnimationWidget.staggeredDotsWave(
+                              child: LoadingAnimationWidget.fourRotatingDots(
                                 color: ColorTheme.desaiGreen,
                                 size: 32,
                               ),

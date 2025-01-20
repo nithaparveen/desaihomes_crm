@@ -234,7 +234,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                           ? Center(
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
-                                child: LoadingAnimationWidget.staggeredDotsWave(
+                                child: LoadingAnimationWidget.fourRotatingDots(
                                   color: ColorTheme.desaiGreen,
                                   size: 28,
                                 ),

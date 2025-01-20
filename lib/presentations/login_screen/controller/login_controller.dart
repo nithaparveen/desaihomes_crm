@@ -2,80 +2,82 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
+import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/global_widgets/custom_button.dart';
 import 'package:desaihomes_crm_application/presentations/bottom_navigation_screen/view/bottom_navigation_screen.dart';
 import 'package:desaihomes_crm_application/repository/api/login_screen/service/login_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../app_config/app_config.dart';
+import 'package:http/http.dart' as http;
 
 class LoginController extends ChangeNotifier {
   bool visibility = true;
   late SharedPreferences sharedPreferences;
 
-Future onLogin(String email, String password, BuildContext context) async {
-  log("loginController -> onLogin() started");
+  Future onLogin(String email, String password, BuildContext context) async {
+    log("loginController -> onLogin() started");
 
-  if (email.isEmpty || password.isEmpty) {
-    // Show error if fields are empty
-    Flushbar(
-      maxWidth: .55.sw,
-      backgroundColor: Colors.grey.shade100,
-      messageColor: ColorTheme.black,
-      icon: Icon(
-        Iconsax.info_circle,
-        color: ColorTheme.red,
-        size: 20.sp,
-      ),
-      message: 'Please fill in all fields',
-      duration: const Duration(seconds: 3),
-      flushbarPosition: FlushbarPosition.TOP,
-    ).show(context);
-    return; // Exit the function early
-  }
-
-  LoginService.postLoginData(email, password).then((value) {
-    if (value["status"] == true) {
-      log("token -> ${value["token"]}");
-      storeLoginData(value);
-      storeUserToken(value["token"]);
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const BottomNavBar()),
-        (route) => false,
-      );
-      Flushbar(
-        maxWidth: .45.sw,
-        backgroundColor: Colors.grey.shade100,
-        messageColor: ColorTheme.black,
-        icon: Icon(
-          Iconsax.tick_circle,
-          color: ColorTheme.green,
-          size: 20.sp,
-        ),
-        message: 'Login successful',
-        duration: const Duration(seconds: 3),
-        flushbarPosition: FlushbarPosition.TOP,
-      ).show(context);
-    } else {
-      // Show invalid credentials message only if fields are not empty
+    if (email.isEmpty || password.isEmpty) {
       Flushbar(
         maxWidth: .55.sw,
         backgroundColor: Colors.grey.shade100,
         messageColor: ColorTheme.black,
         icon: Icon(
-          Iconsax.close_circle,
+          Iconsax.info_circle,
           color: ColorTheme.red,
           size: 20.sp,
         ),
-        message: 'Invalid credentials',
+        message: 'Please fill in all fields',
         duration: const Duration(seconds: 3),
         flushbarPosition: FlushbarPosition.TOP,
       ).show(context);
+      return;
     }
-  });
-}
+
+    LoginService.postLoginData(email, password).then((value) {
+      if (value["status"] == true) {
+        log("token -> ${value["token"]}");
+        storeLoginData(value);
+        storeUserToken(value["token"]);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const BottomNavBar()),
+          (route) => false,
+        );
+        Flushbar(
+          maxWidth: .45.sw,
+          backgroundColor: Colors.grey.shade100,
+          messageColor: ColorTheme.black,
+          icon: Icon(
+            Iconsax.tick_circle,
+            color: ColorTheme.green,
+            size: 20.sp,
+          ),
+          message: 'Login successful',
+          duration: const Duration(seconds: 3),
+          flushbarPosition: FlushbarPosition.TOP,
+        ).show(context);
+      } else {
+        Flushbar(
+          maxWidth: .55.sw,
+          backgroundColor: Colors.grey.shade100,
+          messageColor: ColorTheme.black,
+          icon: Icon(
+            Iconsax.close_circle,
+            color: ColorTheme.red,
+            size: 20.sp,
+          ),
+          message: 'Invalid credentials',
+          duration: const Duration(seconds: 3),
+          flushbarPosition: FlushbarPosition.TOP,
+        ).show(context);
+      }
+    });
+  }
 
   void onPressed() {
     visibility = !visibility;
@@ -99,5 +101,172 @@ Future onLogin(String email, String password, BuildContext context) async {
     sharedPreferences = await SharedPreferences.getInstance();
     String dataUser = json.encode(resData);
     sharedPreferences.setString(AppConfig.token, dataUser);
+  }
+
+  Future<void> checkForAppUpdates(BuildContext context) async {
+    log("Checking for app updates...");
+    var versionData = await LoginService.checkAppVersion();
+
+    if (versionData != null && versionData["version_name"] != null) {
+      String latestVersion = versionData["version_name"];
+      String token = versionData["token"];
+
+      String currentVersion = AppConfig.currentVersion;
+      log("Current version: $currentVersion, Latest version: $latestVersion");
+      if (currentVersion != latestVersion) {
+        log("New version available: $latestVersion");
+        showUpdatePopup(context, latestVersion, token);
+      } else {
+        log("App is up to date");
+      }
+    } else {
+      log("Failed to fetch version information.");
+    }
+  }
+
+  void showUpdatePopup(
+      BuildContext context, String latestVersion, String token) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: (50 / ScreenUtil().screenWidth).sw,
+                height: (50 / ScreenUtil().screenHeight).sh,
+                decoration: BoxDecoration(
+                  color: const Color(0xffA8E9D2),
+                  shape: BoxShape.circle,
+                  border:
+                      Border.all(width: 4.5, color: const Color(0xffE2FFF5)),
+                ),
+                child: Center(
+                    child: Icon(
+                  Iconsax.frame,
+                  color: const Color(0xff3D9073),
+                  size: 20.sp,
+                )),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'Update Available',
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.black,
+                  size: 18.sp,
+                  weight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            "A new version ($latestVersion) is available. Please update to continue.",
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 15.sp,
+              weight: FontWeight.w400,
+            ),
+          ),
+          actions: [
+            CustomButton(
+              borderColor: ColorTheme.white,
+              backgroundColor: ColorTheme.desaiGreen,
+              text: "UPDATE",
+              textColor: Colors.white,
+              width: (110 / ScreenUtil().screenWidth).sw,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await downloadAndInstallApk(latestVersion, token, context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> downloadAndInstallApk(
+      String versionName, String token, BuildContext context) async {
+    String downloadUrl =
+        "https://www.desaihomes.com/api/app/version/view/$token?version_name=$versionName";
+
+    String timestamp =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(4);
+    String savePath = "/storage/emulated/0/Download/app-release-$timestamp.apk";
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Updating...",
+          style: GLTextStyles.manropeStyle(
+            color: ColorTheme.blue,
+            size: 12.sp,
+            weight: FontWeight.w400,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        duration: const Duration(seconds: 10),
+      ),
+    );
+
+    final response = await http.get(Uri.parse(downloadUrl));
+    if (response.statusCode == 200) {
+      var downloadData = jsonDecode(response.body);
+      String filePath = downloadData["file_path"];
+      bool success = await LoginService.downloadApk(filePath, savePath);
+      if (success) {
+        log("APK downloaded successfully.");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Updation completed, closing app...",
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.desaiGreen,
+                size: 12.sp,
+                weight: FontWeight.w400,
+              ),
+            ),
+            backgroundColor: Colors.white,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+
+        await Future.delayed(const Duration(seconds: 3));
+        Future.delayed(const Duration(milliseconds: 500), () {
+          SystemNavigator.pop();
+        });
+      } else {
+        log("Failed to download APK.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Failed to update application",
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.white,
+                size: 12.sp,
+                weight: FontWeight.w400,
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      log("Failed to fetch APK download URL.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Failed to fetch APK download URL.",
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

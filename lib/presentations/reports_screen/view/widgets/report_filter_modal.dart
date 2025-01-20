@@ -42,10 +42,12 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
 
   @override
   void initState() {
-    Provider.of<LeadController>(context, listen: false)
-        .fetchLeadSourceList(context);
-    Provider.of<ReportsController>(context, listen: false)
-        .fetchCampaignList(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LeadController>(context, listen: false)
+          .fetchLeadSourceList(context);
+      Provider.of<ReportsController>(context, listen: false)
+          .fetchCampaignList(context);
+    });
     super.initState();
   }
 

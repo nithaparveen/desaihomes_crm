@@ -363,7 +363,7 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
         ? Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: LoadingAnimationWidget.staggeredDotsWave(
+              child: LoadingAnimationWidget.fourRotatingDots(
                 color: ColorTheme.desaiGreen,
                 size: 32,
               ),

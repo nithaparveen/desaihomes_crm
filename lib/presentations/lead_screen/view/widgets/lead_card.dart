@@ -75,91 +75,79 @@ class LeadCard extends StatelessWidget {
 
   Widget buildLeadDetails(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LeadDetailScreenCopy(
-                leadId: int.tryParse(leadId) ?? 0,
-              ),
-            ),
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  child: Text(
-                    name,
-                    style: GLTextStyles.manropeStyle(
-                      color: const Color(0xff120e2b),
-                      size: 14.sp,
-                      weight: FontWeight.w700,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    softWrap: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Text(
+                  name,
+                  style: GLTextStyles.manropeStyle(
+                    color: const Color(0xff120e2b),
+                    size: 14.sp,
+                    weight: FontWeight.w700,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  softWrap: false,
                 ),
-                if (duplicateFlag == true)
-                  InkWell(
-                    onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return DuplicateLeadModal(
-                                 leadId: leadId,
-                                );
-                              },
-                            );
-                          },
-                    child: SizedBox(
-                      height: 18.h,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 10.w),
-                        child: Icon(
-                          Icons.warning_sharp,
-                          size: 16.sp,
-                          color: ColorTheme.yellow,
-                        ),
+              ),
+              if (duplicateFlag == true)
+                InkWell(
+                  onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return DuplicateLeadModal(
+                               leadId: leadId,
+                              );
+                            },
+                          );
+                        },
+                  child: SizedBox(
+                    height: 18.h,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 10.w),
+                      child: Icon(
+                        Icons.warning_sharp,
+                        size: 16.sp,
+                        color: ColorTheme.yellow,
                       ),
                     ),
                   ),
-              ],
-            ),
-            if (location != "null")
-              Text(
-                location,
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.grey,
-                  size: 14.sp,
-                  weight: FontWeight.w500,
                 ),
-              ),
-            SizedBox(height: 4.h),
-            if (platform != "null")
-              Text(
-                platform,
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.black,
-                  size: 14.sp,
-                  weight: FontWeight.w500,
-                ),
-              ),
+            ],
+          ),
+          if (location != "null")
             Text(
-              timeAgo,
+              location,
               style: GLTextStyles.manropeStyle(
-                color: ColorTheme.lightBlue,
-                size: 12.5.sp,
-                weight: FontWeight.w600,
+                color: ColorTheme.grey,
+                size: 14.sp,
+                weight: FontWeight.w500,
               ),
             ),
-          ],
-        ),
+          SizedBox(height: 4.h),
+          if (platform != "null")
+            Text(
+              platform,
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.black,
+                size: 14.sp,
+                weight: FontWeight.w500,
+              ),
+            ),
+          Text(
+            timeAgo,
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.lightBlue,
+              size: 12.5.sp,
+              weight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,12 +186,15 @@ class LeadCard extends StatelessWidget {
                           itemBuilder: (context, index) {
                             return ListTile(
                               tileColor: const Color(0xfff5f5f5),
-                              title: Text(
-                                users[index],
-                                style: GLTextStyles.manropeStyle(
-                                  color: ColorTheme.black,
-                                  size: 13.sp,
-                                  weight: FontWeight.w500,
+                              title: Padding(
+                                padding:  EdgeInsets.symmetric(horizontal: 6.w),
+                                child: Text(
+                                  users[index],
+                                  style: GLTextStyles.manropeStyle(
+                                    color: ColorTheme.black,
+                                    size: 13.sp,
+                                    weight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                               onTap: () async {
@@ -357,25 +348,37 @@ class LeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4.r),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
-          width: 1,
+    return InkWell(
+      onTap: (){
+         Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LeadDetailScreenCopy(
+                leadId: int.tryParse(leadId) ?? 0,
+              ),
+            ),
+          );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4.r),
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.2),
+            width: 1,
+          ),
         ),
-      ),
-      padding:
-          EdgeInsets.only(left: 16.w, right: 16.w, top: 20.h, bottom: 20.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          buildAvatar(initials, index),
-          SizedBox(width: 16.w),
-          buildLeadDetails(context),
-          buildActions(context),
-        ],
+        padding:
+            EdgeInsets.only(left: 16.w, right: 16.w, top: 20.h, bottom: 20.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            buildAvatar(initials, index),
+            SizedBox(width: 16.w),
+            buildLeadDetails(context),
+            buildActions(context),
+          ],
+        ),
       ),
     );
   }

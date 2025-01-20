@@ -46,24 +46,23 @@ class _NotesSectionCopyState extends State<NotesSectionCopy> {
     }
   }
 
-@override
-void initState() {
-  super.initState();
-  
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    fetchNotes();
-  });
+  @override
+  void initState() {
+    super.initState();
 
-  dateController = TextEditingController(
-      text: DateFormat('dd-MM-yyyy').format(DateTime.now()));
-  toDate = DateTime.now();
-}
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchNotes();
+    });
 
-Future<void> fetchNotes() async {
-  await Provider.of<LeadDetailController>(context, listen: false)
-      .fetchNotes(widget.leadId, context);
-}
+    dateController = TextEditingController(
+        text: DateFormat('dd-MM-yyyy').format(DateTime.now()));
+    toDate = DateTime.now();
+  }
 
+  Future<void> fetchNotes() async {
+    await Provider.of<LeadDetailController>(context, listen: false)
+        .fetchNotes(widget.leadId, context);
+  }
 
   @override
   void dispose() {
@@ -228,6 +227,7 @@ Future<void> fetchNotes() async {
                                             ),
                                           );
                                           return AlertDialog(
+                                            backgroundColor: Colors.white,
                                             surfaceTintColor: Colors.white,
                                             title: Row(
                                               mainAxisAlignment:
@@ -346,6 +346,10 @@ Future<void> fetchNotes() async {
                                                 },
                                               ),
                                             ],
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
+                                            ),
                                           );
                                         },
                                       );
@@ -361,6 +365,7 @@ Future<void> fetchNotes() async {
                                       showDialog(
                                         context: context,
                                         builder: (context) => AlertDialog(
+                                          backgroundColor: Colors.white,
                                           surfaceTintColor: Colors.white,
                                           title: Column(
                                             mainAxisAlignment:
@@ -446,6 +451,10 @@ Future<void> fetchNotes() async {
                                               },
                                             ),
                                           ],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.r),
+                                          ),
                                         ),
                                       );
                                     },
