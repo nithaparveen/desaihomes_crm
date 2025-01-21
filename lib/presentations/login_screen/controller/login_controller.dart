@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
@@ -10,9 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../app_config/app_config.dart';
 import 'package:http/http.dart' as http;
+import 'package:open_file/open_file.dart';
 
 class LoginController extends ChangeNotifier {
   bool visibility = true;
@@ -168,7 +171,7 @@ class LoginController extends ChangeNotifier {
             "A new version ($latestVersion) is available. Please update to continue.",
             style: GLTextStyles.manropeStyle(
               color: ColorTheme.blue,
-              size: 15.sp,
+              size: 13.sp,
               weight: FontWeight.w400,
             ),
           ),
@@ -196,77 +199,70 @@ class LoginController extends ChangeNotifier {
         "https://www.desaihomes.com/api/app/version/view/$token?version_name=$versionName";
 
     String timestamp =
-        DateTime.now().millisecondsSinceEpoch.toString().substring(4);
-    String savePath = "/storage/emulated/0/Download/app-release-$timestamp.apk";
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Updating...",
-          style: GLTextStyles.manropeStyle(
-            color: ColorTheme.blue,
-            size: 12.sp,
-            weight: FontWeight.w400,
-          ),
+        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    Directory? baseDirectory = await getExternalStorageDirectory();
+    if (baseDirectory == null) {
+      log("Unable to access storage directory");
+      return;
+    }
+    String downloadsPath = "/storage/emulated/0/Download";
+    String savePath = "$downloadsPath/app-release-$timestamp.apk";
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    var snackBar = SnackBar(
+      backgroundColor: Colors.white,
+      content: Text(
+        "Downloading update...",
+        style: GLTextStyles.manropeStyle(
+          color: ColorTheme.desaiGreen,
+          size: 12.sp,
+          weight: FontWeight.w500,
         ),
-        backgroundColor: Colors.white,
-        duration: const Duration(seconds: 10),
       ),
+      duration: const Duration(days: 1),
     );
-
+    scaffoldMessenger.showSnackBar(snackBar);
     final response = await http.get(Uri.parse(downloadUrl));
     if (response.statusCode == 200) {
       var downloadData = jsonDecode(response.body);
       String filePath = downloadData["file_path"];
       bool success = await LoginService.downloadApk(filePath, savePath);
+      scaffoldMessenger.hideCurrentSnackBar();
+
       if (success) {
         log("APK downloaded successfully.");
-
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
+            backgroundColor: Colors.white,
             content: Text(
-              "Updation completed, closing app...",
+              "The new APK has been successfully downloaded to the Downloads folder",
               style: GLTextStyles.manropeStyle(
                 color: ColorTheme.desaiGreen,
                 size: 12.sp,
-                weight: FontWeight.w400,
+                weight: FontWeight.w500,
               ),
             ),
-            backgroundColor: Colors.white,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
           ),
         );
-
-        await Future.delayed(const Duration(seconds: 3));
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(seconds: 3), () async {
           SystemNavigator.pop();
+          OpenFile.open(downloadsPath);
         });
       } else {
         log("Failed to download APK.");
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text(
-              "Failed to update application",
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.white,
-                size: 12.sp,
-                weight: FontWeight.w400,
-              ),
-            ),
+            content: Text("Failed to download the update.",
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.white,
+                  size: 12.sp,
+                  weight: FontWeight.w400,
+                )),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
-    } else {
-      log("Failed to fetch APK download URL.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Failed to fetch APK download URL.",
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 }
