@@ -69,9 +69,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
           if (controller == null || controller.reportsModel.data == null) {
             return Center(
                 child: LoadingAnimationWidget.fourRotatingDots(
-                  color: Colors.white,
-                  size: 32,
-                ));
+              color: Colors.white,
+              size: 32,
+            ));
           }
           return CustomScrollView(
             slivers: [
@@ -93,10 +93,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     controller.reportsModel.data?.totalLeads
-                                        .toString() ?? " ",
+                                            .toString() ??
+                                        " ",
                                     style: GLTextStyles.interStyle(
                                       size: 42.sp,
                                       weight: FontWeight.w600,

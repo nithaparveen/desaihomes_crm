@@ -384,7 +384,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                                 ),
                                               ),
                                               SizedBox(height: 6.h),
-                                              DropdownFormTextField(
+                                              SearchableDropdownFormTextField(
                                                 initialValue: selectedStatus,
                                                 items: statusController
                                                         .statusListModel
@@ -417,101 +417,45 @@ class _QuickEditModalState extends State<QuickEditModal>
                                       ],
                                     ),
                                     SizedBox(height: 15.h),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Preferred project',
-                                                style:
-                                                    GLTextStyles.manropeStyle(
-                                                  color: ColorTheme.blue,
-                                                  size: 14.sp,
-                                                  weight: FontWeight.w500,
-                                                ),
-                                              ),
-                                              SizedBox(height: 6.h),
-                                              DropdownFormTextField(
-                                                initialValue: selectedProject,
-                                                items: leadController
-                                                        .projectListModel
-                                                        .projects
-                                                        ?.map((project) =>
-                                                            project.name ?? "")
-                                                        .toList() ??
-                                                    [],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    selectedProject = value;
-                                                    selectedProjectId =
-                                                        leadController
-                                                            .projectListModel
-                                                            .projects
-                                                            ?.firstWhere(
-                                                                (project) =>
-                                                                    project
-                                                                        .name ==
-                                                                    value)
-                                                            .id
-                                                            .toString();
-                                                  });
-                                                },
-                                              ),
-                                            ],
+                                        Text(
+                                          'Preferred project',
+                                          style:
+                                              GLTextStyles.manropeStyle(
+                                            color: ColorTheme.blue,
+                                            size: 14.sp,
+                                            weight: FontWeight.w500,
                                           ),
                                         ),
-                                        SizedBox(width: 15.w),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Profession',
-                                                style:
-                                                    GLTextStyles.manropeStyle(
-                                                  color: ColorTheme.blue,
-                                                  size: 14.sp,
-                                                  weight: FontWeight.w500,
-                                                ),
-                                              ),
-                                              SizedBox(height: 6.h),
-                                              Consumer<LeadController>(
-                                                builder: (context,
-                                                    leadController, child) {
-                                                  if (leadController
-                                                      .professionList.isEmpty) {
-                                                    return const DropdownFormTextField(
-                                                      items: ['Loading...'],
-                                                      onChanged: null,
-                                                    );
-                                                  }
-
-                                                  return DropdownFormTextField(
-                                                    initialValue:
-                                                        selectedProfession,
-                                                    items: leadController
-                                                        .professionList
-                                                        .map((profession) =>
-                                                            profession.name ??
-                                                            "")
-                                                        .toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        selectedProfession =
-                                                            value;
-                                                      });
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
+                                        SizedBox(height: 6.h),
+                                        SearchableDropdownFormTextField(
+                                          initialValue: selectedProject,
+                                          items: leadController
+                                                  .projectListModel
+                                                  .projects
+                                                  ?.map((project) =>
+                                                      project.name ?? "")
+                                                  .toList() ??
+                                              [],
+                                          onChanged: (value) {
+                                            setState(() {
+                                              selectedProject = value;
+                                              selectedProjectId =
+                                                  leadController
+                                                      .projectListModel
+                                                      .projects
+                                                      ?.firstWhere(
+                                                          (project) =>
+                                                              project
+                                                                  .name ==
+                                                              value)
+                                                      .id
+                                                      .toString();
+                                            });
+                                          },
                                         ),
                                       ],
                                     ),
@@ -540,13 +484,13 @@ class _QuickEditModalState extends State<QuickEditModal>
                                                     leadController, child) {
                                                   if (leadController
                                                       .countriesList.isEmpty) {
-                                                    return const DropdownFormTextField(
+                                                    return const SearchableDropdownFormTextField(
                                                       items: ['Loading...'],
                                                       onChanged: null,
                                                     );
                                                   }
 
-                                                  return DropdownFormTextField(
+                                                  return SearchableDropdownFormTextField(
                                                     initialValue:
                                                         selectedCountry,
                                                     items: leadController
@@ -624,13 +568,13 @@ class _QuickEditModalState extends State<QuickEditModal>
                                                     leadController, child) {
                                                   if (leadController
                                                       .ageList.isEmpty) {
-                                                    return const DropdownFormTextField(
+                                                    return const SearchableDropdownFormTextField(
                                                       items: ['Loading...'],
                                                       onChanged: null,
                                                     );
                                                   }
 
-                                                  return DropdownFormTextField(
+                                                  return SearchableDropdownFormTextField(
                                                     initialValue: selectedAge,
                                                     items: leadController
                                                         .ageList
@@ -665,7 +609,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                               ),
                                               SizedBox(height: 6.h),
                                               SizedBox(
-                                                height: (35 /
+                                                height: (38 /
                                                         ScreenUtil()
                                                             .screenHeight)
                                                     .sh,

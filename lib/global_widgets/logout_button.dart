@@ -17,28 +17,11 @@ class LogoutButton extends StatelessWidget {
     return InkWell(
       splashColor: Colors.transparent,
       onTap: () => _showLogoutConfirmation(context),
-      child: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.logout,
-              color: Colors.black,
-              size: 16.sp,
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              "Logout",
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.black,
-                size: 13.sp,
-                weight: FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: Icon(
+            Icons.logout,
+            color: Colors.black,
+            size: 16.sp,
+          ),
     );
   }
 

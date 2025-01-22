@@ -8,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Color backgroundColor;
   final bool hasRadius;
 
@@ -19,10 +19,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
+  _CustomAppBarState createState() => _CustomAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  bool _isVisible = false;
+
+  void _toggleSlide() {
+    setState(() {
+      _isVisible = !_isVisible;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: backgroundColor,
-      shape: hasRadius
+      backgroundColor: widget.backgroundColor,
+      shape: widget.hasRadius
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(20.r),
@@ -34,8 +50,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         future: getUserName(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return 
-            Padding(
+            return Padding(
               padding: EdgeInsets.only(right: 16.w),
               child: Center(
                 child: LoadingAnimationWidget.fourRotatingDots(
@@ -51,8 +66,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           }
 
           String userName = snapshot.data ?? "Unknown User";
-          return _buildUserIcon(
-              context, userName.substring(0, 2).toUpperCase(), userName);
+          return _buildUserIcon(context, userName.substring(0, 2).toUpperCase(), userName);
         },
       ),
       automaticallyImplyLeading: false,
@@ -62,68 +76,46 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildUserIcon(BuildContext context, String initials,
-      [String? userName]) {
-    return Padding(
-      padding: EdgeInsets.only(right: 16.w),
-      child: GestureDetector(
-        onTap: () => _showUserMenu(context, initials, userName),
-        child: Container(
-          width: 36.w,
-          height: 36.w,
-          decoration: BoxDecoration(
-            color: const Color(0xff170E2B),
-            shape: BoxShape.circle,
-            border: Border.all(width: 2.5, color: const Color.fromARGB(255, 255, 255, 255)),
-          ),
-          child: Center(
-            child: Text(
-              initials,
-              style: GLTextStyles.robotoStyle(
-                color: Colors.white,
-                size: 14.sp,
-                weight: FontWeight.w600,
+Widget _buildUserIcon(BuildContext context, String initials, [String? userName]) {
+  return GestureDetector(
+    onTap: _toggleSlide, 
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.fastOutSlowIn,
+      width: _isVisible ? null : 40.w,
+      height: 40.h,
+      decoration: BoxDecoration(
+        color: _isVisible ? Colors.white : Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(_isVisible ? 25.r: 25.r)), 
+        border: Border.all(width: 2, color: Colors.white),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 35.sp,
+            height: 35.sp,
+            decoration: BoxDecoration(
+              color: const Color(0xff170E2B),
+              shape: BoxShape.circle,
+              border: Border.all(width: 2.5, color: Colors.white),
+            ),
+            child: Center(
+              child: Text(
+                initials,
+                style: GLTextStyles.robotoStyle(
+                  color: Colors.white,
+                  size: 13.sp,
+                  weight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showUserMenu(BuildContext context, String initials,
-      [String? userName]) {
-    showMenu(
-      color: Colors.white,
-      context: context,
-      shadowColor: Colors.transparent,
-      position: RelativeRect.fromLTRB(15.w, 70.h, 1000.w, 0),
-      items: [
-        PopupMenuItem(
-          value: 'user_info',
-          child: Row(
-            children: [
-              Container(
-                width: 35.w,
-                height: 35.w,
-                decoration: BoxDecoration(
-                  color: const Color(0xff170E2B),
-                  shape: BoxShape.circle,
-                  border: Border.all(width: 2.5, color: Colors.white),
-                ),
-                child: Center(
-                  child: Text(
-                    initials,
-                    style: GLTextStyles.robotoStyle(
-                      color: ColorTheme.white,
-                      size: 13.sp,
-                      weight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
+          if (_isVisible) ...[
+             SizedBox(width: 8.sp), // Reduced spacing between avatar and text
+            Flexible(
+              child: Padding(
+                padding:  EdgeInsets.symmetric(vertical: 8.h),
                 child: Text(
                   userName ?? "Unknown User",
                   style: GLTextStyles.manropeStyle(
@@ -131,21 +123,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     size: 14.sp,
                     weight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1, // Prevents overflow to a second line
                 ),
               ),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'logout',
-          child: LogoutButton(),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+            ),
+            SizedBox(width: 8.sp), // Reduced spacing between text and logout button
+            const LogoutButton(),
+            SizedBox(width: 4.sp),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 Future<String?> getUserName() async {
@@ -159,4 +149,4 @@ Future<String?> getUserName() async {
     }
   }
   return null;
-}
+}}

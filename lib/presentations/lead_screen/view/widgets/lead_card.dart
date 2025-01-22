@@ -97,15 +97,15 @@ class LeadCard extends StatelessWidget {
               if (duplicateFlag == true)
                 InkWell(
                   onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return DuplicateLeadModal(
-                               leadId: leadId,
-                              );
-                            },
-                          );
-                        },
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return DuplicateLeadModal(
+                          leadId: leadId,
+                        );
+                      },
+                    );
+                  },
                   child: SizedBox(
                     height: 18.h,
                     child: Padding(
@@ -162,7 +162,7 @@ class LeadCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            PopupMenuButton<String>(padding: EdgeInsets.zero,
+            PopupMenuButton<String>(
               color: const Color(0xfff5f5f5),
               itemBuilder: (BuildContext context) {
                 return [
@@ -177,17 +177,16 @@ class LeadCard extends StatelessWidget {
                       ),
                       height: .45.sh,
                       width: .4.sw,
-                      child: Scrollbar(
-                        thickness: 1,
-                        radius: const Radius.circular(15),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(top: 5),
-                          itemCount: users.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.only(top: 5),
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: ListTile(
                               tileColor: const Color(0xfff5f5f5),
                               title: Padding(
-                                padding:  EdgeInsets.symmetric(horizontal: 6.w),
+                                padding: EdgeInsets.symmetric(horizontal: 6.w),
                                 child: Text(
                                   users[index],
                                   style: GLTextStyles.manropeStyle(
@@ -237,9 +236,9 @@ class LeadCard extends StatelessWidget {
                                   flushbarPosition: FlushbarPosition.TOP,
                                 ).show(context);
                               },
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -349,15 +348,15 @@ class LeadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
-         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LeadDetailScreenCopy(
-                leadId: int.tryParse(leadId) ?? 0,
-              ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LeadDetailScreenCopy(
+              leadId: int.tryParse(leadId) ?? 0,
             ),
-          );
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(

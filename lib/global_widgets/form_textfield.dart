@@ -21,7 +21,7 @@ class FormTextField extends StatelessWidget {
     this.controller,
     this.textStyle,
     this.onTap,
-    this.height = 35.0,
+    this.height,
     this.width = double.infinity,
     this.readOnly = false,
     this.maxLines,
@@ -30,7 +30,7 @@ class FormTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height,
+      height: 38.sp,
       width: width,
       child: GestureDetector(
         onTap: onTap,

@@ -61,6 +61,8 @@ dependencies:
   shorebird_code_push: ^2.0.2
   open_file: ^3.5.10
   path_provider: ^2.0.14
+  dropdown_search: ^6.0.2
+
 
 dev_dependencies:
   flutter_test:
