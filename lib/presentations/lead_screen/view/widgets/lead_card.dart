@@ -163,7 +163,9 @@ class LeadCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             PopupMenuButton<String>(
-              color: const Color(0xfff5f5f5),
+              elevation: 8,
+              shadowColor: Colors.black26,
+              color: const Color.fromARGB(255, 255, 255, 255),
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<String>(
@@ -181,61 +183,93 @@ class LeadCard extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 5),
                         itemCount: users.length,
                         itemBuilder: (context, index) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: ListTile(
-                              tileColor: const Color(0xfff5f5f5),
-                              title: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 6.w),
-                                child: Text(
-                                  users[index],
-                                  style: GLTextStyles.manropeStyle(
-                                    color: ColorTheme.black,
-                                    size: 13.sp,
-                                    weight: FontWeight.w500,
+                          return GestureDetector(
+                            onTap: () async {
+                              final newSelectedUser = users[index];
+                              final newUserId = leadController
+                                      .userListModel.users?[index].id
+                                      .toString() ??
+                                  '';
+
+                              onUserSelected(leadId, newSelectedUser);
+
+                              leadController.assignedToTapped(
+                                leadId,
+                                newUserId,
+                                context,
+                              );
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LeadDetailScreenCopy(
+                                    leadId: int.tryParse(leadId),
                                   ),
                                 ),
+                              );
+
+                              await leadController.fetchData(context);
+
+                              Flushbar(
+                                maxWidth: .55.sw,
+                                backgroundColor: Colors.grey.shade100,
+                                messageColor: ColorTheme.black,
+                                icon: Icon(
+                                  Iconsax.profile_tick,
+                                  color: ColorTheme.green,
+                                  size: 20.sp,
+                                ),
+                                message: 'Assign Successful',
+                                duration: const Duration(seconds: 3),
+                                flushbarPosition: FlushbarPosition.TOP,
+                              ).show(context);
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
                               ),
-                              onTap: () async {
-                                final newSelectedUser = users[index];
-                                final newUserId = leadController
-                                        .userListModel.users?[index].id
-                                        .toString() ??
-                                    '';
-
-                                onUserSelected(leadId, newSelectedUser);
-
-                                leadController.assignedToTapped(
-                                  leadId,
-                                  newUserId,
-                                  context,
-                                );
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LeadDetailScreenCopy(
-                                      leadId: int.tryParse(leadId),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 12.r,
+                                        backgroundColor:
+                                            const Color(0xff25274B),
+                                        child: Text(
+                                          users[index]
+                                              .substring(0, 2)
+                                              .toUpperCase(),
+                                          style: GLTextStyles.manropeStyle(
+                                            color: ColorTheme.white,
+                                            size: 10.sp,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 12.w),
+                                      Expanded(
+                                        child: Text(
+                                          users[index],
+                                          style: GLTextStyles.manropeStyle(
+                                            color: const Color(0xff1E232C),
+                                            size: 12.sp,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (index != users.length - 1)
+                                    Divider(
+                                      color:
+                                          const Color.fromARGB(44, 95, 95, 87),
+                                      thickness: 0.55,
+                                      height: 18.h,
                                     ),
-                                  ),
-                                );
-
-                                await leadController.fetchData(context);
-
-                                Flushbar(
-                                  maxWidth: .55.sw,
-                                  backgroundColor: Colors.grey.shade100,
-                                  messageColor: ColorTheme.black,
-                                  icon: Icon(
-                                    Iconsax.profile_tick,
-                                    color: ColorTheme.green,
-                                    size: 20.sp,
-                                  ),
-                                  message: 'Assign Successful',
-                                  duration: const Duration(seconds: 3),
-                                  flushbarPosition: FlushbarPosition.TOP,
-                                ).show(context);
-                              },
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -244,7 +278,6 @@ class LeadCard extends StatelessWidget {
                   ),
                 ];
               },
-              elevation: 0,
               child: Container(
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
