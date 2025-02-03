@@ -192,24 +192,10 @@ class LeadCard extends StatelessWidget {
                                   '';
 
                               onUserSelected(leadId, newSelectedUser);
+                              await leadController.assignedToTapped(
+                                  leadId, newUserId, context);
 
-                              leadController.assignedToTapped(
-                                leadId,
-                                newUserId,
-                                context,
-                              );
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LeadDetailScreenCopy(
-                                    leadId: int.tryParse(leadId),
-                                  ),
-                                ),
-                              );
-
-                              await leadController.fetchData(context);
-
+                              Navigator.pop(context);
                               Flushbar(
                                 maxWidth: .55.sw,
                                 backgroundColor: Colors.grey.shade100,
@@ -223,6 +209,12 @@ class LeadCard extends StatelessWidget {
                                 duration: const Duration(seconds: 3),
                                 flushbarPosition: FlushbarPosition.TOP,
                               ).show(context);
+
+                              await Provider.of<LeadController>(context,
+                                      listen: false)
+                                  .searchLeads(context);
+
+                              leadController.notifyListeners();
                             },
                             child: Container(
                               padding: EdgeInsets.symmetric(horizontal: 8.w),

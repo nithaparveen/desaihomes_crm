@@ -25,7 +25,7 @@ class FollowUpLeadCard extends StatelessWidget {
   final Function(String leadId, String? selectedUser) onUserSelected;
   final int index;
   final bool? duplicateFlag;
-  final dynamic leadData; 
+  final dynamic leadData;
 
   const FollowUpLeadCard({
     super.key,
@@ -41,7 +41,8 @@ class FollowUpLeadCard extends StatelessWidget {
     required this.selectedUser,
     required this.onUserSelected,
     required this.index,
-    this.duplicateFlag, this.leadData,
+    this.duplicateFlag,
+    this.leadData,
   });
 
   Widget buildAvatar(String initials, int index) {
@@ -133,33 +134,41 @@ class FollowUpLeadCard extends StatelessWidget {
                   ),
               ],
             ),
-            if (location != "null")
-              Text(
-                location,
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.grey,
-                  size: 14.sp,
-                  weight: FontWeight.w500,
+            if (location != null && location.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 2.h),
+                child: Text(
+                  location,
+                  style: GLTextStyles.manropeStyle(
+                    color: ColorTheme.grey,
+                    size: 14.sp,
+                    weight: FontWeight.w500,
+                  ),
                 ),
               ),
-            if (location != "null" && platform != "null")
-            SizedBox(height: 4.h),
-            if (platform != "null")
-              Text(
-                platform,
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.black,
-                  size: 14.sp,
-                  weight: FontWeight.w500,
+            if (platform != null && platform.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(
+                    top: (location != null && location.isNotEmpty) ? 4.h : 2.h),
+                child: Text(
+                  platform,
+                  style: GLTextStyles.manropeStyle(
+                    color: ColorTheme.black,
+                    size: 14.sp,
+                    weight: FontWeight.w500,
+                  ),
                 ),
               ),
-            if (followupDate != "null")
-              Text(
-                followupDate,
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.lightBlue,
-                  size: 12.5.sp,
-                  weight: FontWeight.w600,
+            if (followupDate != null && followupDate.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 4.h),
+                child: Text(
+                  followupDate,
+                  style: GLTextStyles.manropeStyle(
+                    color: ColorTheme.lightBlue,
+                    size: 12.5.sp,
+                    weight: FontWeight.w600,
+                  ),
                 ),
               ),
           ],
@@ -179,10 +188,13 @@ class FollowUpLeadCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             PopupMenuButton<String>(
-              color: const Color(0xfff5f5f5),
+              elevation: 8,
+              shadowColor: Colors.black26,
+              color: const Color.fromARGB(255, 255, 255, 255),
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<String>(
+                    padding: EdgeInsets.zero,
                     value: 'assign_user',
                     child: Container(
                       decoration: ShapeDecoration(
@@ -192,72 +204,97 @@ class FollowUpLeadCard extends StatelessWidget {
                       ),
                       height: .45.sh,
                       width: .4.sw,
-                      child: Scrollbar(
-                        thickness: 2,
-                        radius: const Radius.circular(15),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(top: 5),
-                          itemCount: users.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              tileColor: const Color(0xfff5f5f5),
-                              title: Text(
-                                users[index],
-                                style: GLTextStyles.manropeStyle(
-                                  color: ColorTheme.black,
-                                  size: 14.sp,
-                                  weight: FontWeight.w500,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.only(top: 5),
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () async {
+                              final newSelectedUser = users[index];
+                              final newUserId = leadController
+                                      .userListModel.users?[index].id
+                                      .toString() ??
+                                  '';
+
+                              onUserSelected(leadId, newSelectedUser);
+                              await leadController.assignedToTapped(
+                                  leadId, newUserId, context);
+
+                              Navigator.pop(context);
+                              Flushbar(
+                                maxWidth: .55.sw,
+                                backgroundColor: Colors.grey.shade100,
+                                messageColor: ColorTheme.black,
+                                icon: Icon(
+                                  Iconsax.profile_tick,
+                                  color: ColorTheme.green,
+                                  size: 20.sp,
                                 ),
+                                message: 'Assign Successful',
+                                duration: const Duration(seconds: 2),
+                                flushbarPosition: FlushbarPosition.TOP,
+                              ).show(context);
+
+                              await Provider.of<LeadController>(context,
+                                      listen: false)
+                                  .searchLeads(context);
+
+                              leadController.notifyListeners();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
                               ),
-                              onTap: () async {
-                                final newSelectedUser = users[index];
-                                final newUserId = leadController
-                                        .userListModel.users?[index].id
-                                        .toString() ??
-                                    '';
-
-                                onUserSelected(leadId, newSelectedUser);
-
-                                leadController.assignedToTapped(
-                                  leadId,
-                                  newUserId,
-                                  context,
-                                );
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LeadDetailScreenCopy(
-                                      leadId: int.tryParse(leadId),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 12.r,
+                                        backgroundColor:
+                                            const Color(0xff25274B),
+                                        child: Text(
+                                          users[index]
+                                              .substring(0, 2)
+                                              .toUpperCase(),
+                                          style: GLTextStyles.manropeStyle(
+                                            color: ColorTheme.white,
+                                            size: 10.sp,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 12.w),
+                                      Expanded(
+                                        child: Text(
+                                          users[index],
+                                          style: GLTextStyles.manropeStyle(
+                                            color: const Color(0xff1E232C),
+                                            size: 12.sp,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (index != users.length - 1)
+                                    Divider(
+                                      color:
+                                          const Color.fromARGB(44, 95, 95, 87),
+                                      thickness: 0.55,
+                                      height: 18.h,
                                     ),
-                                  ),
-                                );
-
-                                await leadController.fetchData(context);
-
-                                Flushbar(
-                                  maxWidth: .55.sw,
-                                  backgroundColor: Colors.grey.shade100,
-                                  messageColor: ColorTheme.black,
-                                  icon: Icon(
-                                    Iconsax.profile_tick,
-                                    color: ColorTheme.green,
-                                    size: 20.sp,
-                                  ),
-                                  message: 'Assign Successful',
-                                  duration: const Duration(seconds: 3),
-                                  flushbarPosition: FlushbarPosition.TOP,
-                                ).show(context);
-                              },
-                            );
-                          },
-                        ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
                 ];
               },
-              elevation: 0,
               child: Container(
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
@@ -299,18 +336,30 @@ class FollowUpLeadCard extends StatelessWidget {
             SizedBox(width: 15.w),
             InkWell(
               onTap: () {
-                if (leadData != null) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return QuickEditModal(
-                        email: leadData.email ?? "",
-                        phoneNumber: leadData.phoneNumber ?? "",
-                        leadId: leadData.id ?? 0,
-                      );
-                    },
-                  );
-                }
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return QuickEditModal(
+                      email: leadController.leadModel.leads?.data != null &&
+                              index <
+                                  leadController.leadModel.leads!.data!.length
+                          ? (leadController
+                                  .leadModel.leads?.data?[index].email ??
+                              "")
+                          : "",
+                      phoneNumber: leadController.leadModel.leads?.data !=
+                                  null &&
+                              index <
+                                  leadController.leadModel.leads!.data!.length
+                          ? (leadController
+                                  .leadModel.leads?.data?[index].phoneNumber ??
+                              "")
+                          : "",
+                      leadId:
+                          leadController.leadModel.leads?.data?[index].id ?? 0,
+                    );
+                  },
+                );
               },
               child: const Icon(
                 Icons.more_vert,

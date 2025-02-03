@@ -112,7 +112,7 @@ Widget _buildUserIcon(BuildContext context, String initials, [String? userName])
             ),
           ),
           if (_isVisible) ...[
-             SizedBox(width: 8.sp), // Reduced spacing between avatar and text
+             SizedBox(width: 8.sp),
             Flexible(
               child: Padding(
                 padding:  EdgeInsets.symmetric(vertical: 8.h),
@@ -124,11 +124,11 @@ Widget _buildUserIcon(BuildContext context, String initials, [String? userName])
                     weight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 1, // Prevents overflow to a second line
+                  maxLines: 1, 
                 ),
               ),
             ),
-            SizedBox(width: 8.sp), // Reduced spacing between text and logout button
+            SizedBox(width: 8.sp), 
             const LogoutButton(),
             SizedBox(width: 4.sp),
           ],
