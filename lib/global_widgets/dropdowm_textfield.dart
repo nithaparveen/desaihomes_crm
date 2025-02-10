@@ -60,7 +60,11 @@ class _SearchableDropdownFormTextFieldState
   void dispose() {
     searchController.dispose();
     _focusNode.dispose();
-    _removeOverlay();
+
+    if (_overlayEntry != null && isDropdownVisible) {
+      _removeOverlay();
+    }
+
     super.dispose();
   }
 
@@ -103,11 +107,15 @@ class _SearchableDropdownFormTextFieldState
   }
 
   void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    setState(() {
-      isDropdownVisible = false;
-    });
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
+    if (mounted) {
+      setState(() {
+        isDropdownVisible = false;
+      });
+    }
   }
 
   OverlayEntry _createOverlayEntry() {
