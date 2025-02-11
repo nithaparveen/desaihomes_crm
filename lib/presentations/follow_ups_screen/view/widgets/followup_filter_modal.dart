@@ -144,6 +144,7 @@ class _FollowUpFilterModalState extends State<FollowUpFilterModal> {
               ),
               SizedBox(height: 8.h),
               DropdownButtonFormField<String>(
+                dropdownColor: Colors.white,
                 value: selectedProject,
                 icon: Icon(Iconsax.arrow_down_1, size: 15.sp),
                 style: GLTextStyles.manropeStyle(
@@ -217,7 +218,7 @@ class _FollowUpFilterModalState extends State<FollowUpFilterModal> {
                       onPressed: () {
                         if (fromDate == null &&
                             toDate == null &&
-                            selectedProject == null ) {
+                            selectedProject == null) {
                           Flushbar(
                             maxWidth: .55.sw,
                             backgroundColor: Colors.grey.shade100,
@@ -232,7 +233,8 @@ class _FollowUpFilterModalState extends State<FollowUpFilterModal> {
                             flushbarPosition: FlushbarPosition.TOP,
                           ).show(context);
                         } else {
-                          Provider.of<FollowUpController>(context, listen: false)
+                          Provider.of<FollowUpController>(context,
+                                  listen: false)
                               .followUpFilterData(
                             projectId: selectedProject,
                             fromDate: fromDate?.toIso8601String(),

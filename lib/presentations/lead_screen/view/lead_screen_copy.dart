@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/global_appbar.dart';
@@ -26,15 +29,17 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   final Map<String, String?> selectedUsers = {};
   final FocusNode _searchFocusNode = FocusNode();
   bool _isFilterApplied = false;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-            LoginController()
-          .checkForAppUpdates(context); 
+      if (Platform.isAndroid) {
+        LoginController().checkForAppUpdates(context);
+      }
       fetchData();
-      scrollController.addListener(scrollListener);
+      scrollController.addListener(_debouncedScrollListener);
     });
   }
 
@@ -58,10 +63,18 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
     }
   }
 
-  void scrollListener() {
-    if (scrollController.position.extentAfter < 500) {
-      fetchMoreData();
-    }
+  void _debouncedScrollListener() {
+    if (_debounceTimer?.isActive ?? false) return;
+
+    _debounceTimer = Timer(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+
+      if (scrollController.position.extentAfter < 500 &&
+          !Provider.of<LeadController>(context, listen: false).isLoadingMore) {
+        Provider.of<LeadController>(context, listen: false)
+            .loadMoreData(context);
+      }
+    });
   }
 
   void updateSelectedUser(String leadId, String? user) {
@@ -83,6 +96,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     scrollController.dispose();
     _searchFocusNode.dispose();
     Provider.of<LeadController>(context, listen: false)

@@ -8,6 +8,7 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -145,25 +146,6 @@ class _QuickEditModalState extends State<QuickEditModal>
     super.dispose();
   }
 
-  void clearFilters() {
-    setState(() {
-      selectedDate = null;
-      selectedStatus = null;
-      selectedStatusId = null;
-      selectedProject = null;
-      selectedProjectId = null;
-      selectedProfession = null;
-      selectedCountry = null;
-      selectedCountryId = null;
-      selectedAge = null;
-      altNumberController.clear();
-      cityController.clear();
-      ageController.clear();
-
-      noteValidate = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
@@ -174,10 +156,10 @@ class _QuickEditModalState extends State<QuickEditModal>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
       ),
-      insetPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10),
+      insetPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 20),
       child: SingleChildScrollView(
         child: Container(
-          height: (580 / ScreenUtil().screenHeight).sh,
+          height: (680 / ScreenUtil().screenHeight).sh,
           width: (600 / ScreenUtil().screenWidth).sw,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -241,6 +223,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                               ),
                             )
                           : SingleChildScrollView(
+                             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                               child: Padding(
                                 padding: EdgeInsets.only(
                                     left: 18.w,
@@ -384,33 +367,115 @@ class _QuickEditModalState extends State<QuickEditModal>
                                                 ),
                                               ),
                                               SizedBox(height: 6.h),
-                                              SearchableDropdownFormTextField(
-                                                initialValue: selectedStatus,
-                                                items: statusController
-                                                        .statusListModel
-                                                        .crmStatus
-                                                        ?.map((status) =>
-                                                            status.name ??
-                                                            "Unnamed Status")
-                                                        .toList() ??
-                                                    [],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    selectedStatus = value;
-                                                    selectedStatusId =
-                                                        statusController
-                                                            .statusListModel
-                                                            .crmStatus
-                                                            ?.firstWhere(
-                                                                (status) =>
-                                                                    status
-                                                                        .name ==
-                                                                    value)
-                                                            .id
-                                                            .toString();
-                                                  });
-                                                },
+                                              SizedBox(
+                                                height: 38.sp,
+                                                child: DropdownButtonFormField<
+                                                    String>(
+                                                  dropdownColor: Colors.white,
+                                                  value: selectedAge,
+                                                  icon: Icon(
+                                                      Iconsax.arrow_down_1,
+                                                      size: 15.sp),
+                                                  style:
+                                                      GLTextStyles.manropeStyle(
+                                                    weight: FontWeight.w400,
+                                                    size: 14.sp,
+                                                    color: const Color.fromARGB(
+                                                        255, 87, 87, 87),
+                                                  ),
+                                                  decoration: InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    contentPadding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 12.w,
+                                                            vertical: 8.h),
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.r),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                              color: Color(
+                                                                  0xffD5D7DA)),
+                                                    ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.r),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                              color: Color(
+                                                                  0xffD5D7DA)),
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.r),
+                                                      borderSide: BorderSide(
+                                                          color: ColorTheme
+                                                              .desaiGreen),
+                                                    ),
+                                                  ),
+                                                  items: statusController
+                                                      .statusListModel.crmStatus
+                                                      ?.map((status) =>
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value: status
+                                                                .name, 
+                                                            child: Text(
+                                                                status.name ??
+                                                                    ""),
+                                                          ))
+                                                      .toList(),
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      selectedStatus = value;
+                                                      selectedStatusId =
+                                                          statusController
+                                                              .statusListModel
+                                                              .crmStatus
+                                                              ?.firstWhere(
+                                                                  (status) =>
+                                                                      status
+                                                                          .name ==
+                                                                      value)
+                                                              .id
+                                                              .toString();
+                                                    });
+                                                  },
+                                                ),
                                               ),
+                                              // SearchableDropdownFormTextField(
+                                              //   initialValue: selectedStatus,
+                                              //   items: statusController
+                                              //           .statusListModel
+                                              //           .crmStatus
+                                              //           ?.map((status) =>
+                                              //               status.name ??
+                                              //               "Unnamed Status")
+                                              //           .toList() ??
+                                              //       [],
+                                              //   onChanged: (value) {
+                                              //     setState(() {
+                                              //       selectedStatus = value;
+                                              //       selectedStatusId =
+                                              //           statusController
+                                              //               .statusListModel
+                                              //               .crmStatus
+                                              //               ?.firstWhere(
+                                              //                   (status) =>
+                                              //                       status
+                                              //                           .name ==
+                                              //                       value)
+                                              //               .id
+                                              //               .toString();
+                                              //     });
+                                              //   },
+                                              // ),
                                             ],
                                           ),
                                         ),
@@ -423,8 +488,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                       children: [
                                         Text(
                                           'Preferred project',
-                                          style:
-                                              GLTextStyles.manropeStyle(
+                                          style: GLTextStyles.manropeStyle(
                                             color: ColorTheme.blue,
                                             size: 14.sp,
                                             weight: FontWeight.w500,
@@ -434,8 +498,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                         SearchableDropdownFormTextField(
                                           initialValue: selectedProject,
                                           items: leadController
-                                                  .projectListModel
-                                                  .projects
+                                                  .projectListModel.projects
                                                   ?.map((project) =>
                                                       project.name ?? "")
                                                   .toList() ??
@@ -443,17 +506,12 @@ class _QuickEditModalState extends State<QuickEditModal>
                                           onChanged: (value) {
                                             setState(() {
                                               selectedProject = value;
-                                              selectedProjectId =
-                                                  leadController
-                                                      .projectListModel
-                                                      .projects
-                                                      ?.firstWhere(
-                                                          (project) =>
-                                                              project
-                                                                  .name ==
-                                                              value)
-                                                      .id
-                                                      .toString();
+                                              selectedProjectId = leadController
+                                                  .projectListModel.projects
+                                                  ?.firstWhere((project) =>
+                                                      project.name == value)
+                                                  .id
+                                                  .toString();
                                             });
                                           },
                                         ),
@@ -489,7 +547,6 @@ class _QuickEditModalState extends State<QuickEditModal>
                                                       onChanged: null,
                                                     );
                                                   }
-
                                                   return SearchableDropdownFormTextField(
                                                     initialValue:
                                                         selectedCountry,
@@ -566,26 +623,109 @@ class _QuickEditModalState extends State<QuickEditModal>
                                               Consumer<LeadController>(
                                                 builder: (context,
                                                     leadController, child) {
-                                                  if (leadController
-                                                      .ageList.isEmpty) {
-                                                    return const SearchableDropdownFormTextField(
-                                                      items: ['Loading...'],
-                                                      onChanged: null,
-                                                    );
-                                                  }
+                                                  // if (leadController
+                                                  //     .ageList.isEmpty) {
+                                                  //   return const SearchableDropdownFormTextField(
+                                                  //     items: ['Loading...'],
+                                                  //     onChanged: null,
+                                                  //   );
+                                                  // }
 
-                                                  return SearchableDropdownFormTextField(
-                                                    initialValue: selectedAge,
-                                                    items: leadController
-                                                        .ageList
-                                                        .map((age) =>
-                                                            age.name ?? "")
-                                                        .toList(),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        selectedAge = value;
-                                                      });
-                                                    },
+                                                  return
+                                                      // SearchableDropdownFormTextField(
+                                                      //   initialValue: selectedAge,
+                                                      //   items: leadController
+                                                      //       .ageList
+                                                      //       .map((age) =>
+                                                      //           age.name ?? "")
+                                                      //       .toList(),
+                                                      //   onChanged: (value) {
+                                                      //     setState(() {
+                                                      //       selectedAge = value;
+                                                      //     });
+                                                      //   },
+                                                      // );
+                                                      SizedBox(
+                                                    height: 38.sp,
+                                                    child:
+                                                        DropdownButtonFormField<
+                                                            String>(
+                                                      dropdownColor:
+                                                          Colors.white,
+                                                      value: selectedAge,
+                                                      icon: Icon(
+                                                          Iconsax.arrow_down_1,
+                                                          size: 15.sp),
+                                                      style: GLTextStyles
+                                                          .manropeStyle(
+                                                        weight: FontWeight.w400,
+                                                        size: 15.sp,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 87, 87, 87),
+                                                      ),
+                                                      decoration:
+                                                          InputDecoration(
+                                                        filled: true,
+                                                        fillColor: Colors.white,
+                                                        contentPadding:
+                                                            EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        12.w,
+                                                                    vertical:
+                                                                        8.h),
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.r),
+                                                          borderSide:
+                                                              const BorderSide(
+                                                                  color: Color(
+                                                                      0xffD5D7DA)),
+                                                        ),
+                                                        enabledBorder:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.r),
+                                                          borderSide:
+                                                              const BorderSide(
+                                                                  color: Color(
+                                                                      0xffD5D7DA)),
+                                                        ),
+                                                        focusedBorder:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.r),
+                                                          borderSide: BorderSide(
+                                                              color: ColorTheme
+                                                                  .desaiGreen),
+                                                        ),
+                                                      ),
+                                                      items: leadController
+                                                          .ageList
+                                                          .map((age) =>
+                                                              DropdownMenuItem<
+                                                                  String>(
+                                                                value: age
+                                                                    .name, // Ensure age.name is non-null
+                                                                child: Text(
+                                                                    age.name ??
+                                                                        ""),
+                                                              ))
+                                                          .toList(),
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          selectedAge = value;
+                                                        });
+                                                      },
+                                                    ),
                                                   );
                                                 },
                                               ),

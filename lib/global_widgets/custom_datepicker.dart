@@ -213,7 +213,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
-          borderSide: const BorderSide(color: Colors.grey),
+          borderSide:  BorderSide(color: ColorTheme.desaiGreen),
         ),
       ),
       onTap: () => _selectDate(context),

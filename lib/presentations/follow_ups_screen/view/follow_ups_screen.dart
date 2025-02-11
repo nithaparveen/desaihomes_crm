@@ -358,19 +358,22 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        if (index >= (controller.leadModel.leads?.data?.length ?? 0)) {
-    return controller.hasMoreData && controller.isMoreLoading
-        ? Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: LoadingAnimationWidget.fourRotatingDots(
-                color: ColorTheme.desaiGreen,
-                size: 32,
-              ),
-            ),
-          )
-        : const SizedBox.shrink();
-  }
+                        if (index >=
+                            (controller.leadModel.leads?.data?.length ?? 0)) {
+                          return controller.hasMoreData &&
+                                  controller.isMoreLoading
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child:
+                                        LoadingAnimationWidget.fourRotatingDots(
+                                      color: ColorTheme.desaiGreen,
+                                      size: 32,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink();
+                        }
 
                         final lead = controller.leadModel.leads?.data?[index];
                         final projectName = lead?.project?.name ?? '';
@@ -410,7 +413,8 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
                             selectedUser: selectedUsers[leadId],
                             onUserSelected: updateSelectedUser,
                             index: index,
-                            leadData: lead, 
+                            leadData: lead,
+                            assignInitials: lead!.assignedToDetails?.name ?? "--",
                           ),
                         );
                       },

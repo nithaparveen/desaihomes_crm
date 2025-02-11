@@ -18,7 +18,7 @@ class ReportsService {
   }
 
     static Future<dynamic> filterData({
-    String? campaignName,
+    String? projectId,
     String? fromDate,
     String? toDate,
     List<String>? leadSources,
@@ -26,8 +26,8 @@ class ReportsService {
     try {
       String queryString = "reports?";
 
-      if (campaignName != null) {
-        queryString += "campaign_name=$campaignName&";
+      if (projectId != null) {
+        queryString += "project_id=$projectId&";
       }
 
       if (fromDate != null) {

@@ -95,6 +95,30 @@ class LeadCard extends StatelessWidget {
                 ),
               ),
               if (duplicateFlag == true)
+                // InkWell(
+                //   onTap: () {
+                //     showDialog(
+                //       context: context,
+                //       builder: (BuildContext context) {
+                //         return DuplicateLeadModal(
+                //           leadId: leadId,
+                //         );
+                //       },
+                //     );
+                //   },
+                //   child: SizedBox(
+                //     height: 18.h,
+                //     width: 20.w,
+                //     child: Padding(
+                //       padding: EdgeInsets.only(left: 10.w),
+                //       child: Icon(
+                //         Icons.warning_sharp,
+                //         size: 16.sp,
+                //         color: ColorTheme.yellow,
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 InkWell(
                   onTap: () {
                     showDialog(
@@ -106,18 +130,19 @@ class LeadCard extends StatelessWidget {
                       },
                     );
                   },
-                  child: SizedBox(
-                    height: 18.h,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 10.w),
-                      child: Icon(
-                        Icons.warning_sharp,
-                        size: 16.sp,
-                        color: ColorTheme.yellow,
-                      ),
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10.w),
+                    height: 20.h,
+                    width: 50.w,
+                    color: Colors.white,
+                    alignment: Alignment.centerLeft,
+                    child: Icon(
+                      Icons.warning_sharp,
+                      size: 16.sp,
+                      color: ColorTheme.yellow,
                     ),
                   ),
-                ),
+                )
             ],
           ),
           if (location != "null")
@@ -155,7 +180,7 @@ class LeadCard extends StatelessWidget {
   Widget buildActions(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
     final dummyStatus = DummyStatusList.getStatusDetails(status);
-
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -193,7 +218,7 @@ class LeadCard extends StatelessWidget {
 
                               onUserSelected(leadId, newSelectedUser);
                               await leadController.assignedToTapped(
-                                  leadId, newUserId, context);
+                                  leadId, newUserId, newSelectedUser, context);
 
                               Navigator.pop(context);
                               Flushbar(
@@ -209,10 +234,6 @@ class LeadCard extends StatelessWidget {
                                 duration: const Duration(seconds: 3),
                                 flushbarPosition: FlushbarPosition.TOP,
                               ).show(context);
-
-                              await Provider.of<LeadController>(context,
-                                      listen: false)
-                                  .searchLeads(context);
 
                               leadController.notifyListeners();
                             },

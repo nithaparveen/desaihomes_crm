@@ -11,6 +11,7 @@ class SearchableDropdownFormTextField extends StatefulWidget {
   final TextStyle? textStyle;
   final Function(String?)? onChanged;
   final List<String> items;
+  final String? label;
 
   const SearchableDropdownFormTextField({
     super.key,
@@ -19,7 +20,8 @@ class SearchableDropdownFormTextField extends StatefulWidget {
     this.suffixIcon = Iconsax.arrow_down_1,
     this.textStyle,
     required this.onChanged,
-    required this.items,
+    required this.items, 
+    this.label,
   });
 
   @override
@@ -124,55 +126,85 @@ class _SearchableDropdownFormTextFieldState
     final offset = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          // Add a transparent overlay to detect taps outside
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                _focusNode.unfocus();
-                _removeOverlay();
-              },
+      builder: (context) => Material(
+        color: Colors.transparent,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  _focusNode.unfocus();
+                  _removeOverlay();
+                },
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+            Positioned(
+              width: size.width,
+              left: offset.dx,
+              top: offset.dy + size.height + 4,
               child: Container(
-                color: Colors.transparent,
-              ),
-            ),
-          ),
-          Positioned(
-            width: size.width,
-            left: offset.dx,
-            top: offset.dy + size.height + 4,
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(8),
-              child: ConstrainedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 constraints: BoxConstraints(
-                  maxHeight: filteredItems.length == 1
-                      ? 56.0
-                      : (filteredItems.length == 2 ? 112.0 : 180.0),
+                  maxHeight: MediaQuery.of(context).size.height * 0.3,
                 ),
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = filteredItems[index];
-                    return ListTile(
-                      tileColor: Colors.white,
-                      title: Text(item),
-                      onTap: () {
-                        searchController.text = item;
-                        widget.onChanged?.call(item);
-                        _focusNode.unfocus();
-                        _removeOverlay();
-                      },
-                    );
-                  },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.r),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: filteredItems.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredItems[index];
+                      final isSelected = item == searchController.text;
+                      
+                      return InkWell(
+                        onTap: () {
+                          searchController.text = item;
+                          widget.onChanged?.call(item);
+                          _focusNode.unfocus();
+                          _removeOverlay();
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
+                          color: isSelected
+                              ? ColorTheme.desaiGreen.withOpacity(0.1)
+                              : Colors.white,
+                          child: Text(
+                            item,
+                            style: GLTextStyles.manropeStyle(
+                              size: 14.sp,
+                              weight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: isSelected
+                                  ? ColorTheme.desaiGreen
+                                  : const Color(0xFF575757),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -181,40 +213,75 @@ class _SearchableDropdownFormTextFieldState
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _layerLink,
-      child: SizedBox(
-        height: 38.sp,
-        width: double.infinity,
-        child: TextField(
-          cursorColor: ColorTheme.desaiGreen,
-          controller: searchController,
-          focusNode: _focusNode,
-          onTap: _toggleDropdown,
-          decoration: InputDecoration(
-            hintText: widget.hintText,
-            filled: true,
-            fillColor: Colors.white,
-            suffixIcon: Icon(widget.suffixIcon, size: 15.sp),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xffD5D7DA)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.label != null)
+            Padding(
+              padding: EdgeInsets.only(bottom: 6.h),
+              child: Text(
+                widget.label!,
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.blue,
+                  size: 14.sp,
+                  weight: FontWeight.w500,
+                ),
+              ),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xffD5D7DA)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.grey),
+          SizedBox(
+            height: 38.sp,
+            child: TextField(
+              controller: searchController,
+              focusNode: _focusNode,
+              onTap: _toggleDropdown,
+              cursorColor: ColorTheme.desaiGreen,
+              decoration: InputDecoration(
+                hintText: widget.hintText,
+                hintStyle: GLTextStyles.manropeStyle(
+                  size: 14.sp,
+                  weight: FontWeight.w400,
+                  color: const Color(0xFF8C8E90),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                suffixIcon: AnimatedRotation(
+                  duration: const Duration(milliseconds: 200),
+                  turns: isDropdownVisible ? 0.5 : 0,
+                  child: Icon(
+                    widget.suffixIcon,
+                    size: 15.sp,
+                    color: ColorTheme.blue,
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 8.h,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: const BorderSide(color: Color(0xFFD5D7DA)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: const BorderSide(color: Color(0xFFD5D7DA)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: ColorTheme.desaiGreen),
+                ),
+              ),
+              style: widget.textStyle ??
+                  GLTextStyles.manropeStyle(
+                    weight: FontWeight.w400,
+                    size: 14.sp,
+                    color: const Color(0xFF575757),
+                  ),
             ),
           ),
-          style: widget.textStyle ??
-              GLTextStyles.manropeStyle(
-                weight: FontWeight.w400,
-                size: 14.sp,
-                color: const Color.fromARGB(255, 87, 87, 87),
-              ),
-        ),
+        ],
       ),
     );
   }
 }
+

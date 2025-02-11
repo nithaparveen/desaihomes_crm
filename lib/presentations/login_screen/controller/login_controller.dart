@@ -107,6 +107,7 @@ class LoginController extends ChangeNotifier {
   }
 
   Future<void> checkForAppUpdates(BuildContext context) async {
+    if (!Platform.isAndroid) return;
     log("Checking for app updates...");
     var versionData = await LoginService.checkAppVersion();
 

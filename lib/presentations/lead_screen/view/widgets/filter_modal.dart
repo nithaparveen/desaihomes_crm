@@ -157,6 +157,7 @@ class _FilterModalState extends State<FilterModal> {
               ),
               SizedBox(height: 8.h),
               DropdownButtonFormField<String>(
+                dropdownColor: Colors.white,
                 value: selectedProject,
                 icon: Icon(Iconsax.arrow_down_1, size: 15.sp),
                 style: GLTextStyles.manropeStyle(
@@ -314,7 +315,6 @@ class _FilterModalState extends State<FilterModal> {
                             leadSources: selectedLeadSources,
                             context: context,
                           );
-
                           Navigator.of(context).pop();
                           widget.onFilterApplied?.call();
                         }

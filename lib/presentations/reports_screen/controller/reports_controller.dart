@@ -28,7 +28,7 @@ class ReportsController extends ChangeNotifier {
   }
 
   fetchFilterData({
-    String? campaignName,
+    String? projectId,
     String? fromDate,
     String? toDate,
     List<String>? leadSources,
@@ -37,7 +37,7 @@ class ReportsController extends ChangeNotifier {
     isFilterLoading = true;
     notifyListeners();
     ReportsService.filterData(
-      campaignName: campaignName,
+      projectId: projectId,
       fromDate: fromDate,
       toDate: toDate,
       leadSources: leadSources,

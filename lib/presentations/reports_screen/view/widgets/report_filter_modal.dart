@@ -23,7 +23,7 @@ class ReportFilterModal extends StatefulWidget {
 class _ReportFilterModalState extends State<ReportFilterModal> {
   DateTime? fromDate;
   DateTime? toDate;
-  String? selectedCampaign;
+  String? selectedProject;
   List<String> selectedLeadSources = [];
 
   final MultiSelectController<String> leadSourceController =
@@ -33,7 +33,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
     setState(() {
       fromDate = null;
       toDate = null;
-      selectedCampaign = null;
+      selectedProject = null;
       selectedLeadSources.clear();
       leadSourceController.clearAll();
     });
@@ -45,6 +45,8 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<LeadController>(context, listen: false)
           .fetchLeadSourceList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchProjectList(context);
       Provider.of<ReportsController>(context, listen: false)
           .fetchCampaignList(context);
     });
@@ -54,8 +56,6 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
   @override
   Widget build(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
-    final reportController =
-        Provider.of<ReportsController>(context, listen: false);
     final leadSourceItems = leadController.leadSourceModel.data
             ?.map((item) => item.source ?? '')
             .toList() ??
@@ -151,7 +151,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
               ),
               SizedBox(height: 20.h),
               Text(
-                'Campaign',
+                'Project',
                 style: GLTextStyles.manropeStyle(
                   color: ColorTheme.blue,
                   size: 14.sp,
@@ -160,8 +160,8 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
               ),
               SizedBox(height: 8.h),
               DropdownButtonFormField<String>(
-                isExpanded: true,
-                value: selectedCampaign,
+                dropdownColor: Colors.white,
+                value: selectedProject,
                 icon: Icon(Iconsax.arrow_down_1, size: 15.sp),
                 style: GLTextStyles.manropeStyle(
                   weight: FontWeight.w400,
@@ -186,13 +186,11 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                 ),
-                items: reportController.campaignListModel.data
+                items: leadController.projectListModel.projects
                     ?.map((item) => DropdownMenuItem(
-                          value: item.name,
+                          value: item.id.toString(),
                           child: Text(
                             item.name ?? '',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
                             style: GLTextStyles.manropeStyle(
                               weight: FontWeight.w400,
                               size: 15.sp,
@@ -203,7 +201,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedCampaign = value;
+                    selectedProject = value;
                   });
                 },
               ),
@@ -296,7 +294,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                       onPressed: () {
                         if (fromDate == null &&
                             toDate == null &&
-                            selectedCampaign == null &&
+                            selectedProject == null &&
                             selectedLeadSources.isEmpty) {
                           Flushbar(
                             maxWidth: .55.sw,
@@ -314,7 +312,7 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                         } else {
                           Provider.of<ReportsController>(context, listen: false)
                               .fetchFilterData(
-                            campaignName: selectedCampaign,
+                            projectId: selectedProject,
                             fromDate: fromDate?.toIso8601String(),
                             toDate: toDate?.toIso8601String(),
                             leadSources: selectedLeadSources,

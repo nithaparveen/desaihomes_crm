@@ -17,6 +17,7 @@ class FollowUpLeadCard extends StatelessWidget {
   final String platform;
   final String followupDate;
   final String initials;
+  final String assignInitials;
   final String status;
   final List<String> users;
   final String leadId;
@@ -42,7 +43,7 @@ class FollowUpLeadCard extends StatelessWidget {
     required this.onUserSelected,
     required this.index,
     this.duplicateFlag,
-    this.leadData,
+    this.leadData, required this.assignInitials,
   });
 
   Widget buildAvatar(String initials, int index) {
@@ -218,7 +219,7 @@ class FollowUpLeadCard extends StatelessWidget {
 
                               onUserSelected(leadId, newSelectedUser);
                               await leadController.assignedToTapped(
-                                  leadId, newUserId, context);
+                                  leadId, newUserId, newSelectedUser, context);
 
                               Navigator.pop(context);
                               Flushbar(
@@ -234,10 +235,6 @@ class FollowUpLeadCard extends StatelessWidget {
                                 duration: const Duration(seconds: 2),
                                 flushbarPosition: FlushbarPosition.TOP,
                               ).show(context);
-
-                              await Provider.of<LeadController>(context,
-                                      listen: false)
-                                  .searchLeads(context);
 
                               leadController.notifyListeners();
                             },
@@ -304,33 +301,14 @@ class FollowUpLeadCard extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
-                child: leadController.leadModel.leads?.data != null &&
-                        index < leadController.leadModel.leads!.data!.length
-                    ? (leadController
-                                .leadModel.leads?.data?[index].assignedTo ==
-                            null
-                        ? Icon(
-                            Iconsax.profile_add,
-                            size: 22.sp,
-                            color: Colors.black87,
-                          )
-                        : Text(
-                            (leadController.leadModel.leads?.data?[index]
-                                        .assignedToDetails?.name ??
-                                    "")
-                                .substring(0, 2)
-                                .toUpperCase(),
-                            style: GLTextStyles.robotoStyle(
-                              color: ColorTheme.lightBlue,
-                              size: 16.sp,
-                              weight: FontWeight.bold,
-                            ),
-                          ))
-                    : Icon(
-                        Iconsax.profile_add,
-                        size: 22.sp,
-                        color: Colors.black87,
-                      ),
+                child: Text(
+                  assignInitials.substring(0, 2).toUpperCase(),
+                  style: GLTextStyles.robotoStyle(
+                    color: ColorTheme.lightBlue,
+                    size: 16.sp,
+                    weight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             SizedBox(width: 15.w),

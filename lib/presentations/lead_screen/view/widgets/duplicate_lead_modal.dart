@@ -114,7 +114,8 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Original lead is missing')),
+                            const SnackBar(
+                                content: Text('Original lead is missing')),
                           );
                         }
                       },
