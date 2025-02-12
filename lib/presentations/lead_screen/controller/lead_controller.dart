@@ -43,7 +43,7 @@ class LeadController extends ChangeNotifier {
   bool _isLoadingMore = false;
   bool hasMoreData = true;
   final int _pageSize = 15; // Adjust based on your API's page size
-  
+
   // Add this to track ongoing requests
   Future<void>? _currentRequest;
 
@@ -54,6 +54,19 @@ class LeadController extends ChangeNotifier {
   String? _currentFromDate;
   String? _currentToDate;
   List<String>? _currentLeadSources;
+
+  DateTime? appliedFromDate;
+  DateTime? appliedToDate;
+  String? appliedProject;
+  List<String> appliedLeadSources = [];
+
+  void setFilters({DateTime? from, DateTime? to, String? project, List<String>? sources}) {
+    appliedFromDate = from;
+    appliedToDate = to;
+    appliedProject = project;
+    appliedLeadSources = sources ?? [];
+    notifyListeners();
+  }
 
   Future<void> fetchData(context, {int page = 1}) async {
     isLoading = page == 1;
@@ -85,11 +98,11 @@ class LeadController extends ChangeNotifier {
     });
   }
 
-  Future<void> fetchDuplicatelead(leadId,BuildContext context) async {
+  Future<void> fetchDuplicatelead(leadId, BuildContext context) async {
     isduplicateFlagLoading = true;
     duplicateFlag = [];
     notifyListeners();
-    
+
     final resp = await LeadService.fetchDuplicateLead(leadId);
 
     if (resp != null) {
@@ -299,78 +312,72 @@ class LeadController extends ChangeNotifier {
     });
   }
 
-Future<void> assignedToTapped(String id, String assignedTo,String name, BuildContext context) async {
-  final currentSearchText = searchController.text;
-int? leadIndex = -1;
-  // Update UI immediately without waiting for the API call
-  if (leadModel.leads?.data != null) {
-     leadIndex = leadModel.leads?.data?.indexWhere(
-      (lead) => lead.id.toString() == id
-    );
-    
-    if (leadIndex != null && leadIndex != -1) {
-      // Update the lead's assigned user immediately
-      leadModel.leads?.data?[leadIndex].assignedTo = assignedTo;
-      notifyListeners(); // Notify the UI to reflect the change
-    }
-  }
+  Future<void> assignedToTapped(
+      String id, String assignedTo, String name, BuildContext context) async {
+    final currentSearchText = searchController.text;
+    int? leadIndex = -1;
+    // Update UI immediately without waiting for the API call
+    if (leadModel.leads?.data != null) {
+      leadIndex =
+          leadModel.leads?.data?.indexWhere((lead) => lead.id.toString() == id);
 
-  try {
-    // Make API call to assign the lead
-    final value = await LeadService.assignedToTapped(id, assignedTo);
-    
-    if (value["status"] == true) {
-      if(leadIndex != null){
-        leadModel.leads?.data?[leadIndex].assignedToDetails = AssignedToDetails(id: int.parse(assignedTo),name: name);
-      notifyListeners();
+      if (leadIndex != null && leadIndex != -1) {
+        // Update the lead's assigned user immediately
+        leadModel.leads?.data?[leadIndex].assignedTo = assignedTo;
+        notifyListeners(); // Notify the UI to reflect the change
       }
-       
-      // After successfully assigning the lead, keep the data updated
-      // if (currentSearchText.isNotEmpty) {
-      //   // If we're in search mode, reload the data while maintaining position
-      //   LeadService.searchLead(currentSearchText, page: currentPage).then((result) {
-      //     if (result != null && result['status'] == true) {
-      //       var newData = LeadModel.fromJson(result);
-      //       leadModel.leads?.data = newData.leads?.data;
-      //       notifyListeners();
-      //     }
-      //   });
-      // } else {
-      //   // If not searching, update the UI with the new assignment (without reload)
-      //   notifyListeners();
-      // }
+    }
 
+    try {
+      // Make API call to assign the lead
+      final value = await LeadService.assignedToTapped(id, assignedTo);
 
-    } else {
-      // If assignment failed, revert the UI changes
-      if (leadModel.leads?.data != null) {
-        final int? leadIndex = leadModel.leads?.data?.indexWhere(
-          (lead) => lead.id.toString() == id
-        );
-        
-        if (leadIndex != null && leadIndex != -1) {
-          // Revert the assignment if failed
-          leadModel.leads?.data?[leadIndex].assignedTo = null;
-          notifyListeners(); // Revert the UI immediately
+      if (value["status"] == true) {
+        if (leadIndex != null) {
+          leadModel.leads?.data?[leadIndex].assignedToDetails =
+              AssignedToDetails(id: int.parse(assignedTo), name: name);
+          notifyListeners();
         }
-      }
-      
-      AppUtils.oneTimeSnackBar(
-        value["message"] ?? "Failed to assign lead",
-        context: context,
-        bgColor: Colors.redAccent
-      );
-    }
-  } catch (e) {
-    // Handle any errors during the API call
-    // AppUtils.oneTimeSnackBar(
-    //   "Error assigning lead",
-    //   context: context,
-    //   bgColor: Colors.redAccent
-    // );
-  }
-}
 
+        // After successfully assigning the lead, keep the data updated
+        // if (currentSearchText.isNotEmpty) {
+        //   // If we're in search mode, reload the data while maintaining position
+        //   LeadService.searchLead(currentSearchText, page: currentPage).then((result) {
+        //     if (result != null && result['status'] == true) {
+        //       var newData = LeadModel.fromJson(result);
+        //       leadModel.leads?.data = newData.leads?.data;
+        //       notifyListeners();
+        //     }
+        //   });
+        // } else {
+        //   // If not searching, update the UI with the new assignment (without reload)
+        //   notifyListeners();
+        // }
+      } else {
+        // If assignment failed, revert the UI changes
+        if (leadModel.leads?.data != null) {
+          final int? leadIndex = leadModel.leads?.data
+              ?.indexWhere((lead) => lead.id.toString() == id);
+
+          if (leadIndex != null && leadIndex != -1) {
+            // Revert the assignment if failed
+            leadModel.leads?.data?[leadIndex].assignedTo = null;
+            notifyListeners(); // Revert the UI immediately
+          }
+        }
+
+        AppUtils.oneTimeSnackBar(value["message"] ?? "Failed to assign lead",
+            context: context, bgColor: Colors.redAccent);
+      }
+    } catch (e) {
+      // Handle any errors during the API call
+      // AppUtils.oneTimeSnackBar(
+      //   "Error assigning lead",
+      //   context: context,
+      //   bgColor: Colors.redAccent
+      // );
+    }
+  }
 
   quickEdit(
       int? leadId,
@@ -426,7 +433,6 @@ int? leadIndex = -1;
     }
   }
 
-
   Future<void> loadMoreData(BuildContext context) async {
     // Don't load more if already loading or no more data
     if (_isLoadingMore || !hasMoreData || _currentRequest != null) {
@@ -449,39 +455,33 @@ int? leadIndex = -1;
 
   Future<void> _loadData(BuildContext context) async {
     final nextPage = currentPage + 1;
-    
+
     try {
       final response = await LeadService.fetchData(page: nextPage);
-      
+
       if (response["status"] == true) {
         var fetchedData = LeadModel.fromJson(response);
         final newLeads = fetchedData.leads?.data ?? [];
-        
+
         // Only update if we got data and are still on the expected page
         if (newLeads.isNotEmpty) {
           leadModel.leads?.data?.addAll(newLeads);
           currentPage = nextPage;
-          
+
           // Check if we've reached the end
           hasMoreData = newLeads.length >= _pageSize;
         } else {
           hasMoreData = false;
         }
       } else {
-        AppUtils.oneTimeSnackBar(
-          "Unable to fetch Data",
-          context: context,
-          bgColor: ColorTheme.red
-        );
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
         hasMoreData = false;
       }
     } catch (e) {
       log("LoadMoreData error: $e");
-      AppUtils.oneTimeSnackBar(
-        "Error loading more data",
-        context: context,
-        bgColor: ColorTheme.red
-      );
+      AppUtils.oneTimeSnackBar("Error loading more data",
+          context: context, bgColor: ColorTheme.red);
       hasMoreData = false;
     }
   }

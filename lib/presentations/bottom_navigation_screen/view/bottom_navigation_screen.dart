@@ -4,9 +4,11 @@ import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/presentations/follow_ups_screen/view/follow_ups_screen.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/lead_screen_copy.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/view/reports_screen.dart';
+import 'package:desaihomes_crm_application/presentations/whatsapp_screen/view/whatsapp_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -22,17 +24,20 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   final NotchBottomBarController notchBottomBarController =
       NotchBottomBarController(index: 0);
-  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;  
-  static List pageNames = ["LeadScreen","FollowUpScreen","ReportsScreen"];
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  static List pageNames = [
+    "LeadScreen",
+    "FollowUpScreen",
+    "ReportsScreen",
+    "WhatsappScreen"
+  ];
 
   Future<void> requestPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.phone,
     ].request();
 
-    if (statuses[Permission.phone]!.isGranted) {
-      
-    }
+    if (statuses[Permission.phone]!.isGranted) {}
   }
 
   @override
@@ -57,6 +62,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               LeadScreenCopy(),
               FollowUpScreen(),
               ReportsScreen(),
+              WhatsappScreen()
             ],
           );
         },
@@ -101,14 +107,25 @@ class _BottomNavBarState extends State<BottomNavBar> {
                     Icon(Iconsax.chart_2, color: ColorTheme.white, size: 22.sp),
                 itemLabel: "Reports",
               ),
+              BottomBarItem(
+                inActiveItem: Icon(
+                  FontAwesomeIcons.whatsapp,
+                  color: Colors.white,
+                  size: 22.sp,
+                ),
+                activeItem: Icon(
+                  FontAwesomeIcons.whatsapp,
+                  color: ColorTheme.white,
+                  size: 22.sp,
+                ),
+                itemLabel: "WhatsApp",
+              ),
             ],
             onTap: (index) {
-              analytics.logEvent(name: 'pages_tracked',
-              parameters: {
-                "page_name" : pageNames[index],
-                "page_index" : index
-              }
-              );
+              analytics.logEvent(name: 'pages_tracked', parameters: {
+                "page_name": pageNames[index],
+                "page_index": index
+              });
               controller.selectedIndex = index;
               notchBottomBarController.index = index;
             },

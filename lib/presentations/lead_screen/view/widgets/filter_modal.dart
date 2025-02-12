@@ -41,13 +41,19 @@ class _FilterModalState extends State<FilterModal> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<LeadController>(context, listen: false)
-          .fetchLeadSourceList(context);
-      Provider.of<LeadController>(context, listen: false)
-          .fetchProjectList(context);
-    });
     super.initState();
+
+    final leadController = Provider.of<LeadController>(context, listen: false);
+
+    fromDate = leadController.appliedFromDate;
+    toDate = leadController.appliedToDate;
+    selectedProject = leadController.appliedProject;
+    selectedLeadSources = List.from(leadController.appliedLeadSources);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      leadController.fetchLeadSourceList(context);
+      leadController.fetchProjectList(context);
+    });
   }
 
   @override
@@ -307,6 +313,13 @@ class _FilterModalState extends State<FilterModal> {
                             flushbarPosition: FlushbarPosition.TOP,
                           ).show(context);
                         } else {
+                          Provider.of<LeadController>(context, listen: false)
+                              .setFilters(
+                            from: fromDate,
+                            to: toDate,
+                            project: selectedProject,
+                            sources: selectedLeadSources,
+                          );
                           Provider.of<LeadController>(context, listen: false)
                               .fetchFilterData(
                             projectId: selectedProject,
