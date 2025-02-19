@@ -42,18 +42,12 @@ class LeadController extends ChangeNotifier {
   int currentPage = 1;
   bool _isLoadingMore = false;
   bool hasMoreData = true;
-  final int _pageSize = 15; // Adjust based on your API's page size
+  final int _pageSize = 15; 
 
-  // Add this to track ongoing requests
   Future<void>? _currentRequest;
 
   bool get isLoadingMore => _isLoadingMore;
 
-  String? _currentSearchKeyword;
-  String? _currentProjectId;
-  String? _currentFromDate;
-  String? _currentToDate;
-  List<String>? _currentLeadSources;
 
   DateTime? appliedFromDate;
   DateTime? appliedToDate;
@@ -65,16 +59,21 @@ class LeadController extends ChangeNotifier {
     appliedToDate = to;
     appliedProject = project;
     appliedLeadSources = sources ?? [];
+    print("$from , $to , $project , $sources");
     notifyListeners();
+  }
+
+  void clearFilters(){
+          appliedFromDate = null;
+      appliedToDate = null;
+      appliedProject = null;
+      appliedLeadSources.clear();
+      notifyListeners();
+
   }
 
   Future<void> fetchData(context, {int page = 1}) async {
     isLoading = page == 1;
-    _currentSearchKeyword = null;
-    _currentProjectId = null;
-    _currentFromDate = null;
-    _currentToDate = null;
-    _currentLeadSources = null;
 
     currentPage = page;
     notifyListeners();
@@ -191,7 +190,6 @@ class LeadController extends ChangeNotifier {
     }
 
     isLoading = page == 1;
-    _currentSearchKeyword = keyword;
     currentPage = page;
     notifyListeners();
 
@@ -231,10 +229,6 @@ class LeadController extends ChangeNotifier {
     int page = 1,
   }) async {
     isFilterLoading = page == 1;
-    _currentProjectId = projectId;
-    _currentFromDate = fromDate;
-    _currentToDate = toDate;
-    _currentLeadSources = leadSources;
 
     currentPage = page;
     notifyListeners();
@@ -314,7 +308,6 @@ class LeadController extends ChangeNotifier {
 
   Future<void> assignedToTapped(
       String id, String assignedTo, String name, BuildContext context) async {
-    final currentSearchText = searchController.text;
     int? leadIndex = -1;
     // Update UI immediately without waiting for the API call
     if (leadModel.leads?.data != null) {

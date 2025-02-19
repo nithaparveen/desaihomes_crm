@@ -9,12 +9,14 @@ class CustomDatePicker extends StatefulWidget {
   final String? labelText;
   final Function(DateTime)? onDateSelected;
   final TextEditingController? controller;
+  final DateTime? initialDate;
 
   const CustomDatePicker({
     super.key,
     this.labelText,
     this.onDateSelected,
     this.controller,
+    this.initialDate,
   });
 
   @override
@@ -42,6 +44,10 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     if (widget.controller != null && widget.controller!.text.isNotEmpty) {
       _dateController.text = widget.controller!.text;
     }
+    if (widget.initialDate != null) {
+      _dateController.text =
+          DateFormat("dd-MM-yyyy").format(widget.initialDate!);
+    }
   }
 
   void _selectDate(BuildContext context) {
@@ -59,7 +65,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
             builder: (BuildContext context, StateSetter setState) {
               return Container(
                 width: 400.w,
-                height: 380.h,
+                height: 335.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(4.r),
@@ -213,11 +219,10 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
-          borderSide:  BorderSide(color: ColorTheme.desaiGreen),
+          borderSide: BorderSide(color: ColorTheme.desaiGreen),
         ),
       ),
       onTap: () => _selectDate(context),
-      
     );
   }
 

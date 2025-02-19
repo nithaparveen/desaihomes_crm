@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/global_appbar.dart';
@@ -30,6 +29,13 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   final FocusNode _searchFocusNode = FocusNode();
   bool _isFilterApplied = false;
   Timer? _debounceTimer;
+  late final LeadController _leadController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _leadController = Provider.of<LeadController>(context, listen: false);
+  }
 
   @override
   void initState() {
@@ -47,6 +53,10 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
     await Provider.of<LeadController>(context, listen: false)
         .fetchData(context);
     Provider.of<LeadController>(context, listen: false).fetchUserList(context);
+    Provider.of<LeadController>(context, listen: false)
+        .fetchLeadSourceList(context);
+    Provider.of<LeadController>(context, listen: false)
+        .fetchProjectList(context);
     setState(() {});
   }
 
@@ -87,6 +97,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
     setState(() {
       selectedUsers.clear();
       _isFilterApplied = false;
+      Provider.of<LeadController>(context, listen: false).clearFilters();
       Provider.of<LeadController>(context, listen: false)
           .searchController
           .clear();
@@ -99,9 +110,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
     _debounceTimer?.cancel();
     scrollController.dispose();
     _searchFocusNode.dispose();
-    Provider.of<LeadController>(context, listen: false)
-        .searchController
-        .dispose();
+    _leadController.searchController.dispose();
     super.dispose();
   }
 

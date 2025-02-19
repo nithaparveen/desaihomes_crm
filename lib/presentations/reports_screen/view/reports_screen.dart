@@ -3,6 +3,7 @@ import 'package:desaihomes_crm_application/app_config/app_config.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/global_appbar.dart';
+import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/report_filter_modal.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/view/widgets/status_report_tile.dart';
@@ -50,6 +51,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ReportsController>(context, listen: false).fetchData(context);
+            Provider.of<LeadController>(context, listen: false)
+          .fetchLeadSourceList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchProjectList(context);
     });
   }
 

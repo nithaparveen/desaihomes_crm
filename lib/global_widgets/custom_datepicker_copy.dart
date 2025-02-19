@@ -63,7 +63,7 @@ class _CustomDatePickerCopyState extends State<CustomDatePickerCopy> {
             builder: (BuildContext context, StateSetter setState) {
               return Container(
                 width: 400.w,
-                height: 300.h,
+                height: 335.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(4.r),

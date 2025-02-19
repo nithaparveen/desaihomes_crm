@@ -29,30 +29,29 @@ class _FilterModalState extends State<FilterModal> {
       MultiSelectController<String>();
 
   void _clearFilters() {
+    final leadController = Provider.of<LeadController>(context, listen: false);
     setState(() {
+      leadController.clearFilters();
       fromDate = null;
-      toDate = null;
-      selectedProject = null;
+      toDate= null;
+      selectedProject = null ;
       selectedLeadSources.clear();
       leadSourceController.clearAll();
     });
     widget.clearFiltersCallback();
+    
+
   }
 
   @override
   void initState() {
     super.initState();
-
     final leadController = Provider.of<LeadController>(context, listen: false);
-
-    fromDate = leadController.appliedFromDate;
-    toDate = leadController.appliedToDate;
-    selectedProject = leadController.appliedProject;
-    selectedLeadSources = List.from(leadController.appliedLeadSources);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      leadController.fetchLeadSourceList(context);
-      leadController.fetchProjectList(context);
+    setState(() {
+      fromDate = leadController.appliedFromDate;
+      toDate = leadController.appliedToDate;
+      selectedProject = leadController.appliedProject;
+      selectedLeadSources = List.from(leadController.appliedLeadSources);
     });
   }
 
@@ -117,6 +116,7 @@ class _FilterModalState extends State<FilterModal> {
                         ),
                         SizedBox(height: 8.h),
                         CustomDatePicker(
+                          initialDate: leadController.appliedFromDate,
                           onDateSelected: (DateTime date) {
                             setState(() {
                               fromDate = date;
@@ -141,6 +141,7 @@ class _FilterModalState extends State<FilterModal> {
                         ),
                         SizedBox(height: 8.h),
                         CustomDatePicker(
+                          initialDate: leadController.appliedToDate,
                           onDateSelected: (DateTime date) {
                             setState(() {
                               toDate = date;

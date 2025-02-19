@@ -28,8 +28,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => LoginController()),
         ChangeNotifierProvider(create: (context) => LeadController()),
         ChangeNotifierProvider(create: (context) => LeadDetailController()),
-        ChangeNotifierProvider(
-            create: (context) => BottomNavigationController()),
+        ChangeNotifierProvider(create: (context) => BottomNavigationController()),
         ChangeNotifierProvider(create: (context) => ReportsController()),
         ChangeNotifierProvider(create: (context) => FollowUpController()),
       ],

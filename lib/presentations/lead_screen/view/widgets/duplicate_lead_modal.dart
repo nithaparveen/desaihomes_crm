@@ -88,15 +88,11 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                         "Unknown";
                     final createdDate = lead.ogLead is String
                         ? "Invalid Date"
-                        : (lead.ogLead is OgLead &&
-                                lead.ogLead?.createdAt is DateTime)
-                            ? DateFormat('dd-MM-yyyy')
-                                .format(lead.ogLead!.createdAt as DateTime)
-                            : (lead.ogLead?.createdAt != null
-                                ? DateFormat('dd-MM-yyyy').format(
-                                    DateTime.parse(
-                                        lead.ogLead!.createdAt.toString()))
-                                : "");
+                        : (lead.ogLead?.createdAt != null
+                            ? DateFormat('dd-MM-yyyy').format(DateTime.parse(
+                                    lead.ogLead!.createdAt.toString())
+                                .toLocal())
+                            : "");
 
                     return GestureDetector(
                       onTap: () {
@@ -126,7 +122,9 @@ class _DuplicateLeadModalState extends State<DuplicateLeadModal> {
                             : (lead.ogLead as OgLead?)?.project ??
                                 "Unknown Project",
                         createdDate: createdDate,
-                        assignedTo: lead.assignedTo ?? '',
+                        assignedTo: lead.ogLead is String
+                            ? ''
+                            : (lead.ogLead as OgLead?)?.assignedTo ?? '',
                         leadId: lead.ogLead is String
                             ? ""
                             : (lead.ogLead as OgLead?)?.id?.toString() ?? "",

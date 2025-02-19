@@ -12,6 +12,20 @@ class ReportsController extends ChangeNotifier {
   bool isFilterLoading = false;
   bool isCampaignListLoading = false;
 
+  DateTime? appliedFromDate;
+  DateTime? appliedToDate;
+  String? appliedProject;
+  List<String> appliedLeadSources = [];
+
+  void setFilters({DateTime? from, DateTime? to, String? project, List<String>? sources}) {
+    appliedFromDate = from;
+    appliedToDate = to;
+    appliedProject = project;
+    appliedLeadSources = sources ?? [];
+    print("$from , $to , $project , $sources");
+    notifyListeners();
+  }
+
   fetchData(context) async {
     isLoading = true;
     notifyListeners();

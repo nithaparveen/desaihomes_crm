@@ -28,6 +28,8 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
 
   final MultiSelectController<String> leadSourceController =
       MultiSelectController<String>();
+      final TextEditingController fromdateController = TextEditingController();
+      final TextEditingController todateController = TextEditingController();
 
   void _clearFilters() {
     setState(() {
@@ -51,6 +53,15 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
           .fetchCampaignList(context);
     });
     super.initState();
+    final reportsController =
+        Provider.of<ReportsController>(context, listen: false);
+
+    setState(() {
+      fromDate = reportsController.appliedFromDate;
+      toDate = reportsController.appliedToDate;
+      selectedProject = reportsController.appliedProject;
+      selectedLeadSources = List.from(reportsController.appliedLeadSources);
+    });
   }
 
   @override
@@ -113,7 +124,8 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                           ),
                         ),
                         SizedBox(height: 8.h),
-                        CustomDatePicker(
+                        CustomDatePicker(controller: fromdateController,
+                          initialDate: leadController.appliedFromDate,
                           onDateSelected: (DateTime date) {
                             setState(() {
                               fromDate = date;
@@ -137,7 +149,8 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                           ),
                         ),
                         SizedBox(height: 8.h),
-                        CustomDatePicker(
+                        CustomDatePicker( controller: todateController,
+                          initialDate: leadController.appliedToDate,
                           onDateSelected: (DateTime date) {
                             setState(() {
                               toDate = date;
@@ -310,6 +323,13 @@ class _ReportFilterModalState extends State<ReportFilterModal> {
                             flushbarPosition: FlushbarPosition.TOP,
                           ).show(context);
                         } else {
+                          // Provider.of<ReportsController>(context, listen: false)
+                          //     .setFilters(
+                          //   from: fromDate,
+                          //   to: toDate,
+                          //   project: selectedProject,
+                          //   sources: selectedLeadSources,
+                          // );
                           Provider.of<ReportsController>(context, listen: false)
                               .fetchFilterData(
                             projectId: selectedProject,
