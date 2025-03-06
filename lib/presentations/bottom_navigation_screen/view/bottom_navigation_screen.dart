@@ -12,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import '../../new_whatsapp_screen/view/new_whatsapp_screen.dart';
 import '../controller/bottom_navigation_controller.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -62,7 +63,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               LeadScreenCopy(),
               FollowUpScreen(),
               ReportsScreen(),
-              WhatsappScreen()
+              WhatsappScreenCopy()
             ],
           );
         },

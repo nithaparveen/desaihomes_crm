@@ -4,6 +4,7 @@ import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/global_widgets/global_appbar.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
+import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/create_lead_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/filter_modal.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/view/widgets/lead_card.dart';
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
@@ -154,6 +155,19 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
         appBar: const CustomAppBar(
           backgroundColor: Color(0xffF0F6FF),
           hasRadius: false,
+        ),
+        floatingActionButton: FloatingActionButton(
+          shape: const CircleBorder(),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return CreateLeadModal();
+              },
+            );
+          },
+          backgroundColor: const Color(0xff170E2B),
+          child: Icon(Icons.add, color: Colors.white, size: 30.sp),
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

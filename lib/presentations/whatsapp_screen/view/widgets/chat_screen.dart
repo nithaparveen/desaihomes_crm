@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -585,8 +584,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
         setState(() {
           isRecording = true;
-          _currentRecordingPath = path;
-          recordedFilePath = path; // Store recorded file path
+          recordedFilePath = path;
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -596,6 +594,37 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error starting recording: $e")),
+      );
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    try {
+      final path = await _audioRecorder.stop();
+      if (path != null) {
+        final file = File(path);
+        final duration = await _getAudioDuration(file);
+
+        setState(() {
+          isRecording = false;
+          recordedFilePath = path;
+        });
+
+        final newMessage = ChatMessage(
+          sender: "Sarah",
+          message: "",
+          timestamp: _getCurrentTimestamp(),
+          isMe: true,
+          isVoiceMessage: true,
+          voicePath: path,
+          voiceDuration: _formatDuration(duration),
+        );
+
+        _addMessage(newMessage);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error stopping recording: $e")),
       );
     }
   }
@@ -610,39 +639,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<Duration> _getAudioDuration(File file) async {
     final AudioPlayer player = AudioPlayer();
     await player.setFilePath(file.path);
-    return player.duration ?? Duration.zero;
-  }
-
-  Future<void> _stopRecording() async {
-    try {
-      final path = await _audioRecorder.stop();
-      if (path != null) {
-        final file = File(path);
-        final duration = await _getAudioDuration(file);
-
-        setState(() {
-          isRecording = false;
-          recordedFilePath = path; 
-        });
-
-        final newMessage = ChatMessage(
-          sender: "Sarah",
-          message: "",
-          timestamp: _getCurrentTimestamp(),
-          isMe: true,
-          isVoiceMessage: true,
-          voicePath: path, // Use actual recorded file path
-          voiceDuration:
-              _formatDuration(duration), // Use actual recording duration
-        );
-
-        _addMessage(newMessage);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error stopping recording: $e")),
-      );
-    }
+    final duration = await player.duration;
+    await player.dispose();
+    return duration ?? Duration.zero;
   }
 
   Widget _buildVoiceMessage(ChatMessage message) {
@@ -650,14 +649,12 @@ class _ChatScreenState extends State<ChatScreen> {
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             VoiceMessageView(
               controller: VoiceController(
-                audioSrc: recordedFilePath.toString(),
+                audioSrc: message.voicePath!,
                 maxDuration: const Duration(seconds: 10),
-                isFile: recordedFilePath != null,
+                isFile: true,
                 onComplete: () {},
                 onPause: () {},
                 onPlaying: () {},
@@ -678,23 +675,17 @@ class _ChatScreenState extends State<ChatScreen> {
           bottom: 0,
           right: 2,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
                 message.timestamp,
                 style: const TextStyle(
                   color: Color(0xFFA4A4A4),
                   fontSize: 10,
-                  fontWeight: FontWeight.w400,
                 ),
               ),
               if (message.isMe) ...[
                 const SizedBox(width: 4),
-                const Icon(
-                  Icons.done_all,
-                  size: 20,
-                  color: Color(0xFF30C0E0),
-                ),
+                const Icon(Icons.done_all, size: 20, color: Color(0xFF30C0E0)),
               ],
             ],
           ),
@@ -1211,27 +1202,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     ]);
   }
-}
-
-class WaveformPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xff3874F6)
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round;
-    for (var i = 0; i < size.width; i += 4) {
-      final height = (size.height / 2) * (0.3 + 0.7 * (i % 20) / 20);
-      canvas.drawLine(
-        Offset(i.toDouble(), size.height / 2 - height),
-        Offset(i.toDouble(), size.height / 2 + height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class ChatMessage {

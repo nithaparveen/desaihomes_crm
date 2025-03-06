@@ -7,6 +7,7 @@ import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:desaihomes_crm_application/presentations/login_screen/controller/login_controller.dart';
+import 'package:desaihomes_crm_application/presentations/new_whatsapp_screen/controller/new_whatsapp_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
 import 'package:desaihomes_crm_application/presentations/splash_screen/view/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,6 +32,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => BottomNavigationController()),
         ChangeNotifierProvider(create: (context) => ReportsController()),
         ChangeNotifierProvider(create: (context) => FollowUpController()),
+        ChangeNotifierProvider(create: (context) => WhatsappControllerCopy()),
       ],
       child: MyApp(
         isLoggedIn: loggedIn ?? false,
