@@ -126,6 +126,7 @@ class LeadService {
       log("$e");
     }
   }
+
   static Future<Map<String, dynamic>?> searchFollowUpLead(
     String keyword, {
     int page = 1,
@@ -141,6 +142,30 @@ class LeadService {
     try {
       var decodedData = await ApiHelper.getData(
         endPoint: "lead-source",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchLeadType() async {
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "crm-lead-types",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchLabelList() async {
+    try {
+      var decodedData = await ApiHelper.getData(
+        endPoint: "label/list",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -214,6 +239,18 @@ class LeadService {
       var decodedData = await ApiHelper.postData(
         endPoint:
             "lead/action/assigned-to-update?id=$id&assigned_to=$assignedTo",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> createLead() async {
+    try {
+      var decodedData = await ApiHelper.postData(
+        endPoint: "lead/action/create",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

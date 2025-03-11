@@ -7,37 +7,12 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import '../../../core/constants/colors.dart';
+import '../../../global_widgets/custom_button.dart';
 import '../../../repository/api/whatsapp_screen/model/conversation_model.dart';
 import '../controller/new_whatsapp_controller.dart';
 import 'widgets/new_chat_screen.dart';
-
-class Message {
-  final String name;
-  final String? message;
-  final String? photo;
-  final String time;
-  final bool isRead;
-  final bool isSent;
-  final bool isDelivered;
-  final bool hasVoice;
-  final String? voiceDuration;
-  final bool hasUnread;
-  final String? profilePicture;
-
-  Message({
-    required this.name,
-    this.message,
-    this.photo,
-    required this.time,
-    this.isRead = false,
-    this.isSent = false,
-    this.isDelivered = false,
-    this.hasVoice = false,
-    this.voiceDuration,
-    this.hasUnread = false,
-    this.profilePicture,
-  });
-}
+import 'widgets/template_widget.dart';
 
 class WhatsappScreenCopy extends StatefulWidget {
   const WhatsappScreenCopy({super.key});
@@ -49,6 +24,8 @@ class WhatsappScreenCopy extends StatefulWidget {
 class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
   bool showRead = true;
   bool showIcon = true;
+  bool isSelectionMode = false;
+  Set<int> selectedIndices = {};
 
   TextEditingController searchController = TextEditingController();
   String searchQuery = '';
@@ -79,81 +56,38 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
     super.dispose();
   }
 
-  final List<Message> messages = [
-    Message(
-      name: "Rakesh Nair",
-      message: "I'm interested in the 2BHK apartment, is...",
-      time: "6:01 pm",
-      hasUnread: true,
-    ),
-    Message(
-      name: "Erlan Sadewa",
-      photo: "Photo",
-      time: "5:43 pm",
-      hasUnread: true,
-      profilePicture:
-          "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=2960&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ),
-    Message(
-      name: "Rakesh Nair",
-      message: "Please share your location",
-      time: "6:01",
-      isSent: true,
-    ),
-    Message(
-        name: "Gloria",
-        hasVoice: true,
-        voiceDuration: "0:05",
-        time: "6:01",
-        hasUnread: true,
-        profilePicture:
-            "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHVzZXJzfGVufDB8fDB8fHww"),
-    Message(
-      name: "Tony John",
-      message: "Please share your location",
-      time: "6:01",
-      isRead: true,
-      profilePicture:
-          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHVzZXJzfGVufDB8fDB8fHww",
-    ),
-    Message(
-      name: "Abhishek PM",
-      hasVoice: true,
-      voiceDuration: "0:05",
-      time: "6:01",
-      isDelivered: true,
-    ),
-    Message(
-      name: "Nitha Parveen",
-      message: "Document: Aaditri Nivas.pdf",
-      photo: "Document",
-      time: "10/03/25",
-      isRead: true,
-    ),
-  ];
+  void clearSelection() {
+    setState(() {
+      selectedIndices.clear();
+      isSelectionMode = false;
+    });
+  }
 
-  List<Message> getFilteredMessages() {
-    if (searchQuery.isEmpty) {
-      return messages;
-    }
-    // if (showRead) {
-    //   return messages.where((message) => message.isRead).toList();
-    // } else {
-    //   return messages.where((message) => !message.isRead).toList();
-    // }
+  void toggleSelection(int index) {
+    setState(() {
+      if (selectedIndices.contains(index)) {
+        selectedIndices.remove(index);
+        if (selectedIndices.isEmpty) {
+          isSelectionMode = false;
+        }
+      } else {
+        selectedIndices.add(index);
+        isSelectionMode = true;
+      }
+    });
+  }
 
-    return messages.where((message) {
-      final nameMatch = message.name.toLowerCase().contains(searchQuery);
-
-      final messageMatch =
-          message.message?.toLowerCase().contains(searchQuery) ?? false;
-
-      final isDocument = message.photo == "Document";
-      final documentMatch = isDocument &&
-          (message.message?.toLowerCase().contains(searchQuery) ?? false);
-
-      return nameMatch || messageMatch || documentMatch;
-    }).toList();
+  void selectAll(List<ConversationModel> messages) {
+    setState(() {
+      if (selectedIndices.length == messages.length) {
+        selectedIndices.clear();
+        isSelectionMode = false;
+      } else {
+        selectedIndices =
+            Set.from(List.generate(messages.length, (index) => index));
+        isSelectionMode = true;
+      }
+    });
   }
 
   @override
@@ -181,8 +115,6 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
               ),
             );
           }
-
-          // Ensure it's a list
           final List<ConversationModel> messages = controller.conversationModel;
 
           final filteredMessages = messages.where((message) {
@@ -196,19 +128,56 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                 false;
             return nameMatch || messageMatch;
           }).toList();
-
-          if (filteredMessages.isEmpty) {
-            return Center(
-              child: Text(
-                "No messages found",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+          void _showConfirmation(BuildContext context) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  title: const Column(
+                    children: [
+                      Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))
+                    ],
+                  ),
+                  content: Text(
+                    'Are you sure you want to send this template?',
+                    style: GLTextStyles.manropeStyle(
+                      color: ColorTheme.blue,
+                      size: 15.sp,
+                      weight: FontWeight.w400,
+                    ),
+                  ),
+                  actions: <Widget>[
+                    CustomButton(
+                      borderColor: Colors.transparent,
+                      backgroundColor: const Color(0xffFFF2F0),
+                      text: "Cancel",
+                      textColor: const Color(0xffFF9C8E),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        // _messageController.clear();
+                      },
+                      width: (110 / ScreenUtil().screenWidth).sw,
+                    ),
+                    CustomButton(
+                      borderColor: Colors.transparent,
+                      backgroundColor: const Color(0xffECF5FF),
+                      text: "Send",
+                      textColor: const Color(0xff3893FF),
+                      width: (110 / ScreenUtil().screenWidth).sw,
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        // _sendMessage(text: _messageController.text);
+                      },
+                    ),
+                  ],
+                );
+              },
             );
           }
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -220,94 +189,153 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Messages",
-                          style: GLTextStyles.manropeStyle(
-                            size: 18.sp,
-                            weight: FontWeight.w600,
-                            color: const Color(0xff120e2b),
-                          ),
-                        ),
-                        // Container(
-                        //   padding:
-                        //       EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.white,
-                        //     borderRadius: BorderRadius.circular(9.6.r),
-                        //     boxShadow: const [
-                        //       BoxShadow(
-                        //         color:  Color(
-                        //             0x05000000), // #00000005 in ARGB format
-                        //         blurRadius: 6.41, // Blur effect
-                        //         spreadRadius: 6.41, // Spread effect
-                        //         offset:  Offset(
-                        //             0, 0), // No offset, shadow spread evenly
-                        //       ),
-                        //     ],
-                        //   ),
-                        //   child: Row(
-                        //     children: [
-                        //       _buildToggleButton(
-                        //         text: "Read",
-                        //         isSelected: showRead,
-                        //         icon: Icons.done_all, // Icon for "Read"
-                        //         onTap: () => setState(() => showRead = true),
-                        //       ),
-                        //       SizedBox(width: 19.w),
-                        //       _buildToggleButton(
-                        //         text: "Unread",
-                        //         isSelected: !showRead,
-                        //         icon: Iconsax.note, // Icon for "Unread"
-                        //         onTap: () => setState(() => showRead = false),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-                        Icon(
-                          Icons.more_vert_rounded,
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          size: 20.sp,
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 18.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF7F7FC),
-                        borderRadius: BorderRadius.circular(100.r),
-                      ),
-                      child: TextField(
-                        controller: searchController,
-                        focusNode: searchFocusNode,
-                        decoration: InputDecoration(
-                          hintText: "Search",
-                          hintStyle: GLTextStyles.manropeStyle(
-                              size: 14.sp,
-                              color: const Color(0xffADB5BD),
-                              weight: FontWeight.w600),
-                          border: InputBorder.none,
+                        isSelectionMode
+                            ? Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: clearSelection,
+                                    child: Icon(
+                                      Icons.close,
+                                      color: const Color(0xff120e2b),
+                                      size: 20.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    "${selectedIndices.length} selected",
+                                    style: GLTextStyles.manropeStyle(
+                                      size: 18.sp,
+                                      weight: FontWeight.w600,
+                                      color: const Color(0xff120e2b),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                "Messages",
+                                style: GLTextStyles.manropeStyle(
+                                  size: 18.sp,
+                                  weight: FontWeight.w600,
+                                  color: const Color(0xff120e2b),
+                                ),
+                              ),
+                        PopupMenuButton<String>(
+                          color: Colors.white,
+                          elevation: 1,
+                          position: PopupMenuPosition.over,
                           icon: Icon(
-                            Iconsax.search_normal_1,
-                            color: const Color(0xffADB5BD),
+                            Icons.more_vert_rounded,
+                            color: const Color.fromARGB(255, 0, 0, 0),
                             size: 20.sp,
                           ),
+                          onSelected: (value) {
+                            if (value == "Select all") {
+                              selectAll(filteredMessages);
+                            } else if (value == "Select template") {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => TemplateSelectionModal(
+                                  onTemplateSelected: (template) {
+                                    Navigator.of(context).pop();
+                                    Future.delayed(
+                                        const Duration(milliseconds: 300), () {
+                                      _showConfirmation(context);
+                                    });
+                                  },
+                                ),
+                              );
+                            }
+                          },
+                          itemBuilder: (context) => isSelectionMode
+                              ? [
+                                  PopupMenuItem(
+                                    value: "Select all",
+                                    child: Text(
+                                      "Select all",
+                                      style: GLTextStyles.manropeStyle(
+                                        size: 14.sp,
+                                        weight: FontWeight.w500,
+                                        color: const Color(0xff3E9E7C),
+                                      ),
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: "Select template",
+                                    child: Text(
+                                      "Select template",
+                                      style: GLTextStyles.manropeStyle(
+                                        size: 14.sp,
+                                        weight: FontWeight.w500,
+                                        color: const Color(0xff3E9E7C),
+                                      ),
+                                    ),
+                                  ),
+                                ]
+                              : [
+                                  PopupMenuItem(
+                                    value: "Select all",
+                                    child: Text(
+                                      "Select all",
+                                      style: GLTextStyles.manropeStyle(
+                                        size: 14.sp,
+                                        weight: FontWeight.w500,
+                                        color: const Color(0xff3E9E7C),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                         ),
-                      ),
-                    )
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                    if (!isSelectionMode)
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7F7FC),
+                          borderRadius: BorderRadius.circular(100.r),
+                        ),
+                        child: TextField(
+                          cursorColor: const Color(0xFF3E9E7C),
+                          controller: searchController,
+                          focusNode: searchFocusNode,
+                          decoration: InputDecoration(
+                            hintText: "Search",
+                            hintStyle: GLTextStyles.manropeStyle(
+                                size: 14.sp,
+                                color: const Color(0xffADB5BD),
+                                weight: FontWeight.w600),
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Iconsax.search_normal_1,
+                              color: const Color(0xffADB5BD),
+                              size: 20.sp,
+                            ),
+                          ),
+                        ),
+                      )
                   ],
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 10.h),
               Expanded(
-                child: messages.isEmpty
-                    ? const Center(child: Text("No messages found"))
+                child: filteredMessages.isEmpty
+                    ? Center(
+                        child: Text("No messages found",
+                            style: GLTextStyles.manropeStyle(
+                              size: 14.sp,
+                              weight: FontWeight.w400,
+                              color: const Color.fromARGB(255, 89, 88, 94),
+                            )))
                     : ListView.separated(
                         itemCount: filteredMessages.isEmpty
                             ? 0
                             : filteredMessages.length,
                         itemBuilder: (context, index) {
                           final message = filteredMessages[index];
+                          final isSelected = selectedIndices.contains(index);
 
                           return Padding(
                               padding: EdgeInsets.symmetric(horizontal: 6.w),
@@ -482,20 +510,56 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                     //     size: 16.sp,
                                     //     color: Color(0xffA4A4A4),
                                     //   ),
+                                    if (isSelectionMode) SizedBox(height: 10.w),
+                                    if (isSelectionMode)
+                                      Container(
+                                        width: 18.w,
+                                        height: 18.h,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? const Color(0xFF3E9E7C)
+                                                : const Color(0xFFDDDDDD),
+                                            width: 1.5,
+                                          ),
+                                          color: isSelected
+                                              ? const Color(0xFF3E9E7C)
+                                              : Colors.transparent,
+                                        ),
+                                        child: isSelected
+                                            ? const Icon(
+                                                Icons.check,
+                                                color: Colors.white,
+                                                size: 14,
+                                              )
+                                            : null,
+                                      ),
                                   ],
                                 ),
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatScreenCopy(
-                                        contactedNumber: "919567485652",
-                                        name: message.leadName ?? "",
-                                        leadId: message.leadId ?? 0,
+                                  if (isSelectionMode) {
+                                    toggleSelection(index);
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreenCopy(
+                                          contactedNumber: "919567485652",
+                                          name: message.leadName ?? "",
+                                          leadId: message.leadId ?? 0,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                 
+                                    );
+                                  }
+                                },
+                                onLongPress: () {
+                                  if (!isSelectionMode) {
+                                    setState(() {
+                                      isSelectionMode = true;
+                                      toggleSelection(index);
+                                    });
+                                  }
                                 },
                               ));
                         },

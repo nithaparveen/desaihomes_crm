@@ -4,6 +4,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/age_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/countries_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/duplicate_lead_model.dart';
+import 'package:desaihomes_crm_application/repository/api/lead_screen/model/label_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/lead_source_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/professions_list_model.dart';
@@ -15,11 +16,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../repository/api/lead_screen/model/lead_type_model.dart';
 
 class LeadController extends ChangeNotifier {
   LeadModel leadModel = LeadModel();
   UserListModel userListModel = UserListModel();
   LeadSourceModel leadSourceModel = LeadSourceModel();
+  LeadTypeModel leadTypeModel = LeadTypeModel();
+  LabelModel labelModel = LabelModel();
   ProjectListModel projectListModel = ProjectListModel();
   ProfessionsListModel professionsListModel = ProfessionsListModel();
   TextEditingController searchController = TextEditingController();
@@ -36,25 +40,27 @@ class LeadController extends ChangeNotifier {
   bool isProfessionsLoading = false;
   bool isProjectListLoading = false;
   bool isSourceLoading = false;
+  bool isTypeLoading = false;
+  bool isLabelLoading = false;
   bool isCountriesLoading = false;
   bool isduplicateFlagLoading = false;
   bool isAgeLoading = false;
   int currentPage = 1;
   bool _isLoadingMore = false;
   bool hasMoreData = true;
-  final int _pageSize = 15; 
+  final int _pageSize = 15;
 
   Future<void>? _currentRequest;
 
   bool get isLoadingMore => _isLoadingMore;
-
 
   DateTime? appliedFromDate;
   DateTime? appliedToDate;
   String? appliedProject;
   List<String> appliedLeadSources = [];
 
-  void setFilters({DateTime? from, DateTime? to, String? project, List<String>? sources}) {
+  void setFilters(
+      {DateTime? from, DateTime? to, String? project, List<String>? sources}) {
     appliedFromDate = from;
     appliedToDate = to;
     appliedProject = project;
@@ -63,13 +69,12 @@ class LeadController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearFilters(){
-          appliedFromDate = null;
-      appliedToDate = null;
-      appliedProject = null;
-      appliedLeadSources.clear();
-      notifyListeners();
-
+  void clearFilters() {
+    appliedFromDate = null;
+    appliedToDate = null;
+    appliedProject = null;
+    appliedLeadSources.clear();
+    notifyListeners();
   }
 
   Future<void> fetchData(context, {int page = 1}) async {
@@ -283,6 +288,36 @@ class LeadController extends ChangeNotifier {
       if (value["status"] == true) {
         leadSourceModel = LeadSourceModel.fromJson(value);
         isSourceLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
+      }
+      notifyListeners();
+    });
+  }
+
+  fetchLeadTypeList(context) async {
+    isTypeLoading = true;
+    notifyListeners();
+    LeadService.fetchLeadType().then((value) {
+      if (value["status"] == true) {
+        leadTypeModel = LeadTypeModel.fromJson(value);
+        isTypeLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
+      }
+      notifyListeners();
+    });
+  }
+
+  fetchLabelList(context) async {
+    isLabelLoading = true;
+    notifyListeners();
+    LeadService.fetchLabelList().then((value) {
+      if (value["status"] == true) {
+        labelModel = LabelModel.fromJson(value);
+        isLabelLoading = false;
       } else {
         AppUtils.oneTimeSnackBar("Unable to fetch Data",
             context: context, bgColor: ColorTheme.red);

@@ -20,12 +20,44 @@ class WhatsappService {
       String to, String message, String leadId) async {
     try {
       var decodedData = await ApiHelper.postDataWObaseUrl(
-        endPoint: "https://www.desaihomes.com/api/whatsapp/beta/message/send?to=$to&message=$message&lead_id=$leadId",
+        endPoint:
+            "https://www.desaihomes.com/api/whatsapp/beta/message/send?to=$to&message=$message&lead_id=$leadId",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
     } catch (e) {
       log("$e");
+    }
+  }
+
+  static Future<dynamic> sendTemplate(
+      String to, String message, String leadId) async {
+    try {
+      var decodedData = await ApiHelper.postDataWObaseUrl(
+        endPoint:
+            "https://www.desaihomes.com/api/whatsapp-templates/message/send?lead_id=$leadId",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> multiSend(List<Map<String, dynamic>> messages) async {
+    try {
+      var data = {"messages": messages};
+
+      var decodedData = await ApiHelper.postDataWObaseUrl(
+        endPoint:
+            "https://www.desaihomes.com/api/whatsapp-templates/message/multisend?",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+        body: data,
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+      return {"success": false, "message": "Error: $e"};
     }
   }
 
@@ -73,6 +105,18 @@ class WhatsappService {
       var decodedData = await ApiHelper.getDataWObaseUrl(
         endPoint:
             "https://www.desaihomes.com/api/whatsapp/beta/message/list/$leadId",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchWhatsAppTemplates() async {
+    try {
+      var decodedData = await ApiHelper.getDataWObaseUrl(
+        endPoint: "https://www.desaihomes.com/api/whatsapp-meta-templates/list",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

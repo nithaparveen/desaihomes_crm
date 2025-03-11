@@ -7,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:voice_message_package/voice_message_package.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/textstyles.dart';
+import 'image_preview_screen.dart';
 
 class MessageWidget extends StatelessWidget {
   final dynamic message;
@@ -42,12 +43,23 @@ class MessageWidget extends StatelessWidget {
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName);
-      case 'image':
-        return ImageMessageWidget(
-            imageUrl: message.message ?? '',
-            isMe: isMe,
-            timestamp: formattedTime,
-            senderName: senderName);
+     case 'image':
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImagePreviewScreen(imageUrl: message.message),
+        ),
+      );
+    },
+    child: ImageMessageWidget(
+      imageUrl: message.message ?? '',
+      isMe: isMe,
+      timestamp: formattedTime,
+      senderName: senderName,
+    ),
+  );
       case 'audio':
         return VoiceMessageWidget(
             voicePath: message.message ?? '',
@@ -94,44 +106,46 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment:
-            isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-        children: [
-          if (isMe)
-            Padding(
-              padding: EdgeInsets.only(bottom: 2.h, left: 12.w, right: 8.w),
-              child: Text(
-                senderName,
-                style: GLTextStyles.interStyle(
-                  color: Color(0xff000000),
-                  size: 12.sp,
-                  weight: FontWeight.w500,
-                ),
+    return Column(
+      crossAxisAlignment:
+          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        if (!isMe)
+          Padding(
+            padding: EdgeInsets.only(bottom: 2.h, left: 12.w, right: 8.w),
+            child: Text(
+              senderName,
+              style: GLTextStyles.interStyle(
+                color: Color(0xff000000),
+                size: 12.sp,
+                weight: FontWeight.w500,
               ),
             ),
-            if (isMe)
-            SizedBox(height: 3.h,),
-          Container(
-            margin: EdgeInsets.only(bottom: 8.h),
-            constraints: BoxConstraints(maxWidth: 0.8.sw),
-            decoration: BoxDecoration(
-              color: isMe ? Colors.white : const Color(0xffF1F1F1),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(18.r),
-                topRight: Radius.circular(18.r),
-                bottomLeft: isMe ? Radius.circular(18.r) : Radius.circular(4.r),
-                bottomRight:
-                    isMe ? Radius.circular(4.r) : Radius.circular(18.r),
-              ),
-            ),
-            padding: padding,
-            child: child,
           ),
-        ],
-      ),
+        if (!isMe)
+          SizedBox(
+            height: 3.h,
+          ),
+        Container(
+          margin: EdgeInsets.only(bottom: 8.h),
+          constraints: BoxConstraints(maxWidth: 0.8.sw),
+          decoration: BoxDecoration(
+            color: !isMe
+                ? const Color.fromARGB(255, 245, 248, 255)
+                : const Color(0xffF1F1F1),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(18.r),
+              topRight: Radius.circular(18.r),
+              bottomLeft:
+                  !isMe ? Radius.circular(18.r) : Radius.circular(4.r),
+              bottomRight:
+                  !isMe ? Radius.circular(4.r) : Radius.circular(18.r),
+            ),
+          ),
+          padding: padding,
+          child: child,
+        ),
+      ],
     );
   }
 }
@@ -153,7 +167,7 @@ class TextMessageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MessageBubble(
-      isMe: !isMe,
+      isMe: isMe,
       timestamp: timestamp,
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       senderName: senderName,
@@ -268,7 +282,7 @@ class FileMessageWidget extends StatelessWidget {
                               weight: FontWeight.w400,
                             ),
                           ),
-                          if (isMe) ...[
+                          if (!isMe) ...[
                             SizedBox(width: 4.w),
                             Icon(
                               Icons.done_all,
@@ -327,8 +341,9 @@ class VoiceMessageWidget extends StatelessWidget {
           circlesColor: const Color(0xff3874F6),
           playPauseButtonLoadingColor: const Color(0xff3874F6),
           activeSliderColor: const Color(0xff3874F6),
-          backgroundColor:
-              isMe ? const Color(0xFFF8F8FF) : const Color(0xffF1F1F1),
+          backgroundColor: !isMe
+              ? const Color.fromARGB(255, 245, 248, 255)
+              : const Color(0xffF1F1F1),
           innerPadding: 0,
         ),
         Positioned(
@@ -343,7 +358,7 @@ class VoiceMessageWidget extends StatelessWidget {
                   fontSize: 10,
                 ),
               ),
-              if (isMe) ...[
+              if (!isMe) ...[
                 const SizedBox(width: 4),
                 const Icon(Icons.done_all, size: 20, color: Color(0xFF30C0E0)),
               ],
@@ -435,7 +450,7 @@ class ContactMessageWidget extends StatelessWidget {
               weight: FontWeight.w400,
             ),
           ),
-          if (isMe) ...[
+          if (!isMe) ...[
             SizedBox(width: 4.w),
             Icon(
               Icons.done_all,
@@ -516,7 +531,7 @@ class LocationMessageWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(FontAwesomeIcons.locationDot,
-                      size: 18.sp, color: const Color(0xffF83737)),
+                      size: 16.sp, color: const Color(0xffF83737)),
                   SizedBox(width: 6.w),
                   Flexible(
                     child: Row(
@@ -530,7 +545,7 @@ class LocationMessageWidget extends StatelessWidget {
                                 "Location shared",
                                 style: GLTextStyles.manropeStyle(
                                   color: const Color(0xFF170E2B),
-                                  size: 14.sp,
+                                  size: 13.sp,
                                   weight: FontWeight.w500,
                                 ),
                               ),
@@ -563,7 +578,7 @@ class LocationMessageWidget extends StatelessWidget {
                             weight: FontWeight.w400,
                           ),
                         ),
-                        if (isMe) ...[
+                        if (!isMe) ...[
                           SizedBox(width: 4.w),
                           Icon(
                             Icons.done_all,
@@ -654,7 +669,7 @@ class ImageMessageWidget extends StatelessWidget {
                         weight: FontWeight.w500,
                       ),
                     ),
-                    if (isMe) ...[
+                    if (!isMe) ...[
                       SizedBox(width: 4.w),
                       Icon(
                         Icons.done_all,

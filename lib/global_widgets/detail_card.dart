@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../presentations/new_whatsapp_screen/view/widgets/new_chat_screen.dart';
 
 class DetailCard extends StatelessWidget {
   final String? name;
   final String? email;
   final String? phone;
   final String? age;
+  final int? leadId;
   final List<DetailText> detailTexts;
 
   const DetailCard({
@@ -19,6 +23,7 @@ class DetailCard extends StatelessWidget {
     this.phone,
     this.age,
     required this.detailTexts,
+    this.leadId,
   });
 
   Future<void> makePhoneCall(String phoneNumber) async {
@@ -109,6 +114,44 @@ class DetailCard extends StatelessWidget {
                                         color: ColorTheme.black)),
                               ],
                             ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreenCopy(
+                                    contactedNumber: "919567485652",
+                                    name: name ?? "",
+                                    leadId: leadId ?? 0,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(1),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF25d366),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5.r)),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x14000000),
+                                    offset: Offset(0, 4),
+                                    blurRadius: 6,
+                                    spreadRadius: -2,
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(6.w),
+                                child: Icon(
+                                  FontAwesomeIcons.whatsapp,
+                                  size: 20.sp,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       SizedBox(height: 16.h),

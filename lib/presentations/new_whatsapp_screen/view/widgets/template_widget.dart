@@ -1,23 +1,15 @@
+import 'package:desaihomes_crm_application/presentations/new_whatsapp_screen/controller/new_whatsapp_controller.dart';
+import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/constants/textstyles.dart';
 
-class MessageTemplate {
-  final String title;
-  final String content;
-  final Color color;
-
-  MessageTemplate({
-    required this.title,
-    required this.content,
-    required this.color,
-  });
-}
-
 class TemplateSelectionModal extends StatefulWidget {
-  final Function(MessageTemplate) onTemplateSelected;
+  final Function(Datum) onTemplateSelected;
 
   const TemplateSelectionModal({
     super.key,
@@ -31,178 +23,144 @@ class TemplateSelectionModal extends StatefulWidget {
 class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
   bool _showAllTemplates = false;
 
-  final List<MessageTemplate> _templates = [
-    MessageTemplate(
-      title: 'Project Launched',
-      content:
-          'We just launched a new premium villa project in Kochi. Click here to download our brochure.',
-      color: const Color(0xFF4B7BEC),
-    ),
-    MessageTemplate(
-      title: '20th Year Celebration',
-      content:
-          'We are celebrating 20 years of service in the apartments and construction business. Visit our demo centre today.',
-      color: const Color(0xFF26DE81),
-    ),
-    MessageTemplate(
-      title: 'Rain Precaution',
-      content:
-          'Did you take precautions to protect your home from rain damage? Here are some tips.',
-      color: const Color(0xFFFC5C65),
-    ),
-    MessageTemplate(
-      title: 'Visit Our Stall',
-      content:
-          'Visit our stall at the property expo happening this weekend. Exclusive launch offers available.',
-      color: const Color(0xFFFD9644),
-    ),
-    MessageTemplate(
-      title: 'Maintenance Tips',
-      content:
-          'Regular maintenance can extend the life of your property. Check out these essential tips.',
-      color: const Color(0xFF26DE81),
-    ),
-    MessageTemplate(
-      title: 'Special Offer',
-      content:
-          'Limited time offer: Book now and get 10% discount on our premium apartments.',
-      color: const Color(0xFF4B7BEC),
-    ),
-    MessageTemplate(
-      title: 'Home Loan',
-      content:
-          'Get pre-approved home loans at attractive interest rates through our banking partners.',
-      color: const Color(0xFFFC5C65),
-    ),
-    MessageTemplate(
-      title: 'Site Visit',
-      content:
-          'Schedule a site visit this weekend. Our executives are available from 9 AM to 6 PM.',
-      color: const Color(0xFFFD9644),
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<WhatsappControllerCopy>(context, listen: false)
+          .fetchWhatsAppTemplates(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.7,
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(28.r),
-            topRight: Radius.circular(28.r),
+    return Consumer<WhatsappControllerCopy>(
+      builder: (context, controller, _) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
           ),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(28.r),
+                topRight: Radius.circular(28.r),
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, -2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // GestureDetector(
-              //   onTap: () {
-              //   },
-              //   child: Icon(
-              //     Icons.close,
-              //     size: 22.sp,
-              //     color: const Color(0xFF170E2B),
-              //   ),
-              // ),
-              SizedBox(height: 20.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Quick Send',
-                    style: GLTextStyles.manropeStyle(
-                      color: const Color(0xFF1B1B1B),
-                      size: 16.sp,
-                      weight: FontWeight.w400,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showAllTemplates = !_showAllTemplates;
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4.r)),
-                            color: const Color(0xffFAFAFA),
-                          ),
-                          padding: EdgeInsets.all(9.w),
-                          child: Row(
-                            children: [
-                              Text(
-                                'View All Templates',
-                                style: GLTextStyles.manropeStyle(
-                                  color: const Color(0xff1B1B1B),
-                                  size: 12.sp,
-                                  weight: FontWeight.w400,
+            child: controller.isTemplateLoading
+                ? Center(child: LoadingAnimationWidget.fourRotatingDots(
+                  color: const Color(0xFF3E9E7C),
+                  size: 30,
+                ),)
+                : controller.templateModel.data?.data == null ||
+                        controller.templateModel.data!.data!.isEmpty
+                    ? Center(child: Text("No templates available",style: GLTextStyles.manropeStyle(
+                              size: 14.sp,
+                              weight: FontWeight.w400,
+                              color: const Color.fromARGB(255, 89, 88, 94),
+                            )))
+                    : SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 20.h),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Select a Template',
+                                  style: GLTextStyles.manropeStyle(
+                                    color: const Color(0xFF1B1B1B),
+                                    size: 16.sp,
+                                    weight: FontWeight.w400,
+                                  ),
                                 ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _showAllTemplates = !_showAllTemplates;
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(4.r)),
+                                      color: const Color(0xffFAFAFA),
+                                    ),
+                                    padding: EdgeInsets.all(9.w),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          !_showAllTemplates
+                                              ? 'View All Templates'
+                                              : 'View Less Templates',
+                                          style: GLTextStyles.manropeStyle(
+                                            color: const Color(0xff1B1B1B),
+                                            size: 12.sp,
+                                            weight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        Icon(
+                                          _showAllTemplates
+                                              ? Icons.keyboard_arrow_up
+                                              : Icons.keyboard_arrow_down,
+                                          size: 16.sp,
+                                          color: const Color(0xFF000000),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            Wrap(
+                              spacing: 8.w,
+                              runSpacing: 8.h,
+                              children: controller.templateModel.data!.data!
+                                  .map((template) =>
+                                      _buildTemplateChip(template))
+                                  .toList(),
+                            ),
+                            SizedBox(height: 18.h),
+                            if (_showAllTemplates)
+                              Column(
+                                children: controller.templateModel.data!.data!
+                                    .map((template) => Padding(
+                                          padding:
+                                              EdgeInsets.only(bottom: 12.h),
+                                          child: _buildTemplateCard(template),
+                                        ))
+                                    .toList(),
                               ),
-                              Icon(
-                                _showAllTemplates
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                size: 16.sp,
-                                color: const Color(0xFF000000),
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-              // if (!_showAllTemplates)
-              Wrap(
-                spacing: 8.w,
-                runSpacing: 8.h,
-                children: _templates.take(4).map((template) {
-                  return _buildTemplateChip(template);
-                }).toList(),
-              ),
-              SizedBox(height: 18.h),
-              if (_showAllTemplates) ...[
-                for (MessageTemplate template in _templates)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: _buildTemplateCard(template),
-                  ),
-              ],
-            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTemplateChip(MessageTemplate template) {
+  Widget _buildTemplateChip(Datum template) {
     return GestureDetector(
       onTap: () => widget.onTemplateSelected(template),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
           border: Border.all(
-            color: template.color,
-            width: 1,
+            color: _getRandomColor(template),
+            width: .8,
           ),
           borderRadius: BorderRadius.circular(50.r),
         ),
@@ -210,7 +168,7 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              template.title,
+              template.name ?? "", 
               style: GLTextStyles.manropeStyle(
                 color: const Color(0xFF170E2B),
                 size: 12.sp,
@@ -229,7 +187,32 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
     );
   }
 
-  Widget _buildTemplateCard(MessageTemplate template) {
+  final List<Color> _templateColors = [
+    const Color(0xFF1D4ED8),
+    const Color(0xFF64C685),
+    const Color(0xFFE62E7B),
+    const Color(0xFFFFCA63),
+  ];
+
+  Color _getRandomColor(Datum template) {
+    final int index = template.id.hashCode.abs() % _templateColors.length;
+    return _templateColors[index];
+  }
+
+  Widget _buildTemplateCard(Datum template) {
+    String getTemplateBodyText(Datum template) {
+      if (template.components == null || template.components!.isEmpty) {
+        return "No content available";
+      }
+
+      final bodyComponent = template.components!.firstWhere(
+        (component) => component.type == "BODY",
+        orElse: () => Component(),
+      );
+
+      return bodyComponent.text ?? "No body text available";
+    }
+
     return GestureDetector(
       onTap: () => widget.onTemplateSelected(template),
       child: Container(
@@ -238,7 +221,7 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(
-            color: template.color,
+            color: _getRandomColor(template),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(36.r),
@@ -250,7 +233,7 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  template.title,
+                  template.name ?? "",
                   style: GLTextStyles.manropeStyle(
                     color: const Color(0xFF0B0D23),
                     size: 14.sp,
@@ -266,7 +249,7 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
             ),
             SizedBox(height: 8.h),
             Text(
-              template.content,
+              getTemplateBodyText(template),
               style: GLTextStyles.manropeStyle(
                 color: const Color(0xFF2B2B2BB),
                 size: 12.sp,

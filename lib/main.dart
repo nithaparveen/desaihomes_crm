@@ -18,12 +18,15 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'repository/api/login_screen/pusher_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool? loggedIn = prefs.getBool(AppConfig.loggedIn);
   await Firebase.initializeApp();
   await dotenv.load();
+  PusherService().initializePusher();
   runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => LoginController()),

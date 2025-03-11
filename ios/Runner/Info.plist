@@ -45,10 +45,44 @@
     <true/>
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
+
+    <!-- URL Schemes for External Apps -->
     <key>LSApplicationQueriesSchemes</key>
     <array>
       <string>tel</string>
       <string>mailto</string>
+      <string>whatsapp</string>
+      <string>fb</string>
+      <string>instagram</string>
+    </array>
+
+    <!-- Location Permissions for Geolocator -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to provide better services.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>We need your location for background services.</string>
+
+    <!-- Camera, Photo Library & Microphone (Image Picker, Record) -->
+    <key>NSCameraUsageDescription</key>
+    <string>We need camera access to take pictures.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need microphone access for voice recordings.</string>
+
+    <!-- Push Notifications (Firebase Messaging, OneSignal) -->
+    <key>NSUserNotificationUsageDescription</key>
+    <string>We need notifications to send you alerts.</string>
+    <key>FirebaseAppDelegateProxyEnabled</key>
+    <false/>
+    
+    <!-- Background Modes -->
+    <key>UIBackgroundModes</key>
+    <array>
+      <string>fetch</string>
+      <string>remote-notification</string>
+      <string>audio</string>
+      <string>location</string>
     </array>
   </dict>
 </plist>

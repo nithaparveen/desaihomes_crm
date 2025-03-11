@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -18,8 +19,10 @@ class WhatsappControllerCopy extends ChangeNotifier {
   bool isLoading = false;
   ChatModel chatModel = ChatModel();
   List<ChatModel> chatList = <ChatModel>[];
+  TemplateModel templateModel = TemplateModel();
 
   bool isChatLoading = false;
+  bool isTemplateLoading = false;
 
   fetchConversations(context) async {
     isLoading = true;
@@ -43,10 +46,10 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
-  Future sendMessage(String to, String message, String leadId,
-      BuildContext context) async {
+  Future sendMessage(
+      String to, String message, String leadId, BuildContext context) async {
     log("WhatsappController -> sendMessage() started");
-    WhatsappService.sendMessage(to,message,leadId).then((value) {
+    WhatsappService.sendMessage(to, message, leadId).then((value) {
       if (value["success"] == true) {
       } else {
         AppUtils.oneTimeSnackBar(value["message"],
@@ -83,6 +86,27 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
+  Future sendMultiMessages(List<String> leadIds, String templateName,
+      String language, BuildContext context) async {
+    List<Map<String, dynamic>> messages = leadIds
+        .map((leadId) => {
+              "lead_ids": leadId,
+              "template_name": templateName,
+              "language": language,
+            })
+        .toList();
+    WhatsappService.multiSend(messages).then((value) {
+      if (value != null) {
+        // Success handling
+        AppUtils.oneTimeSnackBar("Messages sent successfully",
+            context: context, bgColor: Colors.green);
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"] ?? "Failed to send messages",
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
+
   // Future sendMedias(String to, String message, String receiverId,
   //     BuildContext context) async {
   //   var data = {"to": to, "message": message, "receiver_id": receiverId};
@@ -108,6 +132,26 @@ class WhatsappControllerCopy extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  fetchWhatsAppTemplates( context) async {
+    isTemplateLoading = true;
+    notifyListeners();
+    WhatsappService.fetchWhatsAppTemplates().then((value) {
+      if (value != null) {
+        templateModel = TemplateModel.fromJson(value);
+        isTemplateLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
+      }
+      notifyListeners();
+    });
+  }
+
+  Future<void> addMessageToList(ChatModel message) async {
+    chatList.add(message);
+    notifyListeners();
   }
 
   Future<void> onSendMessage(BuildContext context, File? file,

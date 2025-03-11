@@ -12,6 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:provider/provider.dart';
 
 class CreateLeadModal extends StatefulWidget {
@@ -37,6 +38,8 @@ class _CreateLeadModalState extends State<CreateLeadModal>
   String? selectedCountryId;
   String? selectedAge;
   String? selectedLeadSource;
+  List<String> selectedLabels = [];
+  String? selectedLeadType;
   String? selectedCampaign;
   String? selectedPerson;
   TextEditingController altNumberController = TextEditingController();
@@ -63,6 +66,10 @@ class _CreateLeadModalState extends State<CreateLeadModal>
       Provider.of<LeadController>(context, listen: false)
           .fetchCountries(context);
       Provider.of<LeadController>(context, listen: false).fetchAgeList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchLeadTypeList(context);
+      Provider.of<LeadController>(context, listen: false)
+          .fetchLabelList(context);
       Provider.of<ReportsController>(context, listen: false)
           .fetchCampaignList(context);
     });
@@ -116,6 +123,10 @@ class _CreateLeadModalState extends State<CreateLeadModal>
               Expanded(
                 child: Consumer<LeadDetailController>(
                     builder: (context, leadDetailController, child) {
+                  final labelItems = leadController.labelModel.data
+                          ?.map((item) => item.title ?? '')
+                          .toList() ??
+                      [];
                   return leadDetailController.isLoading
                       ? Center(
                           child: Padding(
@@ -162,7 +173,7 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                             child:
                                                 DropdownButtonFormField<String>(
                                               dropdownColor: Colors.white,
-                                              value: selectedAge,
+                                              value: selectedLeadType,
                                               icon: Icon(Iconsax.arrow_down_1,
                                                   size: 15.sp),
                                               style: GLTextStyles.manropeStyle(
@@ -203,28 +214,19 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                                           .desaiGreen),
                                                 ),
                                               ),
-                                              items: statusController
-                                                  .statusListModel.crmStatus
-                                                  ?.map((status) =>
+                                              items: leadController
+                                                  .leadTypeModel.crmLeadTypes!
+                                                  .map((leadType) =>
                                                       DropdownMenuItem<String>(
-                                                        value: status.name,
+                                                        value: leadType.name,
                                                         child: Text(
-                                                            status.name ?? ""),
+                                                            leadType.name ??
+                                                                ""),
                                                       ))
                                                   .toList(),
                                               onChanged: (value) {
                                                 setState(() {
-                                                  selectedStatus = value;
-                                                  selectedStatusId =
-                                                      statusController
-                                                          .statusListModel
-                                                          .crmStatus
-                                                          ?.firstWhere(
-                                                              (status) =>
-                                                                  status.name ==
-                                                                  value)
-                                                          .id
-                                                          .toString();
+                                                  selectedLeadType = value;
                                                 });
                                               },
                                             ),
@@ -631,34 +633,40 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                           SizedBox(height: 6.h),
                                           SizedBox(
                                             height: 38.sp,
-                                            child:
-                                                DropdownButtonFormField<String>(
-                                              dropdownColor: Colors.white,
-                                              value: selectedAge,
-                                              icon: Icon(Iconsax.arrow_down_1,
-                                                  size: 15.sp),
-                                              style: GLTextStyles.manropeStyle(
-                                                weight: FontWeight.w400,
-                                                size: 14.sp,
-                                                color: const Color.fromARGB(
-                                                    255, 87, 87, 87),
+                                            child: MultiDropdown<String>(
+                                              // searchDecoration: SearchFieldDecoration(
+                                              //   border: OutlineInputBorder(
+                                              //     borderRadius: BorderRadius.circular(8),
+                                              //     borderSide: const BorderSide(color: Color(0xffD5D7DA)),
+                                              //   ),
+                                              // ),
+                                              items: labelItems
+                                                  .map((source) =>
+                                                      DropdownItem<String>(
+                                                        label: source,
+                                                        value: source,
+                                                      ))
+                                                  .toList(),
+                                              // controller: leadSourceController,
+                                              enabled: true,
+                                              // searchEnabled: true,
+                                              chipDecoration: ChipDecoration(
+                                                backgroundColor:
+                                                    const Color(0xffECEEFF),
+                                                deleteIcon: Icon(
+                                                    Iconsax.close_circle,
+                                                    size: 15.sp),
+                                                wrap: true,
+                                                runSpacing: 2,
+                                                spacing: 10,
                                               ),
-                                              decoration: InputDecoration(
-                                                filled: true,
-                                                fillColor: Colors.white,
-                                                contentPadding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 12.w,
-                                                        vertical: 8.h),
+                                              fieldDecoration: FieldDecoration(
+                                                hintText: "",
+                                                suffixIcon: Icon(
+                                                    Iconsax.arrow_down_1,
+                                                    size: 15.sp),
+                                                showClearIcon: true,
                                                 border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.r),
-                                                  borderSide: const BorderSide(
-                                                      color: Color(0xffD5D7DA)),
-                                                ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           8.r),
@@ -670,33 +678,32 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           8.r),
-                                                  borderSide: BorderSide(
-                                                      color: ColorTheme
-                                                          .desaiGreen),
+                                                  borderSide:  BorderSide(
+                                                      color: ColorTheme.desaiGreen),
                                                 ),
                                               ),
-                                              items: statusController
-                                                  .statusListModel.crmStatus
-                                                  ?.map((status) =>
-                                                      DropdownMenuItem<String>(
-                                                        value: status.name,
-                                                        child: Text(
-                                                            status.name ?? ""),
-                                                      ))
-                                                  .toList(),
-                                              onChanged: (value) {
+                                              dropdownDecoration:
+                                                  DropdownDecoration(
+                                                marginTop: 2,
+                                                maxHeight: (300 /
+                                                        ScreenUtil()
+                                                            .screenHeight)
+                                                    .sh,
+                                              ),
+                                              dropdownItemDecoration:
+                                                  DropdownItemDecoration(
+                                                selectedIcon: Icon(
+                                                    Iconsax.tick_square,
+                                                    size: 18.sp),
+                                              ),
+                                              onSelectionChange:
+                                                  (selectedItems) {
                                                 setState(() {
-                                                  selectedStatus = value;
-                                                  selectedStatusId =
-                                                      statusController
-                                                          .statusListModel
-                                                          .crmStatus
-                                                          ?.firstWhere(
-                                                              (status) =>
-                                                                  status.name ==
-                                                                  value)
-                                                          .id
-                                                          .toString();
+                                                  selectedLabels =
+                                                      (selectedItems ?? [])
+                                                          .map((item) =>
+                                                              item as String)
+                                                          .toList();
                                                 });
                                               },
                                             ),
@@ -925,18 +932,19 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                           SizedBox(
                                             height: 38.sp,
                                             child:
-                                                DropdownButtonFormField<String>(
+                                                DropdownButtonFormField<String>(isExpanded: true,
                                               dropdownColor: Colors.white,
                                               value: selectedLeadSource,
                                               icon: Icon(Iconsax.arrow_down_1,
                                                   size: 15.sp),
                                               style: GLTextStyles.manropeStyle(
                                                 weight: FontWeight.w400,
-                                                size: 9.sp,
+                                                size: 13.sp,
                                                 color: const Color.fromARGB(
                                                     255, 87, 87, 87),
                                               ),
                                               decoration: InputDecoration(
+                                                
                                                 filled: true,
                                                 fillColor: Colors.white,
                                                 contentPadding:
@@ -974,7 +982,7 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                                       DropdownMenuItem<String>(
                                                         value:
                                                             leadsource.source,
-                                                        child: Text(
+                                                        child: Text(overflow: TextOverflow.ellipsis,
                                                             leadsource.source ??
                                                                 ""),
                                                       ))

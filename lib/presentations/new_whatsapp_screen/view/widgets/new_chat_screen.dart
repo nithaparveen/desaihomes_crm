@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:desaihomes_crm_application/presentations/new_whatsapp_screen/controller/new_whatsapp_controller.dart';
@@ -16,12 +17,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import '../../../../app_config/app_config.dart';
+import '../../../../core/constants/colors.dart';
 import '../../../../core/constants/textstyles.dart';
+import '../../../../global_widgets/custom_button.dart';
+import '../../../../repository/api/login_screen/pusher_service.dart';
+import '../../../../repository/api/whatsapp_screen/model/chat_model.dart';
+import '../../../../repository/api/whatsapp_screen/model/template_model.dart';
 import 'message_widget.dart';
 import 'template_widget.dart';
 
 class ChatScreenCopy extends StatefulWidget {
-  const ChatScreenCopy({super.key, required this.name, required this.leadId, required this.contactedNumber});
+  const ChatScreenCopy(
+      {super.key,
+      required this.name,
+      required this.leadId,
+      required this.contactedNumber});
   final String name;
   final String contactedNumber;
   final int leadId;
@@ -33,6 +43,7 @@ class ChatScreenCopy extends StatefulWidget {
 class _ChatScreenCopyState extends State<ChatScreenCopy> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final PusherService _pusherService = PusherService();
 
   bool isRecording = false;
   bool isTyping = false;
@@ -48,6 +59,8 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     _messageController.addListener(_onTextChanged);
     _requestPermissions();
     _loadUserId();
+    _pusherService.subscribeToChannelWithId(
+        widget.leadId.toString(), _handleNewMessage, context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -66,7 +79,33 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     _scrollController.dispose();
+    _pusherService.unsubscribe();
     super.dispose();
+  }
+
+  void _handleNewMessage(dynamic data) {
+    try {
+      final Map<String, dynamic> messageData = data;
+
+      final newMessage = ChatModel(
+          message: messageData['message'] ?? '',
+          createdAt: DateTime.tryParse(messageData['created_at'] ?? '') ??
+              DateTime.now(),
+          messageType: messageData['type'] ?? 'received',
+          name: messageData['name'] ?? ' ',
+          messageId: messageData['message_id']);
+
+      final whatsappController =
+          Provider.of<WhatsappControllerCopy>(context, listen: false);
+
+      whatsappController.addMessageToList(newMessage);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
+    } catch (e) {
+      log("Error handling new message: $e");
+    }
   }
 
   void _onTextChanged() {
@@ -105,12 +144,31 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
       {String? text,
       File? file,
       Map<String, dynamic>? contact,
-      Map<String, dynamic>? location}) {
+      Map<String, dynamic>? location}) async {
     if (text != null && text.trim().isNotEmpty) {
-      Provider.of<WhatsappControllerCopy>(context, listen: false).sendMessage(
-          widget.contactedNumber, text, widget.leadId.toString(), context);
-      _messageController.clear();
-      setState(() => isTyping = false);
+      final whatsappController =
+          Provider.of<WhatsappControllerCopy>(context, listen: false);
+
+      String? senderName = await getUserName();
+
+      if (text != null && text.trim().isNotEmpty) {
+        final newMessage = ChatModel(
+            message: text,
+            createdAt: DateTime.now(),
+            messageType: "send",
+            name: senderName);
+
+        await whatsappController.addMessageToList(newMessage);
+
+        // Send the message via API
+        await whatsappController.sendMessage(
+            widget.contactedNumber, text, widget.leadId.toString(), context);
+
+        _messageController.clear();
+        setState(() => isTyping = false);
+
+        _scrollToBottom();
+      }
     }
     // if (file != null) {
     //   Provider.of<WhatsappController>(context, listen: false).onSendMessage(
@@ -166,7 +224,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
       appBar: AppBar(
         foregroundColor: Colors.white,
         elevation: 1,
@@ -202,17 +259,17 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToBottom();
         });
-        if (controller.isChatLoading) {
-          return Padding(
-            padding: EdgeInsets.only(right: 16.w),
-            child: Center(
-              child: LoadingAnimationWidget.fourRotatingDots(
-                color: const Color(0xffF0F6FF),
-                size: 32,
-              ),
-            ),
-          );
-        }
+        // if (controller.isChatLoading) {
+        //   return Padding(
+        //     padding: EdgeInsets.only(right: 16.w),
+        //     child: Center(
+        //       child: LoadingAnimationWidget.fourRotatingDots(
+        //         color: const Color(0xffF0F6FF),
+        //         size: 32,
+        //       ),
+        //     ),
+        //   );
+        // }
 
         return SafeArea(
           child: Column(
@@ -226,13 +283,22 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
                   itemBuilder: (context, index) {
                     final message = controller.chatList[index];
                     if (message == null) return const SizedBox();
-                    final isMe = message.messageType == "received";
-                    return MessageWidget(
-                      message: message,
-                      isMe: isMe,
-                      formattedTime: _formatTimestamp(message.createdAt),
-                      senderName: message.name ?? "",
-                    );
+                    final isMe = message.name == widget.name;
+                    if (message.message != null &&
+                        message.message!.isNotEmpty) {
+                      return Align(
+                        alignment:
+                            isMe ? Alignment.centerLeft : Alignment.centerRight,
+                        child: MessageWidget(
+                          message: message,
+                          isMe: isMe,
+                          formattedTime: _formatTimestamp(message.createdAt),
+                          senderName: message.name ?? "",
+                        ),
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
                   },
                 ),
               ),
@@ -505,129 +571,252 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     });
   }
 
-  Widget _buildMessageInput() {
-    return Stack(children: [
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            child: isAttachmentOpen
-                ? _buildAttachmentOptions()
-                : const SizedBox.shrink(),
+  void _showConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          title: const Column(
+            children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
           ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.ease,
-            child: isTemplateOpen
-                ? TemplateSelectionModal(
-                    onTemplateSelected: (template) {
-                      setState(() {
-                        _messageController.text = template.content;
-                        isTemplateOpen = false;
-                      });
-                    },
-                  )
-                : const SizedBox.shrink(),
-          ),
-          Container(
-            padding: EdgeInsets.all(16.r),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+          content: Text(
+            'Are you sure you want to send this template?',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 15.sp,
+              weight: FontWeight.w400,
             ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      cursorColor: const Color(0xff3874F6),
-                      decoration: InputDecoration(
-                        hintText: 'Send a message',
-                        hintStyle: GLTextStyles.manropeStyle(
-                          weight: FontWeight.w400,
-                          color: const Color(0xffA4A4A4),
-                          size: 14.sp,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: const Color.fromARGB(30, 153, 153, 153),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
-                        suffixIcon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (!isTyping)
-                              IconButton(
-                                onPressed: () {
-                                  _showTemplateModal(context);
-                                },
-                                icon: Icon(
-                                  isTemplateOpen
-                                      ? Icons.close_outlined
-                                      : Iconsax.smallcaps,
-                                  size: 21.sp,
-                                  color: Colors.black,
+          ),
+          actions: <Widget>[
+            CustomButton(
+              borderColor: Colors.transparent,
+              backgroundColor: const Color(0xffFFF2F0),
+              text: "Cancel",
+              textColor: const Color(0xffFF9C8E),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _messageController.clear();
+              },
+              width: (110 / ScreenUtil().screenWidth).sw,
+            ),
+            CustomButton(
+              borderColor: Colors.transparent,
+              backgroundColor: const Color(0xffECF5FF),
+              text: "Send",
+              textColor: const Color(0xff3893FF),
+              width: (110 / ScreenUtil().screenWidth).sw,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                _sendMessage(text: _messageController.text);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMessageInput() {
+    return Consumer<WhatsappControllerCopy>(builder: (context, controller, _) {
+      bool isChatEmpty = controller.chatList.isEmpty;
+      // Check if 24 hours have passed since the last message
+      DateTime? lastMessageTime;
+
+      // For empty chats, consider it as if 24 hours have passed
+      bool isPast24Hours = true; // Default to true for empty chats
+
+      if (!isChatEmpty && controller.conversationModel.isNotEmpty == true) {
+        // Only evaluate the time condition if there are messages
+        lastMessageTime = DateTime.tryParse(
+          controller.conversationModel.last.createdAt.toString(),
+        );
+
+        if (lastMessageTime != null) {
+          final DateTime now = DateTime.now();
+          final Duration difference = now.difference(lastMessageTime);
+          isPast24Hours = difference.inHours >= 24;
+        }
+      }
+
+      bool onlyTemplatesEnabled = isChatEmpty
+          // || isPast24Hours
+          ;
+      String getTemplateBodyText(Datum template) {
+        if (template.components == null || template.components!.isEmpty) {
+          return "No content available";
+        }
+
+        final bodyComponent = template.components!.firstWhere(
+          (component) => component.type == "BODY",
+          orElse: () => Component(),
+        );
+
+        return bodyComponent.text ?? "No body text available";
+      }
+
+      return Stack(children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: isAttachmentOpen && !onlyTemplatesEnabled
+                  ? _buildAttachmentOptions()
+                  : const SizedBox.shrink(),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.ease,
+              child: isTemplateOpen
+                  ? TemplateSelectionModal(
+                      onTemplateSelected: (template) {
+                        setState(() {
+                          _messageController.text =
+                              getTemplateBodyText(template);
+                          isTemplateOpen = false;
+                        });
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          _showConfirmation(context);
+                        });
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            Container(
+              padding: EdgeInsets.all(16.r),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 3.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        cursorColor: const Color(0xff3874F6),
+                        enabled: true,
+                        readOnly: onlyTemplatesEnabled && !isTemplateOpen,
+                        onTap: onlyTemplatesEnabled && !isTemplateOpen
+                            ? () => _showTemplateModal(context)
+                            : null,
+                        onSubmitted: (value) {
+                          if (value.isNotEmpty) {
+                            _sendMessage(text: value);
+                            _messageController.clear();
+                          }
+                        },
+                        decoration: InputDecoration(
+                          hintText: onlyTemplatesEnabled
+                              ? 'Select a template message'
+                              : 'Send a message',
+                          hintStyle: GLTextStyles.manropeStyle(
+                            weight: FontWeight.w400,
+                            color: const Color(0xffA4A4A4),
+                            size: 14.sp,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24.r),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: const Color.fromARGB(30, 153, 153, 153),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          suffixIcon: isTyping
+                              ? null
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () =>
+                                          _showTemplateModal(context),
+                                      icon: Icon(
+                                        isTemplateOpen
+                                            ? Icons.close_outlined
+                                            : Iconsax.smallcaps,
+                                        size: 21.sp,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    if (!onlyTemplatesEnabled)
+                                      Container(
+                                        height: 37.h,
+                                        width: 37.w,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                        ),
+                                        child: IconButton(
+                                          onPressed: toggleAttachment,
+                                          icon: Icon(
+                                            isAttachmentOpen
+                                                ? Icons.close_outlined
+                                                : FontAwesomeIcons.paperclip,
+                                            size: isAttachmentOpen
+                                                ? 22.sp
+                                                : 18.sp,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    SizedBox(width: 6.w)
+                                  ],
                                 ),
-                              ),
-                            if (!isTyping)
-                              Container(
-                                height: 37.h,
-                                width: 37.w,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: IconButton(
-                                  onPressed: toggleAttachment,
-                                  icon: Icon(
-                                    isAttachmentOpen
-                                        ? Icons.close_outlined
-                                        : FontAwesomeIcons.paperclip,
-                                    size: isAttachmentOpen ? 22.sp : 18.sp,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            SizedBox(width: 6.w)
-                          ],
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 3.w),
-                  Container(
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Color(0xffF8F8F8))),
-                    child: IconButton(
-                      onPressed: isTyping
-                          ? () =>
-
-                          _sendMessage(text: _messageController.text)
-                          : (isRecording ? _stopRecording : _startRecording),
-                      icon: Icon(isTyping
-                          ? FontAwesomeIcons.solidPaperPlane
-                          : (isRecording
-                              ? FontAwesomeIcons.stop
-                              : FontAwesomeIcons.microphone)),
-                      color: Color(0xff3874F6),
-                    ),
-                  ),
-                ],
+                    SizedBox(width: 3.w),
+                    if (!onlyTemplatesEnabled)
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xffF8F8F8)),
+                        ),
+                        child: IconButton(
+                          onPressed: _messageController.text.isNotEmpty
+                              ? () =>
+                                  _sendMessage(text: _messageController.text)
+                              : (isRecording
+                                  ? _stopRecording
+                                  : _startRecording),
+                          icon: Icon(
+                            _messageController.text.isNotEmpty
+                                ? FontAwesomeIcons.solidPaperPlane
+                                : (isRecording
+                                    ? FontAwesomeIcons.stop
+                                    : FontAwesomeIcons.microphone),
+                          ),
+                          color: const Color(0xff3874F6),
+                        ),
+                      )
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    ]);
+          ],
+        ),
+      ]);
+    });
   }
+}
+
+Future<String?> getUserName() async {
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  String? storedData = sharedPreferences.getString(AppConfig.loginData);
+
+  if (storedData != null) {
+    var loginData = jsonDecode(storedData);
+    if (loginData["user"] != null && loginData["user"]['name'] != null) {
+      return loginData["user"]['name'];
+    }
+  }
+  return null;
 }
