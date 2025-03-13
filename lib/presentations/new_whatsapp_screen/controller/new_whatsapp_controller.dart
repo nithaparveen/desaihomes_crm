@@ -86,38 +86,25 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
-  Future sendMultiMessages(List<String> leadIds, String templateName,
+  Future sendMultiMessages(List<int> leadIds, String templateName,
       String language, BuildContext context) async {
-    List<Map<String, dynamic>> messages = leadIds
-        .map((leadId) => {
-              "lead_ids": leadId,
-              "template_name": templateName,
-              "language": language,
-            })
-        .toList();
-    WhatsappService.multiSend(messages).then((value) {
-      if (value != null) {
-        // Success handling
-        AppUtils.oneTimeSnackBar("Messages sent successfully",
-            context: context, bgColor: Colors.green);
-      } else {
-        AppUtils.oneTimeSnackBar(value["message"] ?? "Failed to send messages",
-            context: context, bgColor: Colors.redAccent);
-      }
-    });
-  }
+    Map<String, dynamic> data = {
+      "lead_ids": leadIds,
+      "template_name": templateName,
+      "language": language,
+    };
 
-  // Future sendMedias(String to, String message, String receiverId,
-  //     BuildContext context) async {
-  //   var data = {"to": to, "message": message, "receiver_id": receiverId};
-  //   WhatsappService.sendMessage(data).then((value) {
-  //     if (value["success"] == true) {
-  //     } else {
-  //       AppUtils.oneTimeSnackBar(value["message"],
-  //           context: context, bgColor: Colors.redAccent);
-  //     }
-  //   });
-  // }
+    var response = await WhatsappService.multiSend(data);
+
+    if (response != null && response["success"] == true) {
+      // AppUtils.oneTimeSnackBar("Messages sent successfully",
+      //     context: context, bgColor: Colors.green);
+    } else {
+      // String errorMessage = response?["message"] ?? "Failed to send messages";
+      // AppUtils.oneTimeSnackBar(errorMessage,
+      //     context: context, bgColor: Colors.redAccent);
+    }
+  }
 
   fetchChats(leadId, context) async {
     isChatLoading = true;
@@ -134,7 +121,7 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
-  fetchWhatsAppTemplates( context) async {
+  fetchWhatsAppTemplates(context) async {
     isTemplateLoading = true;
     notifyListeners();
     WhatsappService.fetchWhatsAppTemplates().then((value) {
@@ -155,10 +142,9 @@ class WhatsappControllerCopy extends ChangeNotifier {
   }
 
   Future<void> onSendMessage(BuildContext context, File? file,
-      String messageType, String to, String receiverId) async {
+      String messageType, String to, String leadId) async {
     try {
       String? accessToken = await getAccessToken();
-
       if (accessToken == null) {
         log("Access token is null. User might not be authenticated.");
         AppUtils.oneTimeSnackBar("Authentication error. Please log in again.",
@@ -166,16 +152,16 @@ class WhatsappControllerCopy extends ChangeNotifier {
         return;
       }
 
-      var url = "https://console.omnisellcrm.com/api/whatsapp/messages/medias";
-      onUploadFile(url, file, messageType, to, receiverId, accessToken)
+      var url = "https://www.desaihomes.com/api/whatsapp/beta/message/send";
+      onUploadFile(url, file, messageType, to, leadId, accessToken.replaceAll('"', ''))
           .then((value) {
         log("onSendMessage() -> status code -> ${value.statusCode}");
         log("onSendMessage() -> response -> ${value.body}");
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (value.statusCode == 200) {
-            AppUtils.oneTimeSnackBar("Message Sent",
-                context: context, bgColor: Colors.green, time: 2);
+            // AppUtils.oneTimeSnackBar("Message Sent",
+            //     context: context, bgColor: Colors.green, time: 2);
           } else {
             // AppUtils.oneTimeSnackBar("Error: ${value.body}", context: context);
           }
@@ -187,61 +173,69 @@ class WhatsappControllerCopy extends ChangeNotifier {
   }
 
   Future<http.Response> onUploadFile(
-      String url,
-      File? selectedFile,
-      String messageType,
-      String to,
-      String receiverId,
-      String? accessToken) async {
-    // Make sure the file exists
-    if (selectedFile == null || !await selectedFile.exists()) {
-      throw Exception("File does not exist or is null");
-    }
-
-    var request = http.MultipartRequest('POST', Uri.parse(url));
-
-    // Headers
-    Map<String, String> headers = {
-      "Authorization": "Bearer $accessToken"
-      // Don't manually set Content-Type, it will be set automatically with the boundary
-    };
-
-    // Add form fields - ensure field names match exactly what the server expects
-    request.fields["to"] = to;
-    request.fields["receiver_id"] = receiverId;
-    request.fields["message_type"] = messageType;
-
-    // Add file with correct field name 'file' to match the server's expectation
-    var fileStream = http.ByteStream(selectedFile.openRead());
-    var fileLength = await selectedFile.length();
-
-    var multipartFile = http.MultipartFile(
-        'file', // This must match the field name the server expects
-        fileStream,
-        fileLength,
-        filename: selectedFile.path.split('/').last,
-        contentType: MediaType.parse(_getMediaType(selectedFile.path)));
-
-    request.files.add(multipartFile);
-    request.headers.addAll(headers);
-
-    // Log request details
-    log("Uploading file to: $url");
-    log("File size: $fileLength bytes");
-    log("Request fields: ${request.fields}");
-
-    // Send the request
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-
-    // Log the response
-    log("Response status: ${response.statusCode}");
-    log("Response body: ${response.body}");
-
-    return response;
+    String url,
+    File? selectedFile,
+    String messageType,
+    String to,
+    String leadId,
+    String? accessToken) async {
+  if (selectedFile == null || !await selectedFile.exists()) {
+    throw Exception("File does not exist or is null");
   }
 
-// Helper method to determine the content type based on file extension
+  var request = http.MultipartRequest('POST', Uri.parse(url));
+  log("Access Token: $accessToken");
+
+  // Headers
+  Map<String, String> headers = {
+    "Authorization": "Bearer $accessToken"
+  };
+
+  // Add form fields - ensure field names match exactly what the server expects
+  request.fields["to"] = to;
+  request.fields["lead_id"] = leadId;
+  request.fields["msg_type"] = messageType;
+
+  // Get file details
+  var filePath = selectedFile.path;
+  var fileName = filePath.split('/').last;
+  var fileSize = await selectedFile.length();
+  var fileType = _getMediaType(filePath);
+
+  // Log file details
+  log("File Name: $fileName");
+  log("File Path: $filePath");
+  log("File Type: $fileType");
+  log("File Size: $fileSize bytes");
+
+  // Add file with correct field name 'file' to match the server's expectation
+  var fileStream = http.ByteStream(selectedFile.openRead());
+
+  var multipartFile = http.MultipartFile(
+      'audio', 
+      fileStream,
+      fileSize,
+      filename: fileName,
+      contentType: MediaType.parse(fileType));
+
+  request.files.add(multipartFile);
+  request.headers.addAll(headers);
+
+  // Log request details
+  log("Uploading file to: $url");
+  log("Request fields: ${request.fields}");
+
+  // Send the request
+  var streamedResponse = await request.send();
+  var response = await http.Response.fromStream(streamedResponse);
+
+  // Log the response
+  log("Response status: ${response.statusCode}");
+  log("Response body: ${response.body}");
+
+  return response;
+}
+
   String _getMediaType(String path) {
     final extension = path.split('.').last.toLowerCase();
 
@@ -263,9 +257,8 @@ class WhatsappControllerCopy extends ChangeNotifier {
       case 'xls':
       case 'xlsx':
         return 'application/vnd.ms-excel';
-      // Add more types as needed
       default:
-        return 'application/octet-stream'; // Default binary type
+        return 'application/octet-stream';
     }
   }
 

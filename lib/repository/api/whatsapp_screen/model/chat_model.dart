@@ -1,6 +1,3 @@
-// To parse this JSON data, do
-//
-//     final chatModel = chatModelFromJson(jsonString);
 
 import 'dart:convert';
 
@@ -10,31 +7,35 @@ String chatModelToJson(List<ChatModel> data) => json.encode(List<dynamic>.from(d
 
 class ChatModel {
     String? name;
-    String? messageType; // Change from 'type' to 'messageType'
+    String? messageType; 
     String? message;
+    String? msgType;
     String? messageId;
     DateTime? createdAt;
 
     ChatModel({
         this.name,
-        this.messageType, // Update here
+        this.messageType,
         this.message,
+        this.msgType,
         this.messageId,
         this.createdAt,
     });
 
     factory ChatModel.fromJson(Map<String, dynamic> json) => ChatModel(
         name: json["name"],
-        messageType: json["messageType"], // Update here
+        messageType: json["type"],
         message: json["message"],
+        msgType: json["msg_type"],
         messageId: json["message_id"],
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
     );
 
     Map<String, dynamic> toJson() => {
         "name": name,
-        "messageType": messageType, // Update here
+        "type": messageType,
         "message": message,
+        "msg_type": msgType,
         "message_id": messageId,
         "created_at": createdAt?.toIso8601String(),
     };

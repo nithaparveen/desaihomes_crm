@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -25,8 +26,8 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (message.messageType) {
-      case 'text':
+    switch (message.msgType) {
+      case 'Text':
         return TextMessageWidget(
           message: message.message ?? '',
           isMe: isMe,
@@ -43,24 +44,25 @@ class MessageWidget extends StatelessWidget {
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName);
-     case 'image':
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ImagePreviewScreen(imageUrl: message.message),
-        ),
-      );
-    },
-    child: ImageMessageWidget(
-      imageUrl: message.message ?? '',
-      isMe: isMe,
-      timestamp: formattedTime,
-      senderName: senderName,
-    ),
-  );
-      case 'audio':
+      case 'Image':
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    ImagePreviewScreen(imageUrl: message.message),
+              ),
+            );
+          },
+          child: ImageMessageWidget(
+            imageUrl: message.message ?? '',
+            isMe: isMe,
+            timestamp: formattedTime,
+            senderName: senderName,
+          ),
+        );
+      case 'Audio':
         return VoiceMessageWidget(
             voicePath: message.message ?? '',
             isMe: isMe,
@@ -136,10 +138,8 @@ class MessageBubble extends StatelessWidget {
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(18.r),
               topRight: Radius.circular(18.r),
-              bottomLeft:
-                  !isMe ? Radius.circular(18.r) : Radius.circular(4.r),
-              bottomRight:
-                  !isMe ? Radius.circular(4.r) : Radius.circular(18.r),
+              bottomLeft: !isMe ? Radius.circular(18.r) : Radius.circular(4.r),
+              bottomRight: !isMe ? Radius.circular(4.r) : Radius.circular(18.r),
             ),
           ),
           padding: padding,
@@ -319,7 +319,7 @@ class VoiceMessageWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
     return MessageBubble(
       isMe: isMe,
       timestamp: timestamp,

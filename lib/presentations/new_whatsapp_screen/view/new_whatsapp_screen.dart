@@ -26,6 +26,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
   bool showIcon = true;
   bool isSelectionMode = false;
   Set<int> selectedIndices = {};
+  List<int> selectedLeadIds = [];
 
   TextEditingController searchController = TextEditingController();
   String searchQuery = '';
@@ -59,19 +60,26 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
   void clearSelection() {
     setState(() {
       selectedIndices.clear();
+      selectedLeadIds.clear();
       isSelectionMode = false;
     });
   }
 
-  void toggleSelection(int index) {
+  void toggleSelection(int index, ConversationModel message) {
     setState(() {
       if (selectedIndices.contains(index)) {
         selectedIndices.remove(index);
+        if (message.leadId != null) {
+          selectedLeadIds.remove(message.leadId);
+        }
         if (selectedIndices.isEmpty) {
           isSelectionMode = false;
         }
       } else {
         selectedIndices.add(index);
+        if (message.leadId != null) {
+          selectedLeadIds.add(message.leadId!);
+        }
         isSelectionMode = true;
       }
     });
@@ -81,10 +89,15 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
     setState(() {
       if (selectedIndices.length == messages.length) {
         selectedIndices.clear();
+        selectedLeadIds.clear();
         isSelectionMode = false;
       } else {
         selectedIndices =
             Set.from(List.generate(messages.length, (index) => index));
+        selectedLeadIds = messages
+            .where((msg) => msg.leadId != null)
+            .map((msg) => msg.leadId!)
+            .toList();
         isSelectionMode = true;
       }
     });
@@ -128,7 +141,9 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                 false;
             return nameMatch || messageMatch;
           }).toList();
-          void _showConfirmation(BuildContext context) {
+
+          void showConfirmation(
+              BuildContext context, String templateName, List<int> leadIds) {
             showDialog(
               context: context,
               barrierDismissible: false,
@@ -157,7 +172,6 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                       textColor: const Color(0xffFF9C8E),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        // _messageController.clear();
                       },
                       width: (110 / ScreenUtil().screenWidth).sw,
                     ),
@@ -169,7 +183,10 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                       width: (110 / ScreenUtil().screenWidth).sw,
                       onPressed: () async {
                         Navigator.of(context).pop();
-                        // _sendMessage(text: _messageController.text);
+                        Provider.of<WhatsappControllerCopy>(context,
+                                listen: false)
+                            .sendMultiMessages(leadIds,
+                                templateName, "en_US", context);
                       },
                     ),
                   ],
@@ -232,6 +249,9 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                             if (value == "Select all") {
                               selectAll(filteredMessages);
                             } else if (value == "Select template") {
+                              final BuildContext parentContext =
+                                  context;
+
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -241,7 +261,10 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                     Navigator.of(context).pop();
                                     Future.delayed(
                                         const Duration(milliseconds: 300), () {
-                                      _showConfirmation(context);
+                                      showConfirmation(
+                                          parentContext,
+                                          template.name ?? "",
+                                          selectedLeadIds);
                                     });
                                   },
                                 ),
@@ -539,7 +562,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                 ),
                                 onTap: () {
                                   if (isSelectionMode) {
-                                    toggleSelection(index);
+                                    toggleSelection(index, message);
                                   } else {
                                     Navigator.push(
                                       context,
@@ -557,7 +580,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                   if (!isSelectionMode) {
                                     setState(() {
                                       isSelectionMode = true;
-                                      toggleSelection(index);
+                                      toggleSelection(index, message);
                                     });
                                   }
                                 },

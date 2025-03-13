@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import '../../../../core/utils/app_utils.dart';
 import '../../../helper/api_helper.dart';
@@ -21,7 +22,7 @@ class WhatsappService {
     try {
       var decodedData = await ApiHelper.postDataWObaseUrl(
         endPoint:
-            "https://www.desaihomes.com/api/whatsapp/beta/message/send?to=$to&message=$message&lead_id=$leadId",
+            "https://www.desaihomes.com/api/whatsapp/beta/message/send?to=$to&message=$message&lead_id=$leadId&msg_type=Text",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
@@ -44,22 +45,23 @@ class WhatsappService {
     }
   }
 
-  static Future<dynamic> multiSend(List<Map<String, dynamic>> messages) async {
-    try {
-      var data = {"messages": messages};
+static Future<dynamic> multiSend(Map<String, dynamic> data) async {
+  try {
+    var decodedData = await ApiHelper.postDataWObaseUrl(
+      endPoint: "https://www.desaihomes.com/api/whatsapp-templates/message/multisend",
+      header: {
+        'Content-Type': 'application/json', // Ensure the content-type is set
+        'Authorization': 'Bearer ${await AppUtils.getToken()}',
+      },
+      body: data, // Pass the data directly, it will be encoded in ApiHelper
+    );
 
-      var decodedData = await ApiHelper.postDataWObaseUrl(
-        endPoint:
-            "https://www.desaihomes.com/api/whatsapp-templates/message/multisend?",
-        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
-        body: data,
-      );
-      return decodedData;
-    } catch (e) {
-      log("$e");
-      return {"success": false, "message": "Error: $e"};
-    }
+    return decodedData;
+  } catch (e) {
+    log("Error: $e");
+    return {"success": false, "message": "Error: $e"};  // Ensure response is always a Map
   }
+}
 
   static Future<dynamic> sendContact(Map<String, dynamic> data) async {
     try {

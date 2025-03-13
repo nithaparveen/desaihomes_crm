@@ -24,6 +24,7 @@ import '../../../../repository/api/login_screen/pusher_service.dart';
 import '../../../../repository/api/whatsapp_screen/model/chat_model.dart';
 import '../../../../repository/api/whatsapp_screen/model/template_model.dart';
 import 'message_widget.dart';
+import 'preview_screen.dart';
 import 'template_widget.dart';
 
 class ChatScreenCopy extends StatefulWidget {
@@ -92,6 +93,7 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
           createdAt: DateTime.tryParse(messageData['created_at'] ?? '') ??
               DateTime.now(),
           messageType: messageData['type'] ?? 'received',
+          msgType: messageData['msg_type'] ?? 'Text',
           name: messageData['name'] ?? ' ',
           messageId: messageData['message_id']);
 
@@ -156,11 +158,11 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
             message: text,
             createdAt: DateTime.now(),
             messageType: "send",
+            msgType: "Text",
             name: senderName);
 
         await whatsappController.addMessageToList(newMessage);
 
-        // Send the message via API
         await whatsappController.sendMessage(
             widget.contactedNumber, text, widget.leadId.toString(), context);
 
@@ -315,10 +317,10 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
       if (await _audioRecorder.hasPermission()) {
         final directory = await getApplicationDocumentsDirectory();
         final path =
-            '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+            '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
 
         await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc),
+          const RecordConfig(encoder: AudioEncoder.wav),
           path: path,
         );
 
@@ -338,26 +340,50 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     }
   }
 
-  Future<void> _stopRecording() async {
-    try {
-      final path = await _audioRecorder.stop();
-      if (path != null) {
-        final file = File(path);
-        final duration = await _getAudioDuration(file);
+Future<void> _stopRecording() async {
+  try {
+    final path = await _audioRecorder.stop();
+    if (path != null) {
+      final file = File(path);
 
-        // _sendMessage(file: File(path));
+      final provider =
+          Provider.of<WhatsappControllerCopy>(context, listen: false);
 
-        setState(() {
-          isRecording = false;
-          recordedFilePath = path;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error stopping recording: $e")),
+      String? senderName = await getUserName();
+
+      final newMessage = ChatModel(
+        message: path,
+        createdAt: DateTime.now(),
+        messageType: "send", 
+        name: senderName,
+        msgType: "Audio"
       );
+
+      // Append the audio message to the chat list
+      await provider.addMessageToList(newMessage);
+
+      // Send the audio message via API
+      provider.onSendMessage(
+        context,
+        file,
+        "Audio",
+        widget.contactedNumber,
+        widget.leadId.toString(),
+      );
+
+      setState(() {
+        isRecording = false;
+        recordedFilePath = path;
+      });
+
+      _scrollToBottom(); // Ensure the chat scrolls to the latest message
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error stopping recording: $e")),
+    );
   }
+}
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -383,16 +409,16 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     if (image != null) {
       File selectedImage = File(image.path);
 
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => PreviewScreen(
-      //       file: selectedImage,
-      //       contactedNumber: widget.contactedNumber,
-      //       contactedUserId: widget.contactedUserId,
-      //     ),
-      //   ),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PreviewScreen(
+            file: selectedImage,
+            contactedNumber: widget.contactedNumber,
+            contactedUserId: widget.leadId.toString(),
+          ),
+        ),
+      );
     } else {}
   }
 
