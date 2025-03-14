@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_config/app_config.dart';
@@ -45,9 +46,15 @@ class AppUtils {
 
         behavior: showOnTop ? SnackBarBehavior.floating : null,
         backgroundColor: bgColor ?? Colors.white60,
-        content: Text(message!,
-            style:
-                textStyle ?? GLTextStyles.cabinStyle(color: ColorTheme.white)),
+        content: Text(
+          message!,
+          style: textStyle ??
+              GLTextStyles.manropeStyle(
+                color: ColorTheme.white,
+                size: 12.sp,
+                weight: FontWeight.w500,
+              ),
+        ),
         duration: Duration(seconds: time),
         margin: showOnTop
             ? EdgeInsets.only(

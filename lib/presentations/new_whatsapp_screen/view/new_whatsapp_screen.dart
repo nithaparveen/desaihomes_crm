@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/presentations/whatsapp_screen/view/whatsapp_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
@@ -185,8 +186,8 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                         Navigator.of(context).pop();
                         Provider.of<WhatsappControllerCopy>(context,
                                 listen: false)
-                            .sendMultiMessages(leadIds,
-                                templateName, "en_US", context);
+                            .sendMultiMessages(
+                                leadIds, templateName, "en_US", context);
                       },
                     ),
                   ],
@@ -249,8 +250,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                             if (value == "Select all") {
                               selectAll(filteredMessages);
                             } else if (value == "Select template") {
-                              final BuildContext parentContext =
-                                  context;
+                              final BuildContext parentContext = context;
 
                               showModalBottomSheet(
                                 context: context,
@@ -261,10 +261,8 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                     Navigator.of(context).pop();
                                     Future.delayed(
                                         const Duration(milliseconds: 300), () {
-                                      showConfirmation(
-                                          parentContext,
-                                          template.name ?? "",
-                                          selectedLeadIds);
+                                      showConfirmation(parentContext,
+                                          template.name ?? "", selectedLeadIds);
                                     });
                                   },
                                 ),
@@ -428,63 +426,29 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                 ),
                                 subtitle: Row(
                                   children: [
-                                    // if (message.lastMessage?.messageType ==
-                                    //     "audio")
-                                    //   Icon(
-                                    //     Iconsax.microphone_25,
-                                    //     size: 16.sp,
-                                    //     color:
-                                    //         message.lastMessage?.isRead == false
-                                    //             ? const Color(0xFF3E9E7C)
-                                    //             : Colors.grey,
-                                    //   )
-                                    // else if (message.lastMessage?.messageType ==
-                                    //     "image")
-                                    //   Icon(
-                                    //     Iconsax.gallery5,
-                                    //     size: 14.sp,
-                                    //     color:
-                                    //         message.lastMessage?.isRead == false
-                                    //             ? const Color(0xFF3E9E7C)
-                                    //             : Colors.grey,
-                                    //   )
-                                    // else if (message.lastMessage?.messageType ==
-                                    //     "contact")
-                                    //   Icon(
-                                    //     Icons.person_rounded,
-                                    //     size: 14.sp,
-                                    //     color:
-                                    //         message.lastMessage?.isRead == false
-                                    //             ? const Color(0xFF3E9E7C)
-                                    //             : Colors.grey,
-                                    //   )
-                                    // else if (message.lastMessage?.messageType ==
-                                    //     "location")
-                                    //   Icon(
-                                    //     Icons.location_on,
-                                    //     size: 14.sp,
-                                    //     color:
-                                    //         message.lastMessage?.isRead == false
-                                    //             ? const Color(0xFF3E9E7C)
-                                    //             : Colors.grey,
-                                    //   )
-                                    // else if (message.lastMessage?.messageType ==
-                                    //     "document")
-                                    //   Icon(
-                                    //     Iconsax.document_text5,
-                                    //     size: 14.sp,
-                                    //     color:
-                                    //         message.lastMessage?.isRead == false
-                                    //             ? const Color(0xFF3E9E7C)
-                                    //             : Colors.grey,
-                                    //   ),
-                                    // if (message.lastMessage?.messageType !=
-                                    //     null)
-                                    SizedBox(width: 4.w),
+                                    if (message.msgType == "Audio")
+                                      Icon(Iconsax.microphone_25, size: 16.sp)
+                                    else if (message.msgType == "Image")
+                                      Icon(Iconsax.gallery5, size: 14.sp)
+                                    else if (message.msgType == "Video")
+                                      Icon(Iconsax.video5, size: 14.sp)
+                                    else if (message.msgType == "Contact")
+                                      Icon(Icons.person_rounded, size: 14.sp)
+                                    else if (message.msgType == "location")
+                                      Icon(Icons.location_on, size: 14.sp)
+                                    else if (message.msgType == "Document")
+                                      Icon(Iconsax.document_text5, size: 14.sp),
+                                    if (message.msgType != null)
+                                      SizedBox(width: 4.w),
                                     Expanded(
                                       child: Text(
+                                        _getMessageText(
+                                          message.msgType
+                                              .toString(),
+                                          message.message
+                                              .toString(),
+                                        ),
                                         overflow: TextOverflow.ellipsis,
-                                        message.message.toString(),
                                         style: GLTextStyles.manropeStyle(
                                           size: 12.sp,
                                           weight: FontWeight.w400,
@@ -632,29 +596,29 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                 weight: FontWeight.w500,
               ),
             ),
-            SizedBox(width: 6.w), // Spacing between text and checkmark
+            SizedBox(width: 6.w), 
           ],
         ),
       ),
     );
   }
 
-  // String _getMessageText(LastMessage? lastMessage) {
-  //   if (lastMessage == null) return "";
-
-  //   switch (lastMessage.messageType) {
-  //     case "image":
-  //       return "Photo";
-  //     case "document":
-  //       return "Document";
-  //     case "location":
-  //       return "Location";
-  //     case "audio":
-  //       return "Voice message";
-  //     case "contact":
-  //       return "Contact message";
-  //     default:
-  //       return lastMessage.message ?? "";
-  //   }
-  // }
+  String _getMessageText(String msgType, String message) {
+    switch (msgType) {
+      case "Image":
+        return "Photo";
+      case "document":
+        return "Document";
+      case "location":
+        return "Location";
+      case "Audio":
+        return "Voice message";
+      case "contact":
+        return "Contact message";
+      case "Video":
+        return "Video";
+      default:
+        return message;
+    }
+  }
 }

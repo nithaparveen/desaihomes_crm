@@ -1,1 +1,2 @@
 -keep class com.github.chinloyal.pusher_client.** { *; }
+-keep class com.google.android.exoplayer2.** { *; }

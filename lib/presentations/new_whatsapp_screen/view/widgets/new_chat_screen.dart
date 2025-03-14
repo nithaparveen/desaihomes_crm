@@ -376,7 +376,7 @@ Future<void> _stopRecording() async {
         recordedFilePath = path;
       });
 
-      _scrollToBottom(); // Ensure the chat scrolls to the latest message
+      _scrollToBottom();
     }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -385,42 +385,56 @@ Future<void> _stopRecording() async {
   }
 }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes);
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
-  }
-
-  Future<Duration> _getAudioDuration(File file) async {
-    final AudioPlayer player = AudioPlayer();
-    await player.setFilePath(file.path);
-    final duration = player.duration;
-    await player.dispose();
-    return duration ?? Duration.zero;
-  }
-
-  Future<void> _handleImageMessage({bool fromCamera = false}) async {
+Future<void> _handleImageMessage({bool fromCamera = false}) async {
+  if (fromCamera) {
+    // Camera functionality
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
-      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+      source: ImageSource.camera,
     );
-
+    
     if (image != null) {
-      File selectedImage = File(image.path);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PreviewScreen(
-            file: selectedImage,
-            contactedNumber: widget.contactedNumber,
-            contactedUserId: widget.leadId.toString(),
-          ),
-        ),
-      );
-    } else {}
+      // Navigate directly to preview without adding to ChatModel
+      _navigateToPreview(File(image.path), "image");
+    }
+    return;
   }
+  
+  // Use file_picker for gallery
+  final FilePickerResult? result = await FilePicker.platform.pickFiles(
+    type: FileType.media, // This allows both images and videos
+    allowMultiple: false,
+  );
+  
+  if (result != null && result.files.single.path != null) {
+    final File file = File(result.files.single.path!);
+    final String extension = file.path.split('.').last.toLowerCase();
+    
+    // Determine if it's an image or video based on file extension
+    final String messageType = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension) 
+        ? "image" 
+        : "video";
+    
+    // Navigate directly to preview without adding to ChatModel
+    _navigateToPreview(file, messageType);
+  }
+}
+
+// Helper method to navigate to preview screen
+void _navigateToPreview(File selectedMedia, String messageType) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PreviewScreen(
+        file: selectedMedia,
+        contactedNumber: widget.contactedNumber,
+        leadId: widget.leadId.toString(),
+        messageType: messageType,
+      ),
+    ),
+  );
+  isAttachmentOpen = false;
+}
 
   Future<void> _handleDocumentMessage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(

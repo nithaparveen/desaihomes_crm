@@ -46,6 +46,13 @@
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
 
+     <!-- Allow HTTP video URLs -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
     <!-- URL Schemes for External Apps -->
     <key>LSApplicationQueriesSchemes</key>
     <array>

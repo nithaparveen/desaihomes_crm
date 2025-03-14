@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:video_compress/video_compress.dart';
 import 'package:voice_message_package/voice_message_package.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/textstyles.dart';
 import 'image_preview_screen.dart';
+import 'video_preview_screen.dart';
 
 class MessageWidget extends StatelessWidget {
   final dynamic message;
@@ -57,6 +58,26 @@ class MessageWidget extends StatelessWidget {
           },
           child: ImageMessageWidget(
             imageUrl: message.message ?? '',
+            isMe: isMe,
+            timestamp: formattedTime,
+            senderName: senderName,
+          ),
+        );
+      case 'Video':
+        return GestureDetector(
+          onTap: () {
+            if (message.message != null && message.message.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      VideoPreviewScreen(videoUrl: message.message),
+                ),
+              );
+            }
+          },
+          child: VideoMessageWidget(
+            videoUrl: message.message ?? '',
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName,
@@ -319,7 +340,7 @@ class VoiceMessageWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {
     return MessageBubble(
       isMe: isMe,
       timestamp: timestamp,
@@ -670,6 +691,159 @@ class ImageMessageWidget extends StatelessWidget {
                       ),
                     ),
                     if (!isMe) ...[
+                      SizedBox(width: 4.w),
+                      Icon(
+                        Icons.done_all,
+                        size: 18.sp,
+                        color: const Color(0xFF30C0E0),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class VideoMessageWidget extends StatefulWidget {
+  final String videoUrl;
+  final bool isMe;
+  final String timestamp;
+  final String senderName;
+
+  const VideoMessageWidget({
+    Key? key,
+    required this.videoUrl,
+    required this.isMe,
+    required this.timestamp,
+    required this.senderName,
+  }) : super(key: key);
+
+  @override
+  _VideoMessageWidgetState createState() => _VideoMessageWidgetState();
+}
+
+class _VideoMessageWidgetState extends State<VideoMessageWidget> {
+  String? _thumbnailPath;
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateThumbnail();
+  }
+
+  Future<void> _generateThumbnail() async {
+    try {
+      final thumbnailFile = await VideoCompress.getFileThumbnail(
+        widget.videoUrl,
+        quality: 50, // Adjust quality (0-100)
+        position: -1, // Auto-select frame
+      );
+
+      if (mounted) {
+        setState(() {
+          _thumbnailPath = thumbnailFile.path;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _thumbnailPath = null;
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    }
+  }
+
+  Widget _loadVideoThumbnail() {
+    if (_isLoading) {
+      // return const Center(child: CircularProgressIndicator());
+    }
+    if (_hasError || _thumbnailPath == null) {
+      return _defaultThumbnail();
+    }
+
+    return Image.file(File(_thumbnailPath!),
+        fit: BoxFit.cover, width: double.infinity, height: 180.h);
+  }
+
+  Widget _defaultThumbnail() {
+    return Container(
+      height: 180.h,
+      width: double.infinity,
+      color: Colors.black12,
+      child: Icon(Icons.movie, size: 50.sp, color: Colors.grey),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MessageBubble(
+      isMe: widget.isMe,
+      timestamp: widget.timestamp,
+      senderName: widget.senderName,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 0.65.sw),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: _loadVideoThumbnail(),
+            ),
+
+            // Play button overlay
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Center(
+                child: Container(
+                  width: 50.w,
+                  height: 50.h,
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: Colors.white,
+                    size: 30.sp,
+                  ),
+                ),
+              ),
+            ),
+
+            // Timestamp
+            Positioned(
+              bottom: 8.h,
+              right: 4.w,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.timestamp,
+                      style: GLTextStyles.manropeStyle(
+                        color: Colors.white,
+                        size: 10.sp,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
+                    if (!widget.isMe) ...[
                       SizedBox(width: 4.w),
                       Icon(
                         Icons.done_all,

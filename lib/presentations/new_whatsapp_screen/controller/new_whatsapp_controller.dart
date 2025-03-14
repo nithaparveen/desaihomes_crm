@@ -141,99 +141,150 @@ class WhatsappControllerCopy extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> onSendMessage(BuildContext context, File? file,
-      String messageType, String to, String leadId) async {
-    try {
-      String? accessToken = await getAccessToken();
-      if (accessToken == null) {
-        log("Access token is null. User might not be authenticated.");
-        AppUtils.oneTimeSnackBar("Authentication error. Please log in again.",
-            context: context, bgColor: Colors.red);
-        return;
-      }
-
-      var url = "https://www.desaihomes.com/api/whatsapp/beta/message/send";
-      onUploadFile(url, file, messageType, to, leadId, accessToken.replaceAll('"', ''))
-          .then((value) {
-        log("onSendMessage() -> status code -> ${value.statusCode}");
-        log("onSendMessage() -> response -> ${value.body}");
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (value.statusCode == 200) {
-            // AppUtils.oneTimeSnackBar("Message Sent",
-            //     context: context, bgColor: Colors.green, time: 2);
-          } else {
-            // AppUtils.oneTimeSnackBar("Error: ${value.body}", context: context);
-          }
-        });
-      });
-    } catch (e) {
-      log("Error in onSendMessage: $e");
+Future<void> onSendMessage(BuildContext context, File? file,
+    String messageType, String to, String leadId) async {
+  try {
+    String? accessToken = await getAccessToken();
+    if (accessToken == null) {
+      log("Access token is null. User might not be authenticated.");
+      AppUtils.oneTimeSnackBar("Authentication error. Please log in again.",
+          context: context, bgColor: Colors.red);
+      return;
     }
+
+    var url = "https://www.desaihomes.com/api/whatsapp/beta/message/send";
+    onUploadFile(url, file, messageType, to, leadId, accessToken.replaceAll('"', ''))
+        .then((value) {
+      log("onSendMessage() -> status code -> ${value.statusCode}");
+      log("onSendMessage() -> response -> ${value.body}");
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (value.statusCode == 200) {
+          // AppUtils.oneTimeSnackBar("Message Sent",
+          //     context: context, bgColor: Colors.green, time: 2);
+        } else {
+          try {
+            final responseBody = jsonDecode(value.body);
+            if (responseBody['success'] == false) {
+              String errorMessage = responseBody['message'] ?? "An error occurred.";
+              if (responseBody['errors'] != null) {
+                final errors = responseBody['errors'] as Map<String, dynamic>;
+                if (errors.containsKey('video')) {
+                  errorMessage = errors['video'][0]; 
+                }
+                if (errors.containsKey('audio')) {
+                  errorMessage = errors['audio'][0]; 
+                }
+                if (errors.containsKey('image')) {
+                  errorMessage = errors['image'][0]; 
+                }
+              }
+              AppUtils.oneTimeSnackBar(errorMessage, context: context, bgColor: Colors.red);
+            } else {
+              AppUtils.oneTimeSnackBar("Error: ${value.body}", context: context);
+            }
+          } catch (e) {
+            log("Error parsing response: $e");
+            AppUtils.oneTimeSnackBar("An unexpected error occurred.", context: context);
+          }
+        }
+      });
+    });
+  } catch (e) {
+    log("Error in onSendMessage: $e");
+    AppUtils.oneTimeSnackBar("An error occurred while sending the message.", context: context);
   }
+}
 
   Future<http.Response> onUploadFile(
-    String url,
-    File? selectedFile,
-    String messageType,
-    String to,
-    String leadId,
-    String? accessToken) async {
-  if (selectedFile == null || !await selectedFile.exists()) {
-    throw Exception("File does not exist or is null");
+  String url,
+  File? selectedFile,
+  String messageType,
+  String to,
+  String leadId,
+  String? accessToken) async {
+  // Check if file exists
+  if (selectedFile == null) {
+    log("No file selected for upload");
+    return http.Response('{"error": "No file selected"}', 400);
+  }
+  
+  if (!await selectedFile.exists()) {
+    log("Selected file does not exist: ${selectedFile.path}");
+    return http.Response('{"error": "File does not exist"}', 400);
   }
 
-  var request = http.MultipartRequest('POST', Uri.parse(url));
-  log("Access Token: $accessToken");
+  try {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    log("Access Token: $accessToken");
 
-  // Headers
-  Map<String, String> headers = {
-    "Authorization": "Bearer $accessToken"
-  };
+    // Headers
+    Map<String, String> headers = {
+      "Authorization": "Bearer $accessToken"
+    };
 
-  // Add form fields - ensure field names match exactly what the server expects
-  request.fields["to"] = to;
-  request.fields["lead_id"] = leadId;
-  request.fields["msg_type"] = messageType;
+    // Add form fields
+    request.fields["to"] = to;
+    request.fields["lead_id"] = leadId;
+    request.fields["msg_type"] = messageType;
 
-  // Get file details
-  var filePath = selectedFile.path;
-  var fileName = filePath.split('/').last;
-  var fileSize = await selectedFile.length();
-  var fileType = _getMediaType(filePath);
+    // Get file details
+    var filePath = selectedFile.path;
+    var fileName = filePath.split('/').last;
+    var fileSize = await selectedFile.length();
+    var fileType = _getMediaType(filePath);
 
-  // Log file details
-  log("File Name: $fileName");
-  log("File Path: $filePath");
-  log("File Type: $fileType");
-  log("File Size: $fileSize bytes");
+    // Log file details
+    log("File Name: $fileName");
+    log("File Path: $filePath");
+    log("File Type: $fileType");
+    log("File Size: $fileSize bytes");
 
-  // Add file with correct field name 'file' to match the server's expectation
-  var fileStream = http.ByteStream(selectedFile.openRead());
+    // Add file with the correct field name based on message type
+    var fileStream = http.ByteStream(selectedFile.openRead());
+    
+    // Use the messageType to determine the field name for the file
+    String fieldName;
+    switch (messageType.toLowerCase()) {
+      case 'audio':
+        fieldName = 'audio';
+        break;
+      case 'image':
+        fieldName = 'image';
+        break;
+      case 'video':
+        fieldName = 'video';
+        break;
+      case 'document':
+        fieldName = 'document';
+        break;
+      default:
+        fieldName = 'file';
+    }
 
-  var multipartFile = http.MultipartFile(
-      'audio', 
-      fileStream,
-      fileSize,
-      filename: fileName,
-      contentType: MediaType.parse(fileType));
+    var multipartFile = http.MultipartFile(
+        fieldName, 
+        fileStream,
+        fileSize,
+        filename: fileName,
+        contentType: MediaType.parse(fileType));
 
-  request.files.add(multipartFile);
-  request.headers.addAll(headers);
+    request.files.add(multipartFile);
+    request.headers.addAll(headers);
 
-  // Log request details
-  log("Uploading file to: $url");
-  log("Request fields: ${request.fields}");
+    // Log request details
+    log("Uploading $messageType to: $url");
+    log("Request fields: ${request.fields}");
 
-  // Send the request
-  var streamedResponse = await request.send();
-  var response = await http.Response.fromStream(streamedResponse);
+    // Send the request
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
 
-  // Log the response
-  log("Response status: ${response.statusCode}");
-  log("Response body: ${response.body}");
-
-  return response;
+    return response;
+  } catch (e) {
+    log("Error in onUploadFile: $e");
+    return http.Response('{"error": "$e"}', 500);
+  }
 }
 
   String _getMediaType(String path) {

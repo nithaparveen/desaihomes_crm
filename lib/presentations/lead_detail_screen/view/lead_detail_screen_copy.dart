@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/textstyles.dart';
+import '../../new_whatsapp_screen/controller/new_whatsapp_controller.dart';
 
 class LeadDetailScreenCopy extends StatefulWidget {
   final int? leadId;
@@ -112,6 +113,8 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
+             Provider.of<WhatsappControllerCopy>(context, listen: false)
+        .fetchConversations(context);
           },
           icon: Icon(
             Iconsax.arrow_left,
