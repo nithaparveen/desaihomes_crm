@@ -394,13 +394,11 @@ Future<void> _handleImageMessage({bool fromCamera = false}) async {
     );
     
     if (image != null) {
-      // Navigate directly to preview without adding to ChatModel
       _navigateToPreview(File(image.path), "image");
     }
     return;
   }
   
-  // Use file_picker for gallery
   final FilePickerResult? result = await FilePicker.platform.pickFiles(
     type: FileType.media, // This allows both images and videos
     allowMultiple: false,
@@ -410,17 +408,14 @@ Future<void> _handleImageMessage({bool fromCamera = false}) async {
     final File file = File(result.files.single.path!);
     final String extension = file.path.split('.').last.toLowerCase();
     
-    // Determine if it's an image or video based on file extension
     final String messageType = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension) 
         ? "image" 
         : "video";
     
-    // Navigate directly to preview without adding to ChatModel
     _navigateToPreview(file, messageType);
   }
 }
 
-// Helper method to navigate to preview screen
 void _navigateToPreview(File selectedMedia, String messageType) {
   Navigator.push(
     context,
@@ -436,27 +431,18 @@ void _navigateToPreview(File selectedMedia, String messageType) {
   isAttachmentOpen = false;
 }
 
-  Future<void> _handleDocumentMessage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      allowMultiple: false,
-    );
+Future<void> _handleDocumentMessage() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    type: FileType.any,
+    allowMultiple: false,
+  );
 
-    if (result != null && result.files.single.path != null) {
-      File selectedFile = File(result.files.single.path!);
-
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => PreviewScreen(
-      //       file: selectedFile,
-      //       contactedNumber: widget.contactedNumber,
-      //       contactedUserId: widget.contactedUserId,
-      //     ),
-      //   ),
-      // );
-    }
+  if (result != null && result.files.single.path != null) {
+    File selectedFile = File(result.files.single.path!);
+        _navigateToPreview(selectedFile, "document");
+        isAttachmentOpen = false;
   }
+}
 
   Widget _buildAttachmentOptions() {
     return Container(
@@ -474,12 +460,12 @@ void _navigateToPreview(File selectedMedia, String messageType) {
               const Color(0xff3874F6), _handleImageMessage),
           _buildAttachmentIcon(Iconsax.document5, "Document",
               const Color(0xffF63E38), _handleDocumentMessage),
-          _buildAttachmentIcon(
-              Iconsax.location5, "Location", const Color(0xff64C685), () async {
-            await _pickLocation();
-          }),
-          _buildAttachmentIcon(
-              Icons.person, "Contact", const Color(0xffF69738), _pickContact),
+          // _buildAttachmentIcon(
+          //     Iconsax.location5, "Location", const Color(0xff64C685), () async {
+          //   await _pickLocation();
+          // }),
+          // _buildAttachmentIcon(
+          //     Icons.person, "Contact", const Color(0xffF69738), _pickContact),
           _buildAttachmentIcon(
               Icons.photo_camera,
               "Camera",
@@ -611,53 +597,84 @@ void _navigateToPreview(File selectedMedia, String messageType) {
     });
   }
 
-  void _showConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          title: const Column(
-            children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
-          ),
-          content: Text(
-            'Are you sure you want to send this template?',
-            style: GLTextStyles.manropeStyle(
-              color: ColorTheme.blue,
-              size: 15.sp,
-              weight: FontWeight.w400,
+  void _showConfirmation(BuildContext context, String templateContent) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+        title: const Column(
+          children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min, 
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to send this template?',
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.blue,
+                size: 15.sp,
+                weight: FontWeight.w400,
+              ),
             ),
-          ),
-          actions: <Widget>[
-            CustomButton(
-              borderColor: Colors.transparent,
-              backgroundColor: const Color(0xffFFF2F0),
-              text: "Cancel",
-              textColor: const Color(0xffFF9C8E),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _messageController.clear();
-              },
-              width: (110 / ScreenUtil().screenWidth).sw,
+             SizedBox(height: 16.h),
+            Text(
+              'Template Preview:',
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.blue,
+                size: 14.sp,
+                weight: FontWeight.w500,
+              ),
             ),
-            CustomButton(
-              borderColor: Colors.transparent,
-              backgroundColor: const Color(0xffECF5FF),
-              text: "Send",
-              textColor: const Color(0xff3893FF),
-              width: (110 / ScreenUtil().screenWidth).sw,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                _sendMessage(text: _messageController.text);
-              },
+            SizedBox(height: 8.h), 
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                templateContent,
+                style: GLTextStyles.manropeStyle(
+                  color: Colors.black87,
+                  size: 13.sp,
+                  weight: FontWeight.w400,
+                ),
+              ),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: <Widget>[
+          CustomButton(
+            borderColor: Colors.transparent,
+            backgroundColor: const Color(0xffFFF2F0),
+            text: "Cancel",
+            textColor: const Color(0xffFF9C8E),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _messageController.clear();
+            },
+            width: (110 / ScreenUtil().screenWidth).sw,
+          ),
+          CustomButton(
+            borderColor: Colors.transparent,
+            backgroundColor: const Color(0xffECF5FF),
+            text: "Send",
+            textColor: const Color(0xff3893FF),
+            width: (110 / ScreenUtil().screenWidth).sw,
+            onPressed: () async {
+              Navigator.of(context).pop();
+              _sendMessage(text: _messageController.text);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Widget _buildMessageInput() {
     return Consumer<WhatsappControllerCopy>(builder: (context, controller, _) {
@@ -709,23 +726,23 @@ void _navigateToPreview(File selectedMedia, String messageType) {
                   : const SizedBox.shrink(),
             ),
             AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.ease,
-              child: isTemplateOpen
-                  ? TemplateSelectionModal(
-                      onTemplateSelected: (template) {
-                        setState(() {
-                          _messageController.text =
-                              getTemplateBodyText(template);
-                          isTemplateOpen = false;
-                        });
-                        Future.delayed(const Duration(milliseconds: 300), () {
-                          _showConfirmation(context);
-                        });
-                      },
-                    )
-                  : const SizedBox.shrink(),
-            ),
+  duration: const Duration(milliseconds: 300),
+  curve: Curves.ease,
+  child: isTemplateOpen
+      ? TemplateSelectionModal(
+          onTemplateSelected: (template) {
+            final templateContent = getTemplateBodyText(template);
+            setState(() {
+              _messageController.text = templateContent;
+              isTemplateOpen = false;
+            });
+            Future.delayed(const Duration(milliseconds: 300), () {
+              _showConfirmation(context, templateContent); // Pass template content
+            });
+          },
+        )
+      : const SizedBox.shrink(),
+),
             Container(
               padding: EdgeInsets.all(16.r),
               decoration: const BoxDecoration(

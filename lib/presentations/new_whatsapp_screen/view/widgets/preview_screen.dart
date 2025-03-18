@@ -216,7 +216,18 @@ Future<void> _tryInitializeVideo() async {
     if (_hasError) {
       return _buildErrorWidget(_errorMessage);
     }
+      if (messageType == "document") {
+    if (!widget.file.existsSync()) {
+      return _buildErrorWidget("Document file not found");
+    }
     
+    return _buildDocumentPreview();
+  }
+  
+  // For videos with error, show error message
+  if (_hasError) {
+    return _buildErrorWidget(_errorMessage);
+  }
     // For videos that are loading or with initialization issues
     if (messageType == "video") {
       // If chewie controller is ready, show the video
@@ -312,6 +323,116 @@ Future<void> _tryInitializeVideo() async {
       ),
     );
   }
+
+  Widget _buildDocumentPreview() {
+  // Get file name and extension
+  String fileName = widget.file.path.split('/').last;
+  String extension = fileName.split('.').last.toLowerCase();
+  
+  // Get file size
+  String fileSize = 'Calculating...';
+  try {
+    int sizeInBytes = widget.file.lengthSync();
+    if (sizeInBytes < 1024) {
+      fileSize = '$sizeInBytes B';
+    } else if (sizeInBytes < 1024 * 1024) {
+      fileSize = '${(sizeInBytes / 1024).toStringAsFixed(1)} KB';
+    } else if (sizeInBytes < 1024 * 1024 * 1024) {
+      fileSize = '${(sizeInBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } else {
+      fileSize = '${(sizeInBytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    }
+  } catch (e) {
+    fileSize = 'Unknown size';
+    log('Error getting file size: $e');
+  }
+  
+  // Select appropriate icon based on extension
+  IconData fileIcon;
+  Color iconColor;
+  
+  switch (extension) {
+    case 'pdf':
+      fileIcon = Icons.picture_as_pdf;
+      iconColor = Colors.red;
+      break;
+    case 'doc':
+    case 'docx':
+      fileIcon = Icons.description;
+      iconColor = Colors.blue;
+      break;
+    case 'xls':
+    case 'xlsx':
+      fileIcon = Icons.table_chart;
+      iconColor = Colors.green;
+      break;
+    case 'ppt':
+    case 'pptx':
+      fileIcon = Icons.slideshow;
+      iconColor = Colors.orange;
+      break;
+    case 'txt':
+      fileIcon = Icons.text_snippet;
+      iconColor = Colors.grey;
+      break;
+    default:
+      fileIcon = Icons.insert_drive_file;
+      iconColor = Colors.grey;
+  }
+  
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          fileIcon,
+          size: 80,
+          color: iconColor,
+        ),
+        SizedBox(height: 24),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              Text(
+                fileName,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 8),
+              Text(
+                fileSize,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // SizedBox(height: 24),
+        // Text(
+        //   "Document preview not available",
+        //   style: TextStyle(
+        //     fontSize: 14.sp,
+        //     fontStyle: FontStyle.italic,
+        //     color: Colors.grey[600],
+        //   ),
+        // ),
+      ],
+    ),
+  );
+}
 }
 
 // Extension to capitalize the first letter

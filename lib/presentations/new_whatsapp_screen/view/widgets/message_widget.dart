@@ -9,6 +9,7 @@ import 'package:voice_message_package/voice_message_package.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/textstyles.dart';
 import 'image_preview_screen.dart';
+import 'pdf_viewer_screen.dart';
 import 'video_preview_screen.dart';
 
 class MessageWidget extends StatelessWidget {
@@ -35,16 +36,28 @@ class MessageWidget extends StatelessWidget {
           timestamp: formattedTime,
           senderName: senderName,
         );
-      case 'document':
+      case 'Document':
         String fileUrl = message.message ?? '';
         String fileName = fileUrl.split('/').last;
-        String fileSize = 'Unknown size';
-        return FileMessageWidget(
+        String fileSize = '';
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PdfViewerScreen(fileUrl: fileUrl),
+              ),
+            );
+          },
+          child: FileMessageWidget(
             fileName: fileName,
             fileSize: fileSize,
             isMe: isMe,
             timestamp: formattedTime,
-            senderName: senderName);
+            senderName: senderName,
+          ),
+        );
       case 'Image':
         return GestureDetector(
           onTap: () {

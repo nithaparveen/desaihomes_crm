@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:desaihomes_crm_application/presentations/whatsapp_screen/view/whatsapp_screen.dart';
+import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
@@ -143,8 +144,8 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
             return nameMatch || messageMatch;
           }).toList();
 
-          void showConfirmation(
-              BuildContext context, String templateName, List<int> leadIds) {
+          void showConfirmation(BuildContext context, String templateName,
+              String templateContent, List<int> leadIds) {
             showDialog(
               context: context,
               barrierDismissible: false,
@@ -157,13 +158,44 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                       Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))
                     ],
                   ),
-                  content: Text(
-                    'Are you sure you want to send this template?',
-                    style: GLTextStyles.manropeStyle(
-                      color: ColorTheme.blue,
-                      size: 15.sp,
-                      weight: FontWeight.w400,
-                    ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Are you sure you want to send this template?',
+                        style: GLTextStyles.manropeStyle(
+                          color: ColorTheme.blue,
+                          size: 15.sp,
+                          weight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'Template Preview:',
+                        style: GLTextStyles.manropeStyle(
+                          color: ColorTheme.blue,
+                          size: 14.sp,
+                          weight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          templateContent,
+                          style: GLTextStyles.manropeStyle(
+                            color: Colors.black87,
+                            size: 13.sp,
+                            weight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   actions: <Widget>[
                     CustomButton(
@@ -184,6 +216,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                       width: (110 / ScreenUtil().screenWidth).sw,
                       onPressed: () async {
                         Navigator.of(context).pop();
+                        clearSelection();
                         Provider.of<WhatsappControllerCopy>(context,
                                 listen: false)
                             .sendMultiMessages(
@@ -258,11 +291,18 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                 backgroundColor: Colors.transparent,
                                 builder: (context) => TemplateSelectionModal(
                                   onTemplateSelected: (template) {
+                                    final templateContent =
+                                        getTemplateBodyText(template);
+
                                     Navigator.of(context).pop();
                                     Future.delayed(
                                         const Duration(milliseconds: 300), () {
-                                      showConfirmation(parentContext,
-                                          template.name ?? "", selectedLeadIds);
+                                      showConfirmation(
+                                        parentContext,
+                                        template.name ?? "",
+                                        templateContent,
+                                        selectedLeadIds,
+                                      );
                                     });
                                   },
                                 ),
@@ -406,7 +446,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                         ),
                                         alignment: Alignment.center,
                                         child: Text(
-                                          "1",
+                                          "",
                                           style: GLTextStyles.manropeStyle(
                                             size: 10.sp,
                                             color: Colors.white,
@@ -443,10 +483,8 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                     Expanded(
                                       child: Text(
                                         _getMessageText(
-                                          message.msgType
-                                              .toString(),
-                                          message.message
-                                              .toString(),
+                                          message.msgType.toString(),
+                                          message.message.toString(),
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                         style: GLTextStyles.manropeStyle(
@@ -464,8 +502,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                   children: [
                                     Text(
                                       message.createdAt != null
-                                          ? DateFormat('hh:mm a')
-                                              .format(message.createdAt!)
+                                          ? getSmartTimestamp(message.createdAt)
                                           : '',
                                       style: GLTextStyles.manropeStyle(
                                         size: 10.sp,
@@ -596,7 +633,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                 weight: FontWeight.w500,
               ),
             ),
-            SizedBox(width: 6.w), 
+            SizedBox(width: 6.w),
           ],
         ),
       ),
@@ -607,18 +644,51 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
     switch (msgType) {
       case "Image":
         return "Photo";
-      case "document":
+      case "Document":
         return "Document";
-      case "location":
+      case "Location":
         return "Location";
       case "Audio":
         return "Voice message";
-      case "contact":
+      case "Contact":
         return "Contact message";
       case "Video":
         return "Video";
       default:
         return message;
+    }
+  }
+
+  String getTemplateBodyText(Datum template) {
+    if (template.components == null || template.components!.isEmpty) {
+      return "No content available";
+    }
+
+    final bodyComponent = template.components!.firstWhere(
+      (component) => component.type == "BODY",
+      orElse: () => Component(),
+    );
+
+    return bodyComponent.text ?? "No body text available";
+  }
+
+  String getSmartTimestamp(DateTime? timestamp) {
+    if (timestamp == null) return '';
+
+    final localTimestamp = timestamp.isUtc ? timestamp.toLocal() : timestamp;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final messageDate =
+        DateTime(localTimestamp.year, localTimestamp.month, localTimestamp.day);
+
+    if (messageDate == today) {
+      return DateFormat('hh:mm a').format(localTimestamp);
+    } else if (messageDate == yesterday) {
+      return "Yesterday";
+    } else {
+      return DateFormat('MMM d').format(localTimestamp);
     }
   }
 }

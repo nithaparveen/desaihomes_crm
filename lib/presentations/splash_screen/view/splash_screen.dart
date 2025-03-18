@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   SizedBox(
                       height: 37.h,
                       width: 34.w,
-                      child: Image.asset("assets/images/logo.png")),
+                      child: Image.asset("assets/icons/image 9.png")),
                   SizedBox(width: 12.w),
                   Text(
                     "Desai Homes",
