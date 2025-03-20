@@ -58,7 +58,7 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
   void initState() {
     super.initState();
     _messageController.addListener(_onTextChanged);
-    _requestPermissions();
+    // _requestPermissions();
     _loadUserId();
     _pusherService.subscribeToChannelWithId(
         widget.leadId.toString(), _handleNewMessage, context);
@@ -142,59 +142,79 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     }
   }
 
-  void _sendMessage(
-      {String? text,
-      File? file,
-      Map<String, dynamic>? contact,
-      Map<String, dynamic>? location}) async {
-    if (text != null && text.trim().isNotEmpty) {
-      final whatsappController =
-          Provider.of<WhatsappControllerCopy>(context, listen: false);
+  void _sendMessage({
+    String? text,
+    String? templateName,
+    String? templateContent,
+    String? rawTemplateContent,
+    String? parameterFormat,
+    Datum? templateData, // Add this parameter to pass the template data
+  }) async {
+    final whatsappController =
+        Provider.of<WhatsappControllerCopy>(context, listen: false);
 
+    // Handle text message
+    if (text != null && text.trim().isNotEmpty) {
       String? senderName = await getUserName();
 
-      if (text != null && text.trim().isNotEmpty) {
+      final newMessage = ChatModel(
+          message: text,
+          createdAt: DateTime.now(),
+          messageType: "send",
+          msgType: "Text",
+          name: senderName);
+
+      await whatsappController.addMessageToList(newMessage);
+
+      await whatsappController.sendMessage(
+          widget.contactedNumber, text, widget.leadId.toString(), context);
+
+      _messageController.clear();
+      setState(() => isTyping = false);
+
+      _scrollToBottom();
+    }
+
+    // Handle template message
+    if (templateName != null &&
+        templateContent != null &&
+        rawTemplateContent != null) {
+      try {
+        // Get the parameter format
+        String format = parameterFormat ?? "POSITIONAL";
+
+        // If templateData is provided, use its parameterFormat
+        if (templateData != null) {
+          format = templateData.parameterFormat ?? "POSITIONAL";
+        }
+
+        await whatsappController.sendTemplateMessage(
+            widget.contactedNumber,
+            templateName,
+            rawTemplateContent,
+            widget.leadId.toString(),
+            format,
+            context);
+
+        // Add the message to the list regardless of success or failure
+        String? senderName = await getUserName();
+
         final newMessage = ChatModel(
-            message: text,
+            message: templateContent,
             createdAt: DateTime.now(),
             messageType: "send",
-            msgType: "Text",
+            msgType: "Template", // Changed to "Template" for better tracking
             name: senderName);
 
         await whatsappController.addMessageToList(newMessage);
-
-        await whatsappController.sendMessage(
-            widget.contactedNumber, text, widget.leadId.toString(), context);
-
+      } catch (e) {
+        print("Error sending template message: $e");
+      } finally {
         _messageController.clear();
         setState(() => isTyping = false);
-
         _scrollToBottom();
       }
     }
-    // if (file != null) {
-    //   Provider.of<WhatsappController>(context, listen: false).onSendMessage(
-    //       widget.contactedNumber, file, widget.contactedUserId, context);
-    // }
-    // if (contact != null) {
-    //   Provider.of<WhatsappControllerCopy>(context, listen: false).sendContact(
-    //       widget.contactedNumber, contact, widget.contactedUserId, context);
-    // }
-    // if (location != null) {
-    //   Provider.of<WhatsappControllerCopy>(context, listen: false).sendLocation(
-    //       widget.contactedNumber, location, widget.contactedUserId, context);
-    // }
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-
-  String _getCurrentTimestamp() {
-    final now = DateTime.now();
-    return "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}${now.hour >= 12 ? 'pm' : 'am'}";
   }
 
   String _formatTimestamp(DateTime? timestamp) {
@@ -340,109 +360,109 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     }
   }
 
-Future<void> _stopRecording() async {
-  try {
-    final path = await _audioRecorder.stop();
-    if (path != null) {
-      final file = File(path);
+  Future<void> _stopRecording() async {
+    try {
+      final path = await _audioRecorder.stop();
+      if (path != null) {
+        final file = File(path);
 
-      final provider =
-          Provider.of<WhatsappControllerCopy>(context, listen: false);
+        final provider =
+            Provider.of<WhatsappControllerCopy>(context, listen: false);
 
-      String? senderName = await getUserName();
+        String? senderName = await getUserName();
 
-      final newMessage = ChatModel(
-        message: path,
-        createdAt: DateTime.now(),
-        messageType: "send", 
-        name: senderName,
-        msgType: "Audio"
+        final newMessage = ChatModel(
+            message: path,
+            createdAt: DateTime.now(),
+            messageType: "send",
+            name: senderName,
+            msgType: "Audio");
+
+        // Append the audio message to the chat list
+        await provider.addMessageToList(newMessage);
+
+        // Send the audio message via API
+        provider.onSendMessage(
+          context,
+          file,
+          "Audio",
+          widget.contactedNumber,
+          widget.leadId.toString(),
+        );
+
+        setState(() {
+          isRecording = false;
+          recordedFilePath = path;
+        });
+
+        _scrollToBottom();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error stopping recording: $e")),
+      );
+    }
+  }
+
+  Future<void> _handleImageMessage({bool fromCamera = false}) async {
+    if (fromCamera) {
+      // Camera functionality
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.camera,
       );
 
-      // Append the audio message to the chat list
-      await provider.addMessageToList(newMessage);
-
-      // Send the audio message via API
-      provider.onSendMessage(
-        context,
-        file,
-        "Audio",
-        widget.contactedNumber,
-        widget.leadId.toString(),
-      );
-
-      setState(() {
-        isRecording = false;
-        recordedFilePath = path;
-      });
-
-      _scrollToBottom();
+      if (image != null) {
+        _navigateToPreview(File(image.path), "image");
+      }
+      return;
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error stopping recording: $e")),
-    );
-  }
-}
 
-Future<void> _handleImageMessage({bool fromCamera = false}) async {
-  if (fromCamera) {
-    // Camera functionality
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.camera,
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.media, // This allows both images and videos
+      allowMultiple: false,
     );
-    
-    if (image != null) {
-      _navigateToPreview(File(image.path), "image");
+
+    if (result != null && result.files.single.path != null) {
+      final File file = File(result.files.single.path!);
+      final String extension = file.path.split('.').last.toLowerCase();
+
+      final String messageType =
+          ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension)
+              ? "image"
+              : "video";
+
+      _navigateToPreview(file, messageType);
     }
-    return;
   }
-  
-  final FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.media, // This allows both images and videos
-    allowMultiple: false,
-  );
-  
-  if (result != null && result.files.single.path != null) {
-    final File file = File(result.files.single.path!);
-    final String extension = file.path.split('.').last.toLowerCase();
-    
-    final String messageType = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension) 
-        ? "image" 
-        : "video";
-    
-    _navigateToPreview(file, messageType);
-  }
-}
 
-void _navigateToPreview(File selectedMedia, String messageType) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PreviewScreen(
-        file: selectedMedia,
-        contactedNumber: widget.contactedNumber,
-        leadId: widget.leadId.toString(),
-        messageType: messageType,
+  void _navigateToPreview(File selectedMedia, String messageType) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PreviewScreen(
+          file: selectedMedia,
+          contactedNumber: widget.contactedNumber,
+          leadId: widget.leadId.toString(),
+          messageType: messageType,
+        ),
       ),
-    ),
-  );
-  isAttachmentOpen = false;
-}
-
-Future<void> _handleDocumentMessage() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.any,
-    allowMultiple: false,
-  );
-
-  if (result != null && result.files.single.path != null) {
-    File selectedFile = File(result.files.single.path!);
-        _navigateToPreview(selectedFile, "document");
-        isAttachmentOpen = false;
+    );
+    isAttachmentOpen = false;
   }
-}
+
+  Future<void> _handleDocumentMessage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: false,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      File selectedFile = File(result.files.single.path!);
+      _navigateToPreview(selectedFile, "document");
+      isAttachmentOpen = false;
+    }
+  }
 
   Widget _buildAttachmentOptions() {
     return Container(
@@ -597,84 +617,128 @@ Future<void> _handleDocumentMessage() async {
     });
   }
 
-  void _showConfirmation(BuildContext context, String templateContent) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
-        title: const Column(
-          children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min, 
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Are you sure you want to send this template?',
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.blue,
-                size: 15.sp,
-                weight: FontWeight.w400,
-              ),
-            ),
-             SizedBox(height: 16.h),
-            Text(
-              'Template Preview:',
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.blue,
-                size: 14.sp,
-                weight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 8.h), 
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                templateContent,
+  void _showConfirmation(BuildContext context, String templateContent,
+      String templateName, String rawTemplateContent, Datum template) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          title: const Column(
+            children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to send this template?',
                 style: GLTextStyles.manropeStyle(
-                  color: Colors.black87,
-                  size: 13.sp,
+                  color: ColorTheme.blue,
+                  size: 15.sp,
                   weight: FontWeight.w400,
                 ),
               ),
+              SizedBox(height: 16.h),
+              Text(
+                'Template Preview:',
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.blue,
+                  size: 14.sp,
+                  weight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  templateContent, // Replaced version for preview
+                  style: GLTextStyles.manropeStyle(
+                    color: Colors.black87,
+                    size: 13.sp,
+                    weight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            CustomButton(
+              borderColor: Colors.transparent,
+              backgroundColor: const Color(0xffFFF2F0),
+              text: "Cancel",
+              textColor: const Color(0xffFF9C8E),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _messageController.clear();
+              },
+              width: (110 / ScreenUtil().screenWidth).sw,
+            ),
+            CustomButton(
+              borderColor: Colors.transparent,
+              backgroundColor: const Color(0xffECF5FF),
+              text: "Send",
+              textColor: const Color(0xff3893FF),
+              width: (110 / ScreenUtil().screenWidth).sw,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                _sendMessage(
+                    templateName: templateName,
+                    templateContent:
+                        templateContent, // Preview text with replacements
+                    rawTemplateContent: rawTemplateContent,
+                    templateData: template // Raw template with placeholders
+                    );
+              },
             ),
           ],
-        ),
-        actions: <Widget>[
-          CustomButton(
-            borderColor: Colors.transparent,
-            backgroundColor: const Color(0xffFFF2F0),
-            text: "Cancel",
-            textColor: const Color(0xffFF9C8E),
-            onPressed: () {
-              Navigator.of(context).pop();
-              _messageController.clear();
-            },
-            width: (110 / ScreenUtil().screenWidth).sw,
-          ),
-          CustomButton(
-            borderColor: Colors.transparent,
-            backgroundColor: const Color(0xffECF5FF),
-            text: "Send",
-            textColor: const Color(0xff3893FF),
-            width: (110 / ScreenUtil().screenWidth).sw,
-            onPressed: () async {
-              Navigator.of(context).pop();
-              _sendMessage(text: _messageController.text);
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
+
+  Map<String, String> getTemplateBodyText(Datum template, String widgetName) {
+    if (template.components == null || template.components!.isEmpty) {
+      return {
+        "previewText": "No content available",
+        "rawText": "No content available"
+      };
+    }
+
+    final bodyComponent = template.components!.firstWhere(
+      (component) => component.type == "BODY",
+      orElse: () => Component(),
+    );
+
+    String rawTemplateText = bodyComponent.text ?? "No body text available";
+    String previewTemplateText = rawTemplateText;
+
+    if (template.parameterFormat == "POSITIONAL") {
+      previewTemplateText = previewTemplateText.replaceAll("{{1}}", widgetName);
+
+      if (bodyComponent.example != null &&
+          bodyComponent.example!.bodyText != null &&
+          bodyComponent.example!.bodyText!.isNotEmpty &&
+          bodyComponent.example!.bodyText![0].isNotEmpty) {
+        final exampleValues = bodyComponent.example!.bodyText![0];
+
+        for (int i = 1; i < exampleValues.length; i++) {
+          previewTemplateText =
+              previewTemplateText.replaceAll("{{${i + 1}}}", exampleValues[i]);
+        }
+      }
+    }
+    return {
+      "previewText": previewTemplateText, // Used for UI preview
+      "rawText": rawTemplateText // Sent via API
+    };
+  }
 
   Widget _buildMessageInput() {
     return Consumer<WhatsappControllerCopy>(builder: (context, controller, _) {
@@ -701,18 +765,6 @@ Future<void> _handleDocumentMessage() async {
       bool onlyTemplatesEnabled = isChatEmpty
           // || isPast24Hours
           ;
-      String getTemplateBodyText(Datum template) {
-        if (template.components == null || template.components!.isEmpty) {
-          return "No content available";
-        }
-
-        final bodyComponent = template.components!.firstWhere(
-          (component) => component.type == "BODY",
-          orElse: () => Component(),
-        );
-
-        return bodyComponent.text ?? "No body text available";
-      }
 
       return Stack(children: [
         Column(
@@ -726,23 +778,32 @@ Future<void> _handleDocumentMessage() async {
                   : const SizedBox.shrink(),
             ),
             AnimatedSize(
-  duration: const Duration(milliseconds: 300),
-  curve: Curves.ease,
-  child: isTemplateOpen
-      ? TemplateSelectionModal(
-          onTemplateSelected: (template) {
-            final templateContent = getTemplateBodyText(template);
-            setState(() {
-              _messageController.text = templateContent;
-              isTemplateOpen = false;
-            });
-            Future.delayed(const Duration(milliseconds: 300), () {
-              _showConfirmation(context, templateContent); // Pass template content
-            });
-          },
-        )
-      : const SizedBox.shrink(),
-),
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.ease,
+              child: isTemplateOpen
+                  ? TemplateSelectionModal(
+                      onTemplateSelected: (template) {
+                        final templateContent =
+                            getTemplateBodyText(template, widget.name);
+                        setState(() {
+                          _messageController.text = templateContent.toString();
+                          isTemplateOpen = false;
+                        });
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          final templateTexts =
+                              getTemplateBodyText(template, widget.name);
+
+                          _showConfirmation(
+                              context,
+                              templateTexts["previewText"]!,
+                              template.name.toString(),
+                              templateTexts["rawText"]!,
+                              template);
+                        });
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            ),
             Container(
               padding: EdgeInsets.all(16.r),
               decoration: const BoxDecoration(

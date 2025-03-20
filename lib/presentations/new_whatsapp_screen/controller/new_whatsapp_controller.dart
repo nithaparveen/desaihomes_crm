@@ -58,6 +58,20 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
+  Future sendTemplate(String to, String templateName, String message,
+      String leadId, String parameterFormat, BuildContext context) async {
+    log("WhatsappController -> sendTemplate() started");
+    WhatsappService.sendTemplate(
+            to, templateName, leadId, message, parameterFormat)
+        .then((value) {
+      if (value["success"] == true) {
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
+
   Future sendContact(String to, Map<String, dynamic> contact, String receiverId,
       BuildContext context) async {
     var data = {"to": to, "receiver_id": receiverId, "contact": contact};
@@ -84,6 +98,30 @@ class WhatsappControllerCopy extends ChangeNotifier {
             context: context, bgColor: Colors.redAccent);
       }
     });
+  }
+
+  Future sendTemplateMessage(String to, String templateName, String message,
+      String leadId, String parameterFormat, BuildContext context) async {
+    Map<String, dynamic> data = {
+      "lead_id": leadId,
+      "template_name": templateName,
+      "language": "en_US",
+      "to": to,
+      "message": message,
+      "parameter_format": parameterFormat
+    };
+
+    var response = await WhatsappService.sendTemplateMessage(data);
+    log("API Response: $response"); 
+
+    if (response != null && response["success"] == true) {
+      // AppUtils.oneTimeSnackBar("Messages sent successfully",
+      //     context: context, bgColor: Colors.green);
+    } else {
+      // String errorMessage = response?["message"] ?? "Failed to send messages";
+      // AppUtils.oneTimeSnackBar(errorMessage,
+      //     context: context, bgColor: Colors.redAccent);
+    }
   }
 
   Future sendMultiMessages(List<int> leadIds, String templateName,
@@ -141,151 +179,146 @@ class WhatsappControllerCopy extends ChangeNotifier {
     notifyListeners();
   }
 
-Future<void> onSendMessage(BuildContext context, File? file,
-    String messageType, String to, String leadId) async {
-  try {
-    String? accessToken = await getAccessToken();
-    if (accessToken == null) {
-      log("Access token is null. User might not be authenticated.");
-      AppUtils.oneTimeSnackBar("Authentication error. Please log in again.",
-          context: context, bgColor: Colors.red);
-      return;
-    }
+  Future<void> onSendMessage(BuildContext context, File? file,
+      String messageType, String to, String leadId) async {
+    try {
+      String? accessToken = await getAccessToken();
+      if (accessToken == null) {
+        log("Access token is null. User might not be authenticated.");
+        AppUtils.oneTimeSnackBar("Authentication error. Please log in again.",
+            context: context, bgColor: Colors.red);
+        return;
+      }
 
-    var url = "https://www.desaihomes.com/api/whatsapp/beta/message/send";
-    onUploadFile(url, file, messageType, to, leadId, accessToken.replaceAll('"', ''))
-        .then((value) {
-      log("onSendMessage() -> status code -> ${value.statusCode}");
-      log("onSendMessage() -> response -> ${value.body}");
+      var url = "https://www.desaihomes.com/api/whatsapp/beta/message/send";
+      onUploadFile(url, file, messageType, to, leadId,
+              accessToken.replaceAll('"', ''))
+          .then((value) {
+        log("onSendMessage() -> status code -> ${value.statusCode}");
+        log("onSendMessage() -> response -> ${value.body}");
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (value.statusCode == 200) {
-          // AppUtils.oneTimeSnackBar("Message Sent",
-          //     context: context, bgColor: Colors.green, time: 2);
-        } else {
-          try {
-            final responseBody = jsonDecode(value.body);
-            if (responseBody['success'] == false) {
-              String errorMessage = responseBody['message'] ?? "An error occurred.";
-              if (responseBody['errors'] != null) {
-                final errors = responseBody['errors'] as Map<String, dynamic>;
-                if (errors.containsKey('video')) {
-                  errorMessage = errors['video'][0]; 
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (value.statusCode == 200) {
+            // AppUtils.oneTimeSnackBar("Message Sent",
+            //     context: context, bgColor: Colors.green, time: 2);
+          } else {
+            try {
+              final responseBody = jsonDecode(value.body);
+              if (responseBody['success'] == false) {
+                String errorMessage =
+                    responseBody['message'] ?? "An error occurred.";
+                if (responseBody['errors'] != null) {
+                  final errors = responseBody['errors'] as Map<String, dynamic>;
+                  if (errors.containsKey('video')) {
+                    errorMessage = errors['video'][0];
+                  }
+                  if (errors.containsKey('audio')) {
+                    errorMessage = errors['audio'][0];
+                  }
+                  if (errors.containsKey('image')) {
+                    errorMessage = errors['image'][0];
+                  }
                 }
-                if (errors.containsKey('audio')) {
-                  errorMessage = errors['audio'][0]; 
-                }
-                if (errors.containsKey('image')) {
-                  errorMessage = errors['image'][0]; 
-                }
+                AppUtils.oneTimeSnackBar(errorMessage,
+                    context: context, bgColor: Colors.red);
+              } else {
+                AppUtils.oneTimeSnackBar("Error: ${value.body}",
+                    context: context);
               }
-              AppUtils.oneTimeSnackBar(errorMessage, context: context, bgColor: Colors.red);
-            } else {
-              AppUtils.oneTimeSnackBar("Error: ${value.body}", context: context);
+            } catch (e) {
+              log("Error parsing response: $e");
+              AppUtils.oneTimeSnackBar("An unexpected error occurred.",
+                  context: context);
             }
-          } catch (e) {
-            log("Error parsing response: $e");
-            AppUtils.oneTimeSnackBar("An unexpected error occurred.", context: context);
           }
-        }
+        });
       });
-    });
-  } catch (e) {
-    log("Error in onSendMessage: $e");
-    AppUtils.oneTimeSnackBar("An error occurred while sending the message.", context: context);
-  }
-}
-
-  Future<http.Response> onUploadFile(
-  String url,
-  File? selectedFile,
-  String messageType,
-  String to,
-  String leadId,
-  String? accessToken) async {
-  // Check if file exists
-  if (selectedFile == null) {
-    log("No file selected for upload");
-    return http.Response('{"error": "No file selected"}', 400);
-  }
-  
-  if (!await selectedFile.exists()) {
-    log("Selected file does not exist: ${selectedFile.path}");
-    return http.Response('{"error": "File does not exist"}', 400);
+    } catch (e) {
+      log("Error in onSendMessage: $e");
+      AppUtils.oneTimeSnackBar("An error occurred while sending the message.",
+          context: context);
+    }
   }
 
-  try {
-    var request = http.MultipartRequest('POST', Uri.parse(url));
-    log("Access Token: $accessToken");
-
-    // Headers
-    Map<String, String> headers = {
-      "Authorization": "Bearer $accessToken"
-    };
-
-    // Add form fields
-    request.fields["to"] = to;
-    request.fields["lead_id"] = leadId;
-    request.fields["msg_type"] = messageType;
-
-    // Get file details
-    var filePath = selectedFile.path;
-    var fileName = filePath.split('/').last;
-    var fileSize = await selectedFile.length();
-    var fileType = _getMediaType(filePath);
-
-    // Log file details
-    log("File Name: $fileName");
-    log("File Path: $filePath");
-    log("File Type: $fileType");
-    log("File Size: $fileSize bytes");
-
-    // Add file with the correct field name based on message type
-    var fileStream = http.ByteStream(selectedFile.openRead());
-    
-    // Use the messageType to determine the field name for the file
-    String fieldName;
-    switch (messageType.toLowerCase()) {
-      case 'audio':
-        fieldName = 'audio';
-        break;
-      case 'image':
-        fieldName = 'image';
-        break;
-      case 'video':
-        fieldName = 'video';
-        break;
-      case 'document':
-        fieldName = 'document';
-        break;
-      default:
-        fieldName = 'file';
+  Future<http.Response> onUploadFile(String url, File? selectedFile,
+      String messageType, String to, String leadId, String? accessToken) async {
+    // Check if file exists
+    if (selectedFile == null) {
+      log("No file selected for upload");
+      return http.Response('{"error": "No file selected"}', 400);
     }
 
-    var multipartFile = http.MultipartFile(
-        fieldName, 
-        fileStream,
-        fileSize,
-        filename: fileName,
-        contentType: MediaType.parse(fileType));
+    if (!await selectedFile.exists()) {
+      log("Selected file does not exist: ${selectedFile.path}");
+      return http.Response('{"error": "File does not exist"}', 400);
+    }
 
-    request.files.add(multipartFile);
-    request.headers.addAll(headers);
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      log("Access Token: $accessToken");
 
-    // Log request details
-    log("Uploading $messageType to: $url");
-    log("Request fields: ${request.fields}");
+      // Headers
+      Map<String, String> headers = {"Authorization": "Bearer $accessToken"};
 
-    // Send the request
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
+      // Add form fields
+      request.fields["to"] = to;
+      request.fields["lead_id"] = leadId;
+      request.fields["msg_type"] = messageType;
 
-    return response;
-  } catch (e) {
-    log("Error in onUploadFile: $e");
-    return http.Response('{"error": "$e"}', 500);
+      // Get file details
+      var filePath = selectedFile.path;
+      var fileName = filePath.split('/').last;
+      var fileSize = await selectedFile.length();
+      var fileType = _getMediaType(filePath);
+
+      // Log file details
+      log("File Name: $fileName");
+      log("File Path: $filePath");
+      log("File Type: $fileType");
+      log("File Size: $fileSize bytes");
+
+      // Add file with the correct field name based on message type
+      var fileStream = http.ByteStream(selectedFile.openRead());
+
+      // Use the messageType to determine the field name for the file
+      String fieldName;
+      switch (messageType.toLowerCase()) {
+        case 'audio':
+          fieldName = 'audio';
+          break;
+        case 'image':
+          fieldName = 'image';
+          break;
+        case 'video':
+          fieldName = 'video';
+          break;
+        case 'document':
+          fieldName = 'document';
+          break;
+        default:
+          fieldName = 'file';
+      }
+
+      var multipartFile = http.MultipartFile(fieldName, fileStream, fileSize,
+          filename: fileName, contentType: MediaType.parse(fileType));
+
+      request.files.add(multipartFile);
+      request.headers.addAll(headers);
+
+      // Log request details
+      log("Uploading $messageType to: $url");
+      log("Request fields: ${request.fields}");
+
+      // Send the request
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      return response;
+    } catch (e) {
+      log("Error in onUploadFile: $e");
+      return http.Response('{"error": "$e"}', 500);
+    }
   }
-}
 
   String _getMediaType(String path) {
     final extension = path.split('.').last.toLowerCase();

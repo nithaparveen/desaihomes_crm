@@ -57,13 +57,17 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
               ],
             ),
             child: controller.isTemplateLoading
-                ? Center(child: LoadingAnimationWidget.fourRotatingDots(
-                  color: const Color(0xFF3E9E7C),
-                  size: 30,
-                ),)
+                ? Center(
+                    child: LoadingAnimationWidget.fourRotatingDots(
+                      color: const Color(0xFF3E9E7C),
+                      size: 30,
+                    ),
+                  )
                 : controller.templateModel.data?.data == null ||
                         controller.templateModel.data!.data!.isEmpty
-                    ? Center(child: Text("No templates available",style: GLTextStyles.manropeStyle(
+                    ? Center(
+                        child: Text("No templates available",
+                            style: GLTextStyles.manropeStyle(
                               size: 14.sp,
                               weight: FontWeight.w400,
                               color: const Color.fromARGB(255, 89, 88, 94),
@@ -168,7 +172,7 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              template.name ?? "", 
+              template.name ?? "",
               style: GLTextStyles.manropeStyle(
                 color: const Color(0xFF170E2B),
                 size: 12.sp,
@@ -232,12 +236,15 @@ class _TemplateSelectionModalState extends State<TemplateSelectionModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  template.name ?? "",
-                  style: GLTextStyles.manropeStyle(
-                    color: const Color(0xFF0B0D23),
-                    size: 14.sp,
-                    weight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    maxLines: 2,
+                    template.name ?? "",
+                    style: GLTextStyles.manropeStyle(
+                      color: const Color(0xFF0B0D23),
+                      size: 14.sp,
+                      weight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 Icon(
