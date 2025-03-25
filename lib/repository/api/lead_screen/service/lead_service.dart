@@ -247,15 +247,75 @@ class LeadService {
     }
   }
 
-  static Future<dynamic> createLead() async {
+  static Future<dynamic> deleteLead(leadId) async {
     try {
       var decodedData = await ApiHelper.postData(
-        endPoint: "lead/action/create",
+        endPoint: "lead/action/delete?id=$leadId",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;
     } catch (e) {
       log("$e");
+    }
+  }
+
+  static Future<dynamic> createLead({
+    required String ageRange,
+    required int assignedTo,
+    required int assignedToUser,
+    required String campaignName,
+    required int countryId,
+    required int crmLeadTypeId,
+    required String crmStatus,
+    required String email,
+    required String followUpDate,
+    required int id,
+    required String ipAddress,
+    required List<int> labelsId,
+    required String name,
+    required String phoneNumber,
+    required String profession,
+    required int projectId,
+    required String referredBy,
+    required String remarks,
+    required String requestedDate,
+    required String source,
+    required String userAgent,
+  }) async {
+    try {
+      Map<String, dynamic> leadData = {
+        "age_range": ageRange,
+        "assigned_to": assignedTo,
+        "assigned_to_user": assignedToUser,
+        "campaign_name": campaignName,
+        "country_id": countryId,
+        "crm_lead_type_id": crmLeadTypeId,
+        "crm_status": crmStatus,
+        "email": email,
+        "follow_up_date": followUpDate,
+        "id": id,
+        "ip_address": ipAddress,
+        "labels_id": labelsId,
+        "name": name,
+        "phone_number": phoneNumber,
+        "profession": profession,
+        "project_id": projectId,
+        "referred_by": referredBy,
+        "remarks": remarks,
+        "requested_date": requestedDate,
+        "source": source,
+        "user_agent": userAgent,
+      };
+
+      var response = await ApiHelper.postData(
+        endPoint: "lead/action/create",
+        body: leadData,
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return response;
+    } catch (e) {
+      print("Error: $e");
+      return null;
     }
   }
 

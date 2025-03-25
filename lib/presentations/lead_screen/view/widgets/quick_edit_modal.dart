@@ -372,7 +372,7 @@ class _QuickEditModalState extends State<QuickEditModal>
                                                 child: DropdownButtonFormField<
                                                     String>(
                                                   dropdownColor: Colors.white,
-                                                  value: selectedAge,
+                                                  value: selectedStatus,
                                                   icon: Icon(
                                                       Iconsax.arrow_down_1,
                                                       size: 15.sp),

@@ -341,6 +341,17 @@ class LeadController extends ChangeNotifier {
     });
   }
 
+  deleteLead(leadId, context) async {
+    LeadService.deleteLead(leadId).then((value) {
+      if (value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context,textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value["message"],
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
+  }
+
   Future<void> assignedToTapped(
       String id, String assignedTo, String name, BuildContext context) async {
     int? leadIndex = -1;
@@ -512,5 +523,61 @@ class LeadController extends ChangeNotifier {
           context: context, bgColor: ColorTheme.red);
       hasMoreData = false;
     }
+  }
+
+  void createLead({
+    required String ageRange,
+    required int assignedTo,
+    required int assignedToUser,
+    required String campaignName,
+    required int countryId,
+    required int crmLeadTypeId,
+    required String crmStatus,
+    required String email,
+    required String followUpDate,
+    required int id,
+    required String ipAddress,
+    required List<int> labelsId,
+    required String name,
+    required String phoneNumber,
+    required String profession,
+    required int projectId,
+    required String referredBy,
+    required String remarks,
+    required String requestedDate,
+    required String source,
+    required String userAgent,
+    required BuildContext context,
+  }) async {
+    LeadService.createLead(
+      ageRange: ageRange,
+      assignedTo: assignedTo,
+      assignedToUser: assignedToUser,
+      campaignName: campaignName,
+      countryId: countryId,
+      crmLeadTypeId: crmLeadTypeId,
+      crmStatus: crmStatus,
+      email: email,
+      followUpDate: followUpDate,
+      id: id,
+      ipAddress: ipAddress,
+      labelsId: labelsId,
+      name: name,
+      phoneNumber: phoneNumber,
+      profession: profession,
+      projectId: projectId,
+      referredBy: referredBy,
+      remarks: remarks,
+      requestedDate: requestedDate,
+      source: source,
+      userAgent: userAgent,
+    ).then((value) {
+      if (value != null && value["status"] == true) {
+        // AppUtils.oneTimeSnackBar(value["message"], context: context, textStyle: TextStyle(fontSize: 18));
+      } else {
+        AppUtils.oneTimeSnackBar(value?["message"] ?? "Error",
+            context: context, bgColor: Colors.redAccent);
+      }
+    });
   }
 }

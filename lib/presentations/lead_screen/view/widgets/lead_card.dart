@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/global_widgets/dummy_status_list.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/view/lead_detail_screen_copy.dart';
@@ -10,6 +12,8 @@ import 'package:iconsax/iconsax.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../global_widgets/custom_button.dart';
 
 class LeadCard extends StatelessWidget {
   final String name;
@@ -180,7 +184,7 @@ class LeadCard extends StatelessWidget {
   Widget buildActions(BuildContext context) {
     final leadController = Provider.of<LeadController>(context, listen: false);
     final dummyStatus = DummyStatusList.getStatusDetails(status);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -303,8 +307,17 @@ class LeadCard extends StatelessWidget {
                 child: leadController.leadModel.leads?.data != null &&
                         index < leadController.leadModel.leads!.data!.length
                     ? (leadController
-                                .leadModel.leads?.data?[index].assignedTo ==
-                            null
+                                    .leadModel.leads?.data?[index].assignedTo ==
+                                null ||
+                            leadController
+                                    .leadModel.leads?.data?[index].assignedTo ==
+                                "0" ||
+                            leadController.leadModel.leads?.data?[index]
+                                    .assignedToDetails?.name ==
+                                null ||
+                            leadController.leadModel.leads?.data?[index]
+                                    .assignedToDetails?.name?.isEmpty ==
+                                true
                         ? Icon(
                             Iconsax.profile_add,
                             size: 22.sp,
@@ -314,7 +327,17 @@ class LeadCard extends StatelessWidget {
                             (leadController.leadModel.leads?.data?[index]
                                         .assignedToDetails?.name ??
                                     "")
-                                .substring(0, 2)
+                                .substring(
+                                    0,
+                                    min(
+                                        2,
+                                        leadController
+                                            .leadModel
+                                            .leads!
+                                            .data![index]
+                                            .assignedToDetails!
+                                            .name!
+                                            .length))
                                 .toUpperCase(),
                             style: GLTextStyles.robotoStyle(
                               color: ColorTheme.lightBlue,
@@ -394,6 +417,9 @@ class LeadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onLongPress: () {
+        _showDeleteConfirmation(context);
+      },
       onTap: () {
         Navigator.push(
           context,
@@ -425,6 +451,82 @@ class LeadCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: (50 / ScreenUtil().screenWidth).sw,
+                height: (50 / ScreenUtil().screenHeight).sh,
+                decoration: BoxDecoration(
+                  color: const Color(0xffFEE4E2),
+                  shape: BoxShape.circle,
+                  border:
+                      Border.all(width: 4.5, color: const Color(0xffFEF3F2)),
+                ),
+                child: Center(
+                    child: Icon(
+                  Iconsax.trash,
+                  color: Color(0xffF9A7A4),
+                  size: 20.sp,
+                )),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'Confirm Delete',
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.black,
+                  size: 18.sp,
+                  weight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to delete this lead ?',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 15.sp,
+              weight: FontWeight.w400,
+            ),
+          ),
+          actions: <Widget>[
+            CustomButton(
+              borderColor: ColorTheme.logoutRed,
+              backgroundColor: ColorTheme.white,
+              text: "Cancel",
+              textColor: ColorTheme.logoutRed,
+              onPressed: () => Navigator.of(context).pop(),
+              width: (110 / ScreenUtil().screenWidth).sw,
+            ),
+            CustomButton(
+              borderColor: ColorTheme.white,
+              backgroundColor: ColorTheme.logoutRed,
+              text: "Confirm",
+              textColor: Colors.white,
+              width: (110 / ScreenUtil().screenWidth).sw,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await Provider.of<LeadController>(context, listen: false)
+                    .deleteLead(leadId, context);
+                await Provider.of<LeadController>(context, listen: false)
+                    .fetchData(context);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
