@@ -576,8 +576,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => ChatScreenCopy(
-                                            contactedNumber: "919567485652",
-                                            name: message.leadName ?? "",
+contactedNumber: _formatPhoneNumber(message.phoneNumber ?? ""),                                            name: message.leadName ?? "",
                                             leadId: message.leadId ?? 0,
                                           ),
                                         ),
@@ -699,4 +698,15 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
       return DateFormat('MMM d').format(localTimestamp);
     }
   }
-}
+  
+String _formatPhoneNumber(String phoneNumber) {
+  // Remove all non-digit characters
+  final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+
+  // If the number doesn't start with '91', prepend it
+  if (!digitsOnly.startsWith('91') && digitsOnly.isNotEmpty) {
+    return '91$digitsOnly';
+  }
+
+  return digitsOnly; // Return as-is if '91' already exists or if empty
+}}

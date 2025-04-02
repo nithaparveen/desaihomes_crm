@@ -82,6 +82,12 @@
     <string>We need notifications to send you alerts.</string>
     <key>FirebaseAppDelegateProxyEnabled</key>
     <false/>
+
+    <key>NSAppTransportSecurity</key>
+    <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+    </dict>
     
     <!-- Background Modes -->
     <key>UIBackgroundModes</key>

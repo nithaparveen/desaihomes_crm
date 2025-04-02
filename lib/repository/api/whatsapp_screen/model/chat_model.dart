@@ -10,6 +10,7 @@ class ChatModel {
     String? messageType; 
     String? message;
     String? msgType;
+    dynamic mediaUrl;
     String? messageId;
     DateTime? createdAt;
 
@@ -17,6 +18,7 @@ class ChatModel {
         this.name,
         this.messageType,
         this.message,
+        this.mediaUrl,
         this.msgType,
         this.messageId,
         this.createdAt,
@@ -26,6 +28,7 @@ class ChatModel {
         name: json["name"],
         messageType: json["type"],
         message: json["message"],
+        mediaUrl: json["media_url"],
         msgType: json["msg_type"],
         messageId: json["message_id"],
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
@@ -35,6 +38,7 @@ class ChatModel {
         "name": name,
         "type": messageType,
         "message": message,
+        "media_url": mediaUrl,
         "msg_type": msgType,
         "message_id": messageId,
         "created_at": createdAt?.toIso8601String(),

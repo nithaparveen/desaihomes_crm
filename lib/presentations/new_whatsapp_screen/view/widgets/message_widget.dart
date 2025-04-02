@@ -36,6 +36,13 @@ class MessageWidget extends StatelessWidget {
           timestamp: formattedTime,
           senderName: senderName,
         );
+      case 'Text/Attach':
+        return TemplateMessageWidget(
+          message: message.message ?? '',
+          isMe: isMe,
+          timestamp: formattedTime,
+          senderName: senderName,
+        );
       case 'Document':
         String fileUrl = message.message ?? '';
         String fileName = fileUrl.split('/').last;
@@ -120,6 +127,148 @@ class MessageWidget extends StatelessWidget {
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName);
+    }
+  }
+}
+
+class TemplateMessageWidget extends StatelessWidget {
+  final String message;
+  final bool isMe;
+  final String timestamp;
+  final String senderName;
+  final String? headerType;
+
+  const TemplateMessageWidget({
+    super.key,
+    required this.message,
+    required this.isMe,
+    required this.timestamp,
+    required this.senderName,
+    this.headerType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MessageBubble(
+      isMe: isMe,
+      timestamp: timestamp,
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+      senderName: senderName,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Display header media if available
+  
+          // Message text
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Flexible(
+                child: Text(
+                  message,
+                  style: GLTextStyles.manropeStyle(
+                    color: const Color(0xFF170E2B),
+                    size: 14.sp,
+                    weight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                timestamp,
+                style: GLTextStyles.manropeStyle(
+                  color: const Color(0xFFA4A4A4),
+                  size: 10.sp,
+                  weight: FontWeight.w400,
+                ),
+              ),
+              if (!isMe) ...[
+                SizedBox(width: 4.w),
+                Icon(
+                  Icons.done_all,
+                  size: 16.sp,
+                  color: const Color(0xFF30C0E0),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderWidget(String type) {
+    switch (type.toLowerCase()) {
+      case 'image':
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            width: 200.w,
+            height: 150.h,
+            color: Colors.grey[300],
+            child: Icon(Icons.image, size: 50.sp, color: Colors.grey[600]),
+          ),
+        );
+      case 'document':
+        return Container(
+          width: 200.w,
+          padding: EdgeInsets.all(8.r),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.insert_drive_file, size: 24.sp),
+              SizedBox(width: 8.w),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Document',
+                      style: GLTextStyles.manropeStyle(
+                        size: 14.sp,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'Tap to view',
+                      style: GLTextStyles.manropeStyle(
+                        size: 12.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      case 'video':
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 200.w,
+              height: 150.h,
+              color: Colors.grey[300],
+              child: Icon(Icons.videocam, size: 50.sp, color: Colors.grey[600]),
+            ),
+            Container(
+              width: 40.w,
+              height: 40.h,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.play_arrow, color: Colors.white, size: 24.sp),
+            ),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
     }
   }
 }

@@ -24,6 +24,11 @@ class WhatsappControllerCopy extends ChangeNotifier {
   bool isChatLoading = false;
   bool isTemplateLoading = false;
 
+  void clearChatList() {
+    chatList.clear();
+    notifyListeners();
+  }
+
   fetchConversations(context) async {
     isLoading = true;
     notifyListeners();
@@ -100,30 +105,47 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
-  Future sendTemplateMessage(String to, String templateName, String message,
-      String leadId, String parameterFormat, BuildContext context) async {
-    Map<String, dynamic> data = {
-      "lead_id": leadId,
-      "template_name": templateName,
-      "language": "en_US",
-      "to": to,
-      "message": message,
-      "parameter_format": parameterFormat
-    };
+Future sendTemplateMessage(
+    String to,
+    String templateName,
+    String message,
+    String leadId,
+    String parameterFormat,
+    List<String> headers, 
+    String headerType,
+    BuildContext context) async {
+  
+  Map<String, dynamic> data = {
+    "lead_id": leadId,
+    "template_name": templateName,
+    "language": "en_US",
+    "to": to,
+    "message": message,
+    "parameter_format": parameterFormat,
+    "header_type": headerType,
+  };
 
-    var response = await WhatsappService.sendTemplateMessage(data);
-    log("API Response: $response"); 
-
-    if (response != null && response["success"] == true) {
-      // AppUtils.oneTimeSnackBar("Messages sent successfully",
-      //     context: context, bgColor: Colors.green);
-    } else {
-      // String errorMessage = response?["message"] ?? "Failed to send messages";
-      // AppUtils.oneTimeSnackBar(errorMessage,
-      //     context: context, bgColor: Colors.redAccent);
+  // Fix: Ensure headers are passed correctly
+  if (headerType == "image") {
+    data["headers[]"] = "image"; // Pass "image" instead of URLs
+  } else {
+    for (var i = 0; i < headers.length; i++) {
+      data["headers[$i]"] = headers[i]; // Keep this for other types
     }
   }
 
+  var response = await WhatsappService.sendTemplateMessage(data);
+  log("API Response: $response");
+
+  if (response != null && response["success"] == true) {
+    // AppUtils.oneTimeSnackBar("Messages sent successfully",
+    //     context: context, bgColor: Colors.green);
+  } else {
+    // String errorMessage = response?["message"] ?? "Failed to send messages";
+    // AppUtils.oneTimeSnackBar(errorMessage,
+    //     context: context, bgColor: Colors.redAccent);
+  }
+}
   Future sendMultiMessages(List<int> leadIds, String templateName,
       String language, BuildContext context) async {
     Map<String, dynamic> data = {

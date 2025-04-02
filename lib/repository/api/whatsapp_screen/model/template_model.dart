@@ -179,10 +179,12 @@ class Button {
 class Example {
   List<String>? headerText;
   List<List<String>>? bodyText;
+  List<String>? headerHandle; // Added header_handle field
 
   Example({
     this.headerText,
     this.bodyText,
+    this.headerHandle,
   });
 
   factory Example.fromJson(Map<String, dynamic> json) => Example(
@@ -193,6 +195,9 @@ class Example {
             ? []
             : List<List<String>>.from(json["body_text"]!
                 .map((x) => List<String>.from(x.map((x) => x)))),
+        headerHandle: json["header_handle"] == null
+            ? []
+            : List<String>.from(json["header_handle"]!.map((x) => x)), // Added header_handle parsing
       );
 
   Map<String, dynamic> toJson() => {
@@ -203,6 +208,9 @@ class Example {
             ? []
             : List<dynamic>.from(
                 bodyText!.map((x) => List<dynamic>.from(x.map((x) => x)))),
+        "header_handle": headerHandle == null
+            ? []
+            : List<dynamic>.from(headerHandle!.map((x) => x)), // Added header_handle serialization
       };
 }
 

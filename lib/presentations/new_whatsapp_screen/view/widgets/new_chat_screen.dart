@@ -142,80 +142,90 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     }
   }
 
-  void _sendMessage({
-    String? text,
-    String? templateName,
-    String? templateContent,
-    String? rawTemplateContent,
-    String? parameterFormat,
-    Datum? templateData, // Add this parameter to pass the template data
-  }) async {
-    final whatsappController =
-        Provider.of<WhatsappControllerCopy>(context, listen: false);
+void _sendMessage({
+  String? text,
+  String? templateName,
+  String? templateContent,
+  String? rawTemplateContent,
+  String? parameterFormat,
+  Datum? templateData,
+}) async {
+  final whatsappController =
+      Provider.of<WhatsappControllerCopy>(context, listen: false);
 
-    // Handle text message
-    if (text != null && text.trim().isNotEmpty) {
+  if (text != null && text.trim().isNotEmpty) {
+    String? senderName = await getUserName();
+
+    final newMessage = ChatModel(
+        message: text,
+        createdAt: DateTime.now(),
+        messageType: "send",
+        msgType: "Text",
+        name: senderName);
+
+    await whatsappController.addMessageToList(newMessage);
+
+    await whatsappController.sendMessage(
+        widget.contactedNumber, text, widget.leadId.toString(), context);
+
+    _messageController.clear();
+    setState(() => isTyping = false);
+
+    _scrollToBottom();
+  }
+
+  if (templateName != null &&
+      templateContent != null &&
+      rawTemplateContent != null &&
+      templateData != null) {
+    try {
+      String format = templateData.parameterFormat ?? "POSITIONAL";
+
+      List<String> headers = [];
+      String headerType = "";
+
+      for (var component in templateData.components ?? []) {
+        if (component.type == "HEADER") {
+          headerType = component.format.toLowerCase();
+
+          // Debugging print
+          print("Example Object: ${component.example.toJson()}");
+
+          // Correct way to access header_handle
+          headers = List<String>.from(component.example?.toJson()["header_handle"] ?? []);
+          break;
+        }
+      }
+
+      await whatsappController.sendTemplateMessage(
+          widget.contactedNumber,
+          templateName,
+          rawTemplateContent,
+          widget.leadId.toString(),
+          format,
+          headers,
+          headerType,
+          context);
+
       String? senderName = await getUserName();
 
       final newMessage = ChatModel(
-          message: text,
+          message: templateContent,
           createdAt: DateTime.now(),
           messageType: "send",
-          msgType: "Text",
+          msgType: "Template",
           name: senderName);
 
       await whatsappController.addMessageToList(newMessage);
-
-      await whatsappController.sendMessage(
-          widget.contactedNumber, text, widget.leadId.toString(), context);
-
+    } catch (e) {
+      print("Error sending template message: $e");
+    } finally {
       _messageController.clear();
       setState(() => isTyping = false);
-
       _scrollToBottom();
     }
-
-    // Handle template message
-    if (templateName != null &&
-        templateContent != null &&
-        rawTemplateContent != null) {
-      try {
-        // Get the parameter format
-        String format = parameterFormat ?? "POSITIONAL";
-
-        // If templateData is provided, use its parameterFormat
-        if (templateData != null) {
-          format = templateData.parameterFormat ?? "POSITIONAL";
-        }
-
-        await whatsappController.sendTemplateMessage(
-            widget.contactedNumber,
-            templateName,
-            rawTemplateContent,
-            widget.leadId.toString(),
-            format,
-            context);
-
-        // Add the message to the list regardless of success or failure
-        String? senderName = await getUserName();
-
-        final newMessage = ChatModel(
-            message: templateContent,
-            createdAt: DateTime.now(),
-            messageType: "send",
-            msgType: "Template", // Changed to "Template" for better tracking
-            name: senderName);
-
-        await whatsappController.addMessageToList(newMessage);
-      } catch (e) {
-        print("Error sending template message: $e");
-      } finally {
-        _messageController.clear();
-        setState(() => isTyping = false);
-        _scrollToBottom();
-      }
-    }
   }
+}
 
   String _formatTimestamp(DateTime? timestamp) {
     if (timestamp == null) return '';
@@ -250,7 +260,9 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         foregroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            _clearChatAndPop(context);
+          },
           icon: Icon(Iconsax.arrow_left, color: Colors.black, size: 20.sp),
         ),
         title: Row(
@@ -281,12 +293,13 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToBottom();
         });
-        // if (controller.isChatLoading) {
+
+        // if (controller.chatList.isEmpty) {
         //   return Padding(
         //     padding: EdgeInsets.only(right: 16.w),
         //     child: Center(
         //       child: LoadingAnimationWidget.fourRotatingDots(
-        //         color: const Color(0xffF0F6FF),
+        //         color: const Color(0xff3893FF),
         //         size: 32,
         //       ),
         //     ),
@@ -337,10 +350,10 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
       if (await _audioRecorder.hasPermission()) {
         final directory = await getApplicationDocumentsDirectory();
         final path =
-            '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
+            '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
         await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.wav),
+          const RecordConfig(encoder: AudioEncoder.aacLc),
           path: path,
         );
 
@@ -355,7 +368,7 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error starting recording: $e")),
+        SnackBar(content: Text("Error: $e")),
       );
     }
   }
@@ -617,33 +630,56 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     });
   }
 
-  void _showConfirmation(BuildContext context, String templateContent,
-      String templateName, String rawTemplateContent, Datum template) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          title: const Column(
-            children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Are you sure you want to send this template?',
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.blue,
-                  size: 15.sp,
-                  weight: FontWeight.w400,
-                ),
+ void _showConfirmation(BuildContext context, String templateContent,
+    String templateName, String rawTemplateContent, Datum template) {
+  
+  String headerType = "";
+  List<String> headers = [];
+
+  /// **Extract Header Type & Headers from Template Components**
+  for (var component in template.components ?? []) {
+    if (component.type == "HEADER") {
+      headerType = component.format.toLowerCase();
+
+      // Debugging print
+      print("Example Object: ${component.example.toJson()}");
+
+      // Extract header_handle
+      headers = List<String>.from(
+          component.example?.toJson()["header_handle"] ?? []);
+
+      break; // Stop loop after finding the first header
+    }
+  }
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+        title: const Column(
+          children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to send this template?',
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.blue,
+                size: 15.sp,
+                weight: FontWeight.w400,
               ),
-              SizedBox(height: 16.h),
+            ),
+            SizedBox(height: 16.h),
+
+            /// **Header Preview Section**
+            if (headerType == "image" && headers.isNotEmpty) ...[
               Text(
-                'Template Preview:',
+                'Image Preview:',
                 style: GLTextStyles.manropeStyle(
                   color: ColorTheme.blue,
                   size: 14.sp,
@@ -652,56 +688,107 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
               ),
               SizedBox(height: 8.h),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  templateContent, // Replaced version for preview
-                  style: GLTextStyles.manropeStyle(
-                    color: Colors.black87,
-                    size: 13.sp,
-                    weight: FontWeight.w400,
-                  ),
+                child: Image.network(
+                  headers.first, 
+                
                 ),
               ),
+              SizedBox(height: 16.h),
+            ] 
+            else if (headerType == "document" && headers.isNotEmpty) ...[
+              Text(
+                'Document Preview:',
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.blue,
+                  size: 14.sp,
+                  weight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Row(
+                children: [
+                  Icon(Icons.insert_drive_file, color: Colors.blue, size: 40),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Text(
+                      headers.first.split('/').last, // Show document filename
+                      overflow: TextOverflow.ellipsis,
+                      style: GLTextStyles.manropeStyle(
+                        color: Colors.black87,
+                        size: 13.sp,
+                        weight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
             ],
-          ),
-          actions: <Widget>[
-            CustomButton(
-              borderColor: Colors.transparent,
-              backgroundColor: const Color(0xffFFF2F0),
-              text: "Cancel",
-              textColor: const Color(0xffFF9C8E),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _messageController.clear();
-              },
-              width: (110 / ScreenUtil().screenWidth).sw,
+
+            /// **Text Preview**
+            Text(
+              'Template Preview:',
+              style: GLTextStyles.manropeStyle(
+                color: ColorTheme.blue,
+                size: 14.sp,
+                weight: FontWeight.w500,
+              ),
             ),
-            CustomButton(
-              borderColor: Colors.transparent,
-              backgroundColor: const Color(0xffECF5FF),
-              text: "Send",
-              textColor: const Color(0xff3893FF),
-              width: (110 / ScreenUtil().screenWidth).sw,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                _sendMessage(
-                    templateName: templateName,
-                    templateContent:
-                        templateContent, // Preview text with replacements
-                    rawTemplateContent: rawTemplateContent,
-                    templateData: template // Raw template with placeholders
-                    );
-              },
+            SizedBox(height: 8.h),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                templateContent,
+                style: GLTextStyles.manropeStyle(
+                  color: Colors.black87,
+                  size: 13.sp,
+                  weight: FontWeight.w400,
+                ),
+              ),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: <Widget>[
+          CustomButton(
+            borderColor: Colors.transparent,
+            backgroundColor: const Color(0xffFFF2F0),
+            text: "Cancel",
+            textColor: const Color(0xffFF9C8E),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _messageController.clear();
+            },
+            width: (110 / ScreenUtil().screenWidth).sw,
+          ),
+          CustomButton(
+            borderColor: Colors.transparent,
+            backgroundColor: const Color(0xffECF5FF),
+            text: "Send",
+            textColor: const Color(0xff3893FF),
+            width: (110 / ScreenUtil().screenWidth).sw,
+            onPressed: () async {
+              Navigator.of(context).pop();
+              _sendMessage(
+                  templateName: templateName,
+                  templateContent: templateContent,
+                  rawTemplateContent: rawTemplateContent,
+                  templateData: template);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Map<String, String> getTemplateBodyText(Datum template, String widgetName) {
     if (template.components == null || template.components!.isEmpty) {
@@ -743,16 +830,13 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
   Widget _buildMessageInput() {
     return Consumer<WhatsappControllerCopy>(builder: (context, controller, _) {
       bool isChatEmpty = controller.chatList.isEmpty;
-      // Check if 24 hours have passed since the last message
       DateTime? lastMessageTime;
 
-      // For empty chats, consider it as if 24 hours have passed
-      bool isPast24Hours = true; // Default to true for empty chats
+      bool isPast24Hours = true;
 
       if (!isChatEmpty && controller.conversationModel.isNotEmpty == true) {
-        // Only evaluate the time condition if there are messages
         lastMessageTime = DateTime.tryParse(
-          controller.conversationModel.last.createdAt.toString(),
+          controller.chatList.last.createdAt.toString(),
         );
 
         if (lastMessageTime != null) {
@@ -762,9 +846,7 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         }
       }
 
-      bool onlyTemplatesEnabled = isChatEmpty
-          // || isPast24Hours
-          ;
+      bool onlyTemplatesEnabled = isChatEmpty || isPast24Hours;
 
       return Stack(children: [
         Column(
@@ -923,6 +1005,13 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         ),
       ]);
     });
+  }
+
+  void _clearChatAndPop(BuildContext context) {
+    final controller =
+        Provider.of<WhatsappControllerCopy>(context, listen: false);
+    controller.clearChatList();
+    Navigator.pop(context);
   }
 }
 

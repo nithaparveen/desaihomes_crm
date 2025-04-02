@@ -657,9 +657,9 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                                 deleteIcon: Icon(
                                                     Iconsax.close_circle,
                                                     size: 15.sp),
-                                                wrap: true,
-                                                runSpacing: 2,
-                                                spacing: 10,
+                                                wrap: false,
+                                                runSpacing: 1,
+                                                spacing: 5,
                                               ),
                                               fieldDecoration: FieldDecoration(
                                                 hintText: "",

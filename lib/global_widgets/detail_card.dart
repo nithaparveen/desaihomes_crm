@@ -120,7 +120,7 @@ class DetailCard extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ChatScreenCopy(
-                                    contactedNumber: "919567485652",
+                                    contactedNumber: phone ?? "",
                                     name: name ?? "",
                                     leadId: leadId ?? 0,
                                   ),
