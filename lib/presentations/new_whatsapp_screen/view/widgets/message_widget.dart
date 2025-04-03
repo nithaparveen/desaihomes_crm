@@ -17,13 +17,15 @@ class MessageWidget extends StatelessWidget {
   final bool isMe;
   final String formattedTime;
   final String senderName;
+  final String mediaUrl;
 
   const MessageWidget({
     super.key,
     required this.message,
     required this.isMe,
     required this.formattedTime,
-    required this.senderName,
+    required this.senderName, 
+    required this.mediaUrl,
   });
 
   @override
@@ -32,6 +34,7 @@ class MessageWidget extends StatelessWidget {
       case 'Text':
         return TextMessageWidget(
           message: message.message ?? '',
+          mediaUrl: message.mediaUrl ?? "",
           isMe: isMe,
           timestamp: formattedTime,
           senderName: senderName,
@@ -39,6 +42,7 @@ class MessageWidget extends StatelessWidget {
       case 'Text/Attach':
         return TemplateMessageWidget(
           message: message.message ?? '',
+          mediaUrl: message.mediaUrl ?? "",
           isMe: isMe,
           timestamp: formattedTime,
           senderName: senderName,
@@ -63,6 +67,7 @@ class MessageWidget extends StatelessWidget {
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName,
+            mediaUrl: message.mediaUrl ?? "",
           ),
         );
       case 'Image':
@@ -81,6 +86,7 @@ class MessageWidget extends StatelessWidget {
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName,
+            mediaUrl: message.mediaUrl ?? "",
           ),
         );
       case 'Video':
@@ -101,6 +107,7 @@ class MessageWidget extends StatelessWidget {
             isMe: isMe,
             timestamp: formattedTime,
             senderName: senderName,
+            mediaUrl: message.mediaUrl ?? "",
           ),
         );
       case 'Audio':
@@ -108,24 +115,28 @@ class MessageWidget extends StatelessWidget {
             voicePath: message.message ?? '',
             isMe: isMe,
             timestamp: formattedTime,
+            mediaUrl: message.mediaUrl ?? "",
             senderName: senderName);
       case 'location':
         return LocationMessageWidget(
             message: message?.message ?? '{}',
             isMe: isMe,
             timestamp: formattedTime,
+            mediaUrl: message.mediaUrl ?? "",
             senderName: senderName);
       case 'contact':
         return ContactMessageWidget(
             isMe: isMe,
             timestamp: formattedTime,
             message: message?.message ?? '{}',
+            mediaUrl: message.mediaUrl ?? "",
             senderName: senderName);
       default:
         return TextMessageWidget(
             message: message.message ?? '',
             isMe: isMe,
             timestamp: formattedTime,
+            mediaUrl: message.mediaUrl ?? "",
             senderName: senderName);
     }
   }
@@ -133,6 +144,7 @@ class MessageWidget extends StatelessWidget {
 
 class TemplateMessageWidget extends StatelessWidget {
   final String message;
+  final String mediaUrl;
   final bool isMe;
   final String timestamp;
   final String senderName;
@@ -144,7 +156,8 @@ class TemplateMessageWidget extends StatelessWidget {
     required this.isMe,
     required this.timestamp,
     required this.senderName,
-    this.headerType,
+    this.headerType, 
+    required this.mediaUrl,
   });
 
   @override
@@ -157,8 +170,9 @@ class TemplateMessageWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Display header media if available
-  
+          // Display media from mediaUrl if available
+          if (mediaUrl.isNotEmpty) _buildMediaWidget(context),
+          SizedBox(height: mediaUrl.isNotEmpty ? 8.h : 0),
           // Message text
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -198,81 +212,162 @@ class TemplateMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderWidget(String type) {
-    switch (type.toLowerCase()) {
-      case 'image':
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8.r),
-          child: Container(
-            width: 200.w,
-            height: 150.h,
-            color: Colors.grey[300],
-            child: Icon(Icons.image, size: 50.sp, color: Colors.grey[600]),
-          ),
-        );
-      case 'document':
-        return Container(
-          width: 200.w,
-          padding: EdgeInsets.all(8.r),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Row(
+  Widget _buildMediaWidget(BuildContext context) {
+    final lowerUrl = mediaUrl.toLowerCase();
+    final fileName = mediaUrl.split('/').last;
+    
+    if (lowerUrl.endsWith('.jpg') || lowerUrl.endsWith('.jpeg') || lowerUrl.endsWith('.png')) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ImagePreviewScreen(imageUrl: mediaUrl),
+            ),
+          );
+        },
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 0.65.sw),
+          child: Stack(
             children: [
-              Icon(Icons.insert_drive_file, size: 24.sp),
-              SizedBox(width: 8.w),
-              Flexible(
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: Image.network(
+                  mediaUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 180.h,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 180.h,
+                    width: double.infinity,
+                    color: Colors.grey[300],
+                    child: Icon(Icons.broken_image, size: 50.sp),
+                  ),
+                ),
+              ),            
+            ],
+          ),
+        ),
+      );
+    } else if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov') || lowerUrl.endsWith('.avi')) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VideoPreviewScreen(videoUrl: mediaUrl),
+            ),
+          );
+        },
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 0.65.sw),
+          child: Stack(
+            children: [
+              Container(
+                height: 180.h,
+                width: double.infinity,
+                color: Colors.black12,
+                child: Icon(Icons.movie, size: 50.sp, color: Colors.grey),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    width: 50.w,
+                    height: 50.h,
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 30.sp,
+                    ),
+                  ),
+                ),
+              ),
+            
+            ],
+          ),
+        ),
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          if (lowerUrl.endsWith('.pdf')) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PdfViewerScreen(fileUrl: mediaUrl),
+              ),
+            );
+          } else {
+            // Handle other file types or show download dialog
+          }
+        },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 230.w),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(7.w),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xff3874F6),
+                ),
+                child: Icon(
+                  _getFileIcon(fileName),
+                  color: Colors.white,
+                  size: 20.sp,
+                ),
+              ),
+              SizedBox(width: 9.w),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Document',
-                      style: GLTextStyles.manropeStyle(
-                        size: 14.sp,
-                        weight: FontWeight.w600,
+                      fileName,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: const Color(0xff170E2B),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                    Text(
-                      'Tap to view',
-                      style: GLTextStyles.manropeStyle(
-                        size: 12.sp,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                   
                   ],
                 ),
               ),
             ],
           ),
-        );
-      case 'video':
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 200.w,
-              height: 150.h,
-              color: Colors.grey[300],
-              child: Icon(Icons.videocam, size: 50.sp, color: Colors.grey[600]),
-            ),
-            Container(
-              width: 40.w,
-              height: 40.h,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.play_arrow, color: Colors.white, size: 24.sp),
-            ),
-          ],
-        );
-      default:
-        return const SizedBox.shrink();
+        ),
+      );
     }
   }
-}
 
+
+}
+  IconData _getFileIcon(String fileName) {
+    if (fileName.toLowerCase().endsWith('.pdf')) {
+      return Iconsax.document_text5;
+    } else if (fileName.toLowerCase().endsWith('.doc') || fileName.toLowerCase().endsWith('.docx')) {
+      return Iconsax.document_text5;
+    } else if (fileName.toLowerCase().endsWith('.xls') || fileName.toLowerCase().endsWith('.xlsx')) {
+      return Iconsax.document_text5;
+    } else if (fileName.toLowerCase().endsWith('.ppt') || fileName.toLowerCase().endsWith('.pptx')) {
+      return Iconsax.document_text5;
+    } else {
+      return Iconsax.document_text5;
+    }
+  }
 class MessageBubble extends StatelessWidget {
   final Widget child;
   final bool isMe;
@@ -338,13 +433,14 @@ class TextMessageWidget extends StatelessWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const TextMessageWidget({
     super.key,
     required this.message,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
+    required this.senderName, required this.mediaUrl,
   });
 
   @override
@@ -397,6 +493,7 @@ class FileMessageWidget extends StatelessWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const FileMessageWidget({
     super.key,
@@ -404,7 +501,7 @@ class FileMessageWidget extends StatelessWidget {
     required this.fileSize,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
+    required this.senderName, required this.mediaUrl,
   });
 
   @override
@@ -456,7 +553,7 @@ class FileMessageWidget extends StatelessWidget {
                         ),
                       ),
                       Row(
-                        children: [
+                        children: [     
                           Text(
                             timestamp,
                             style: GLTextStyles.manropeStyle(
@@ -492,14 +589,15 @@ class VoiceMessageWidget extends StatelessWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const VoiceMessageWidget({
-    Key? key,
+    super.key,
     required this.voicePath,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
-  }) : super(key: key);
+    required this.senderName, required this.mediaUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -558,14 +656,15 @@ class ContactMessageWidget extends StatelessWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const ContactMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
-  }) : super(key: key);
+    required this.senderName, required this.mediaUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -652,14 +751,15 @@ class LocationMessageWidget extends StatelessWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const LocationMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
-  }) : super(key: key);
+    required this.senderName, required this.mediaUrl,
+  });
 
   Future<void> _openMap(
       double latitude, double longitude, BuildContext context) async {
@@ -787,14 +887,15 @@ class ImageMessageWidget extends StatelessWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const ImageMessageWidget({
-    Key? key,
+    super.key,
     required this.imageUrl,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
-  }) : super(key: key);
+    required this.senderName, required this.mediaUrl,
+  });
 
   Widget _loadImage() {
     if (imageUrl.startsWith('http')) {
@@ -876,14 +977,15 @@ class VideoMessageWidget extends StatefulWidget {
   final bool isMe;
   final String timestamp;
   final String senderName;
+  final String mediaUrl;
 
   const VideoMessageWidget({
-    Key? key,
+    super.key,
     required this.videoUrl,
     required this.isMe,
     required this.timestamp,
-    required this.senderName,
-  }) : super(key: key);
+    required this.senderName, required this.mediaUrl,
+  });
 
   @override
   _VideoMessageWidgetState createState() => _VideoMessageWidgetState();

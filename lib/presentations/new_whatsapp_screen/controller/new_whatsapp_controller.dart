@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
+import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/whatsapp_lead_list_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -20,9 +21,11 @@ class WhatsappControllerCopy extends ChangeNotifier {
   ChatModel chatModel = ChatModel();
   List<ChatModel> chatList = <ChatModel>[];
   TemplateModel templateModel = TemplateModel();
+  WhatsappToLeadListModel whatsappToLeadListModel = WhatsappToLeadListModel();
 
   bool isChatLoading = false;
   bool isTemplateLoading = false;
+  bool isWhatsappLeadsLoading = false;
 
   void clearChatList() {
     chatList.clear();
@@ -127,10 +130,10 @@ Future sendTemplateMessage(
 
   // Fix: Ensure headers are passed correctly
   if (headerType == "image") {
-    data["headers[]"] = "image"; // Pass "image" instead of URLs
+    data["header[]"] = "image"; 
   } else {
     for (var i = 0; i < headers.length; i++) {
-      data["headers[$i]"] = headers[i]; // Keep this for other types
+      data["header[$i]"] = headers[i]; 
     }
   }
 
@@ -146,6 +149,7 @@ Future sendTemplateMessage(
     //     context: context, bgColor: Colors.redAccent);
   }
 }
+
   Future sendMultiMessages(List<int> leadIds, String templateName,
       String language, BuildContext context) async {
     Map<String, dynamic> data = {
@@ -188,6 +192,21 @@ Future sendTemplateMessage(
       if (value != null) {
         templateModel = TemplateModel.fromJson(value);
         isTemplateLoading = false;
+      } else {
+        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+            context: context, bgColor: ColorTheme.red);
+      }
+      notifyListeners();
+    });
+  }
+
+  fetchWhatsappLeads(context) async {
+    isWhatsappLeadsLoading = true;
+    notifyListeners();
+    WhatsappService.fetchWhatsappLeads().then((value) {
+      if (value != null) {
+        whatsappToLeadListModel = WhatsappToLeadListModel.fromJson(value);
+        isWhatsappLeadsLoading = false;
       } else {
         AppUtils.oneTimeSnackBar("Unable to fetch Data",
             context: context, bgColor: ColorTheme.red);

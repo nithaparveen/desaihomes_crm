@@ -12,6 +12,7 @@ import '../../../repository/api/whatsapp_screen/model/conversation_model.dart';
 import '../controller/new_whatsapp_controller.dart';
 import 'widgets/new_chat_screen.dart';
 import 'widgets/template_widget.dart';
+import 'widgets/whatsapp_lead_convertor.dart';
 
 class WhatsappScreenCopy extends StatefulWidget {
   const WhatsappScreenCopy({super.key});
@@ -113,6 +114,25 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
         appBar: AppBar(
           forceMaterialTransparency: true,
           toolbarHeight: 20.0,
+        ),
+        floatingActionButton: FloatingActionButton(
+          shape: const CircleBorder(),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return WhatsappLeadConvertor(
+                  leads: ['Anand', 'Steffy', 'John'],
+                  onConvert: (selectedLeads) {
+                    // Handle conversion logic here
+                    print('Converting leads: $selectedLeads');
+                  },
+                );
+              },
+            );
+          },
+          backgroundColor: const Color(0xff170E2B),
+          child: Icon(Icons.arrow_outward, color: Colors.white, size: 26.sp),
         ),
         body: RefreshIndicator(
           backgroundColor: Colors.white,
@@ -576,7 +596,9 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => ChatScreenCopy(
-contactedNumber: _formatPhoneNumber(message.phoneNumber ?? ""),                                            name: message.leadName ?? "",
+                                            contactedNumber: _formatPhoneNumber(
+                                                message.phoneNumber ?? ""),
+                                            name: message.leadName ?? "",
                                             leadId: message.leadId ?? 0,
                                           ),
                                         ),
@@ -698,15 +720,16 @@ contactedNumber: _formatPhoneNumber(message.phoneNumber ?? ""),                 
       return DateFormat('MMM d').format(localTimestamp);
     }
   }
-  
-String _formatPhoneNumber(String phoneNumber) {
-  // Remove all non-digit characters
-  final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
 
-  // If the number doesn't start with '91', prepend it
-  if (!digitsOnly.startsWith('91') && digitsOnly.isNotEmpty) {
-    return '91$digitsOnly';
+  String _formatPhoneNumber(String phoneNumber) {
+    // Remove all non-digit characters
+    final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // If the number doesn't start with '91', prepend it
+    if (!digitsOnly.startsWith('91') && digitsOnly.isNotEmpty) {
+      return '91$digitsOnly';
+    }
+
+    return digitsOnly; // Return as-is if '91' already exists or if empty
   }
-
-  return digitsOnly; // Return as-is if '91' already exists or if empty
-}}
+}

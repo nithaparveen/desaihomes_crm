@@ -31,8 +31,8 @@ class WhatsappService {
     }
   }
 
-  static Future<dynamic> sendTemplate(
-      String to, String templateName, String leadId, String message,String parameterFormat) async {
+  static Future<dynamic> sendTemplate(String to, String templateName,
+      String leadId, String message, String parameterFormat) async {
     try {
       var decodedData = await ApiHelper.postDataWObaseUrl(
         endPoint:
@@ -51,10 +51,10 @@ class WhatsappService {
         endPoint:
             "https://www.desaihomes.com/api/whatsapp-templates/message/send",
         header: {
-          'Content-Type': 'application/json', // Ensure the content-type is set
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer ${await AppUtils.getToken()}',
         },
-        body: data, // Pass the data directly, it will be encoded in ApiHelper
+        body: data,
       );
 
       return decodedData;
@@ -66,6 +66,7 @@ class WhatsappService {
       }; // Ensure response is always a Map
     }
   }
+
   static Future<dynamic> multiSend(Map<String, dynamic> data) async {
     try {
       var decodedData = await ApiHelper.postDataWObaseUrl(
@@ -132,6 +133,18 @@ class WhatsappService {
       var decodedData = await ApiHelper.getDataWObaseUrl(
         endPoint:
             "https://www.desaihomes.com/api/whatsapp/beta/message/list/$leadId",
+        header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+      );
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
+
+  static Future<dynamic> fetchWhatsappLeads() async {
+    try {
+      var decodedData = await ApiHelper.getDataWObaseUrl(
+        endPoint: "https://www.desaihomes.com/api/whatsapp/beta/lead-list",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

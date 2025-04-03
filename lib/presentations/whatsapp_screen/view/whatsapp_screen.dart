@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../lead_screen/view/widgets/create_lead_modal.dart';
+
 class Message {
   final String name;
   final String? message;
@@ -158,6 +160,7 @@ class _WhatsappScreenState extends State<WhatsappScreen> {
           forceMaterialTransparency: true,
           toolbarHeight: 20.0, // Adjust the height as needed
         ),
+        
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

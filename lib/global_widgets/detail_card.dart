@@ -70,29 +70,34 @@ class DetailCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           if (name != null)
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xff93FAB4),
-                                      borderRadius: BorderRadius.circular(4)),
-                                  child: Center(
-                                      child: Icon(
-                                    Iconsax.user,
-                                    size: 18.sp,
-                                    color: const Color(0xff0B0D23),
-                                  )),
-                                ),
-                                SizedBox(
-                                  width: 16.w,
-                                ),
-                                Text(name!,
-                                    style: GLTextStyles.interStyle(
-                                        size: 16.sp,
-                                        weight: FontWeight.w500,
-                                        color: ColorTheme.black)),
-                              ],
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                        color: const Color(0xff93FAB4),
+                                        borderRadius: BorderRadius.circular(4)),
+                                    child: Center(
+                                        child: Icon(
+                                      Iconsax.user,
+                                      size: 18.sp,
+                                      color: const Color(0xff0B0D23),
+                                    )),
+                                  ),
+                                  SizedBox(
+                                    width: 16.w,
+                                  ),
+                                  Expanded(
+                                    child: Text(name!,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GLTextStyles.interStyle(
+                                            size: 16.sp,
+                                            weight: FontWeight.w500,
+                                            color: ColorTheme.black)),
+                                  ),
+                                ],
+                              ),
                             ),
                           if (age != null)
                             Row(

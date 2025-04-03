@@ -34,7 +34,7 @@ class _CallHistorySectionState extends State<CallHistorySection> {
     var phoneNumber = widget.phoneNumber;
 
     return Padding(
-      padding:  EdgeInsets.only(left: 18.w, right: 18.w, top: 5.w, bottom: 15.w),
+      padding: EdgeInsets.only(left: 18.w, right: 18.w, top: 5.w, bottom: 15.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,27 +71,30 @@ class _CallHistorySectionState extends State<CallHistorySection> {
                 ),
               ),
               SizedBox(width: 10.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userName,
-                    style: GLTextStyles.manropeStyle(
-                      color: ColorTheme.blue,
-                      size: 16.sp,
-                      weight: FontWeight.w600,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userName,
+                      overflow: TextOverflow.ellipsis,
+                      style: GLTextStyles.manropeStyle(
+                        color: ColorTheme.blue,
+                        size: 16.sp,
+                        weight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    phoneNumber,
-                    style: GLTextStyles.manropeStyle(
-                      color: ColorTheme.grey,
-                      size: 12.sp,
-                      weight: FontWeight.w500,
+                    SizedBox(height: 4.h),
+                    Text(
+                      phoneNumber,
+                      style: GLTextStyles.manropeStyle(
+                        color: ColorTheme.grey,
+                        size: 12.sp,
+                        weight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

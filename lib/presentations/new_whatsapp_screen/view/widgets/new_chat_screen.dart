@@ -90,6 +90,7 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
 
       final newMessage = ChatModel(
           message: messageData['message'] ?? '',
+          mediaUrl: messageData['media_url'] ?? '',
           createdAt: DateTime.tryParse(messageData['created_at'] ?? '') ??
               DateTime.now(),
           messageType: messageData['type'] ?? 'received',
@@ -142,90 +143,103 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     }
   }
 
-void _sendMessage({
-  String? text,
-  String? templateName,
-  String? templateContent,
-  String? rawTemplateContent,
-  String? parameterFormat,
-  Datum? templateData,
-}) async {
-  final whatsappController =
-      Provider.of<WhatsappControllerCopy>(context, listen: false);
+  void _sendMessage({
+    String? text,
+    String? templateName,
+    String? templateContent,
+    String? rawTemplateContent,
+    String? parameterFormat,
+    Datum? templateData,
+  }) async {
+    final whatsappController =
+        Provider.of<WhatsappControllerCopy>(context, listen: false);
 
-  if (text != null && text.trim().isNotEmpty) {
-    String? senderName = await getUserName();
-
-    final newMessage = ChatModel(
-        message: text,
-        createdAt: DateTime.now(),
-        messageType: "send",
-        msgType: "Text",
-        name: senderName);
-
-    await whatsappController.addMessageToList(newMessage);
-
-    await whatsappController.sendMessage(
-        widget.contactedNumber, text, widget.leadId.toString(), context);
-
-    _messageController.clear();
-    setState(() => isTyping = false);
-
-    _scrollToBottom();
-  }
-
-  if (templateName != null &&
-      templateContent != null &&
-      rawTemplateContent != null &&
-      templateData != null) {
-    try {
-      String format = templateData.parameterFormat ?? "POSITIONAL";
-
-      List<String> headers = [];
-      String headerType = "";
-
-      for (var component in templateData.components ?? []) {
-        if (component.type == "HEADER") {
-          headerType = component.format.toLowerCase();
-
-          // Debugging print
-          print("Example Object: ${component.example.toJson()}");
-
-          // Correct way to access header_handle
-          headers = List<String>.from(component.example?.toJson()["header_handle"] ?? []);
-          break;
-        }
-      }
-
-      await whatsappController.sendTemplateMessage(
-          widget.contactedNumber,
-          templateName,
-          rawTemplateContent,
-          widget.leadId.toString(),
-          format,
-          headers,
-          headerType,
-          context);
-
+    if (text != null && text.trim().isNotEmpty) {
       String? senderName = await getUserName();
 
       final newMessage = ChatModel(
-          message: templateContent,
+          message: text,
           createdAt: DateTime.now(),
           messageType: "send",
-          msgType: "Template",
+          msgType: "Text",
           name: senderName);
 
       await whatsappController.addMessageToList(newMessage);
-    } catch (e) {
-      print("Error sending template message: $e");
-    } finally {
+
+      await whatsappController.sendMessage(
+          widget.contactedNumber, text, widget.leadId.toString(), context);
+
       _messageController.clear();
       setState(() => isTyping = false);
+
       _scrollToBottom();
     }
+
+    if (templateName != null &&
+        templateContent != null &&
+        rawTemplateContent != null &&
+        templateData != null) {
+      try {
+        String format = templateData.parameterFormat ?? "POSITIONAL";
+
+        List<String> headers = [];
+        String headerType = "";
+        String? mediaUrl; // To store attachment URL if present
+
+        for (var component in templateData.components ?? []) {
+          if (component.type == "HEADER") {
+            headerType = component.format.toLowerCase();
+
+            // Debugging print
+            print("Example Object: ${component.example?.toJson()}");
+
+            // Get header handles (for attachments) or text
+            if (component.example != null) {
+              var exampleJson = component.example!.toJson();
+              if (exampleJson.containsKey("header_handle")) {
+                headers = List<String>.from(exampleJson["header_handle"] ?? []);
+                if (headers.isNotEmpty) {
+                  mediaUrl = headers.first; // Use the first URL as mediaUrl
+                }
+              }
+            }
+            break;
+          }
+        }
+
+        await whatsappController.sendTemplateMessage(
+            widget.contactedNumber,
+            templateName,
+            rawTemplateContent,
+            widget.leadId.toString(),
+            format,
+            headers,
+            headerType,
+            context);
+
+        await Provider.of<WhatsappControllerCopy>(context, listen: false)
+            .fetchChats(widget.leadId, context);
+
+        String? senderName = await getUserName();
+
+        final newMessage = ChatModel(
+            message: templateContent,
+            createdAt: DateTime.now(),
+            messageType: "send",
+            msgType: headerType.isNotEmpty ? headerType.toUpperCase() : "Text",
+            mediaUrl: mediaUrl,
+            name: senderName);
+
+        await whatsappController.addMessageToList(newMessage);
+      } catch (e) {
+        print("Error sending template message: $e");
+      } finally {
+        _messageController.clear();
+        setState(() => isTyping = false);
+        _scrollToBottom();
+      }
+    }
   }
-}
 
   String _formatTimestamp(DateTime? timestamp) {
     if (timestamp == null) return '';
@@ -329,6 +343,7 @@ void _sendMessage({
                           isMe: isMe,
                           formattedTime: _formatTimestamp(message.createdAt),
                           senderName: message.name ?? "",
+                          mediaUrl: message.mediaUrl ?? '',
                         ),
                       );
                     } else {
@@ -630,56 +645,106 @@ void _sendMessage({
     });
   }
 
- void _showConfirmation(BuildContext context, String templateContent,
-    String templateName, String rawTemplateContent, Datum template) {
-  
-  String headerType = "";
-  List<String> headers = [];
+  void _showConfirmation(BuildContext context, String templateContent,
+      String templateName, String rawTemplateContent, Datum template) {
+    String headerType = "";
+    List<String> headers = [];
 
-  /// **Extract Header Type & Headers from Template Components**
-  for (var component in template.components ?? []) {
-    if (component.type == "HEADER") {
-      headerType = component.format.toLowerCase();
+    /// **Extract Header Type & Headers from Template Components**
+    for (var component in template.components ?? []) {
+      if (component.type == "HEADER") {
+        headerType = component.format.toLowerCase();
 
-      // Debugging print
-      print("Example Object: ${component.example.toJson()}");
+        // Debugging print
+        log("Example Object: ${component.example.toJson()}");
 
-      // Extract header_handle
-      headers = List<String>.from(
-          component.example?.toJson()["header_handle"] ?? []);
+        // Extract header_handle
+        headers = List<String>.from(
+            component.example?.toJson()["header_handle"] ?? []);
 
-      break; // Stop loop after finding the first header
+        break; // Stop loop after finding the first header
+      }
     }
-  }
 
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        surfaceTintColor: Colors.white,
-        backgroundColor: Colors.white,
-        title: const Column(
-          children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Are you sure you want to send this template?',
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.blue,
-                size: 15.sp,
-                weight: FontWeight.w400,
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            /// **Header Preview Section**
-            if (headerType == "image" && headers.isNotEmpty) ...[
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          title: const Column(
+            children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                'Image Preview:',
+                'Are you sure you want to send this template?',
+                style: GLTextStyles.manropeStyle(
+                  color: ColorTheme.blue,
+                  size: 15.sp,
+                  weight: FontWeight.w400,
+                ),
+              ),
+              SizedBox(height: 16.h),
+
+              /// **Header Preview Section**
+              if (headerType == "image" && headers.isNotEmpty) ...[
+                Text(
+                  'Image Preview:',
+                  style: GLTextStyles.manropeStyle(
+                    color: ColorTheme.blue,
+                    size: 14.sp,
+                    weight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.network(
+                    headers.first,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+              ] else if (headerType == "document" && headers.isNotEmpty) ...[
+                Text(
+                  'Document Preview:',
+                  style: GLTextStyles.manropeStyle(
+                    color: ColorTheme.blue,
+                    size: 14.sp,
+                    weight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  children: [
+                    Icon(Icons.insert_drive_file, color: Colors.blue, size: 40),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Text(
+                        headers.first.split('/').last, // Show document filename
+                        overflow: TextOverflow.ellipsis,
+                        style: GLTextStyles.manropeStyle(
+                          color: Colors.black87,
+                          size: 13.sp,
+                          weight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+              ],
+
+              /// **Text Preview**
+              Text(
+                'Template Preview:',
                 style: GLTextStyles.manropeStyle(
                   color: ColorTheme.blue,
                   size: 14.sp,
@@ -688,107 +753,54 @@ void _sendMessage({
               ),
               SizedBox(height: 8.h),
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.network(
-                  headers.first, 
-                
-                ),
-              ),
-              SizedBox(height: 16.h),
-            ] 
-            else if (headerType == "document" && headers.isNotEmpty) ...[
-              Text(
-                'Document Preview:',
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.blue,
-                  size: 14.sp,
-                  weight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Row(
-                children: [
-                  Icon(Icons.insert_drive_file, color: Colors.blue, size: 40),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text(
-                      headers.first.split('/').last, // Show document filename
-                      overflow: TextOverflow.ellipsis,
-                      style: GLTextStyles.manropeStyle(
-                        color: Colors.black87,
-                        size: 13.sp,
-                        weight: FontWeight.w400,
-                      ),
-                    ),
+                child: Text(
+                  templateContent,
+                  style: GLTextStyles.manropeStyle(
+                    color: Colors.black87,
+                    size: 13.sp,
+                    weight: FontWeight.w400,
                   ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-            ],
-
-            /// **Text Preview**
-            Text(
-              'Template Preview:',
-              style: GLTextStyles.manropeStyle(
-                color: ColorTheme.blue,
-                size: 14.sp,
-                weight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                templateContent,
-                style: GLTextStyles.manropeStyle(
-                  color: Colors.black87,
-                  size: 13.sp,
-                  weight: FontWeight.w400,
                 ),
               ),
+            ],
+          ),
+          actions: <Widget>[
+            CustomButton(
+              borderColor: Colors.transparent,
+              backgroundColor: const Color(0xffFFF2F0),
+              text: "Cancel",
+              textColor: const Color(0xffFF9C8E),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _messageController.clear();
+              },
+              width: (110 / ScreenUtil().screenWidth).sw,
+            ),
+            CustomButton(
+              borderColor: Colors.transparent,
+              backgroundColor: const Color(0xffECF5FF),
+              text: "Send",
+              textColor: const Color(0xff3893FF),
+              width: (110 / ScreenUtil().screenWidth).sw,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                _sendMessage(
+                    templateName: templateName,
+                    templateContent: templateContent,
+                    rawTemplateContent: rawTemplateContent,
+                    templateData: template);
+              },
             ),
           ],
-        ),
-        actions: <Widget>[
-          CustomButton(
-            borderColor: Colors.transparent,
-            backgroundColor: const Color(0xffFFF2F0),
-            text: "Cancel",
-            textColor: const Color(0xffFF9C8E),
-            onPressed: () {
-              Navigator.of(context).pop();
-              _messageController.clear();
-            },
-            width: (110 / ScreenUtil().screenWidth).sw,
-          ),
-          CustomButton(
-            borderColor: Colors.transparent,
-            backgroundColor: const Color(0xffECF5FF),
-            text: "Send",
-            textColor: const Color(0xff3893FF),
-            width: (110 / ScreenUtil().screenWidth).sw,
-            onPressed: () async {
-              Navigator.of(context).pop();
-              _sendMessage(
-                  templateName: templateName,
-                  templateContent: templateContent,
-                  rawTemplateContent: rawTemplateContent,
-                  templateData: template);
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Map<String, String> getTemplateBodyText(Datum template, String widgetName) {
     if (template.components == null || template.components!.isEmpty) {
