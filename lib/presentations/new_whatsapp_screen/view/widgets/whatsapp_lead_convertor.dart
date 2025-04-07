@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/project_list_model.dart';
 import 'package:desaihomes_crm_application/repository/api/lead_screen/model/user_list_model.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +12,13 @@ import 'package:desaihomes_crm_application/presentations/lead_screen/controller/
 
 class WhatsappLeadConvertor extends StatefulWidget {
   final List<String> leads;
+  final List<int> leadIds;
   final Function(List<Map<String, dynamic>>) onConvert;
 
   const WhatsappLeadConvertor({
     super.key,
     required this.leads,
+    required this.leadIds,
     required this.onConvert,
   });
 
@@ -151,21 +152,29 @@ class _WhatsappLeadConvertorState extends State<WhatsappLeadConvertor> {
     );
   }
 
-  void _convertLeads() {
-    final List<Map<String, dynamic>> leadsToConvert = [];
-    
-    for (var lead in selectedLeads) {
+void _convertLeads() {
+  final List<Map<String, dynamic>> leadsToConvert = [];
+
+  // Create a mapping of lead names to their IDs
+  final Map<String, int> nameToIdMap = {};
+  for (int i = 0; i < widget.leads.length; i++) {
+    nameToIdMap[widget.leads[i]] = widget.leadIds[i];
+  }
+
+  for (var leadName in selectedLeads) {
+    final leadId = nameToIdMap[leadName];
+    if (leadId != null) {
       leadsToConvert.add({
-        'id': lead,
-        'project_id': selectedProjects[lead],
-        'assigned_to': assignedUsers[lead],
+        'id': leadId,  // Use the actual ID here
+        'project_id': selectedProjects[leadName],
+        'assigned_to': assignedUsers[leadName],
       });
     }
-    
-    widget.onConvert(leadsToConvert);
-    Navigator.of(context).pop();
-    _showSuccessMessage('Conversion Successful');
   }
+
+  widget.onConvert(leadsToConvert);
+  Navigator.of(context).pop();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -243,11 +252,11 @@ class _WhatsappLeadConvertorState extends State<WhatsappLeadConvertor> {
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          TextButton(
-                            onPressed: clearSelection,
-                            child: Text(
+                      TextButton(
+                        onPressed: clearSelection,
+                        child: Row(
+                          children: [
+                            Text(
                               'Clear',
                               style: GLTextStyles.manropeStyle(
                                 color: Colors.black54,
@@ -255,10 +264,11 @@ class _WhatsappLeadConvertorState extends State<WhatsappLeadConvertor> {
                                 weight: FontWeight.w500,
                               ),
                             ),
-                          ),
-                          Icon(Iconsax.close_circle,
-                              size: 18.sp, color: Colors.black54)
-                        ],
+                            SizedBox(width: 8.w),
+                            Icon(Iconsax.close_circle,
+                                size: 18.sp, color: Colors.black54)
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -459,10 +469,10 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Bulk Assign ${widget.leadIds.length} Leads',
+                        'Bulk Assign  ${widget.leadIds.length}  Lead(s)',
                         style: GLTextStyles.manropeStyle(
                           color: ColorTheme.blue,
-                          size: 16.sp,
+                          size: 14.sp,
                           weight: FontWeight.w600,
                         ),
                       ),
@@ -515,25 +525,32 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                                     child: ListView.separated(
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
-                                      physics: const AlwaysScrollableScrollPhysics(),
-                                      separatorBuilder: (context, index) => const Divider(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      separatorBuilder: (context, index) =>
+                                          const Divider(
                                         color: Color.fromARGB(44, 95, 95, 87),
                                         thickness: 0.55,
                                         height: 1,
                                         indent: 0,
                                         endIndent: 0,
                                       ),
-                                      itemCount: widget.leadController.userListModel.users?.length ?? 0,
+                                      itemCount: widget.leadController
+                                              .userListModel.users?.length ??
+                                          0,
                                       itemBuilder: (context, index) {
-                                        final user = widget.leadController.userListModel.users![index];
+                                        final user = widget.leadController
+                                            .userListModel.users![index];
                                         return InkWell(
                                           onTap: () {
                                             Navigator.pop(context);
                                             setState(() {
-                                              selectedUserId = user.id.toString();
+                                              selectedUserId =
+                                                  user.id.toString();
                                               selectedUserName = user.name;
                                             });
-                                            _showSuccessMessage('User selected');
+                                            _showSuccessMessage(
+                                                'User selected');
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
@@ -544,14 +561,22 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                                               children: [
                                                 CircleAvatar(
                                                   radius: 12.r,
-                                                  backgroundColor: const Color(0xff25274B),
+                                                  backgroundColor:
+                                                      const Color(0xff25274B),
                                                   child: Text(
                                                     (user.name ?? '').isNotEmpty
                                                         ? (user.name ?? '')
-                                                            .substring(0, min(2, (user.name ?? '').length))
+                                                            .substring(
+                                                                0,
+                                                                min(
+                                                                    2,
+                                                                    (user.name ??
+                                                                            '')
+                                                                        .length))
                                                             .toUpperCase()
                                                         : '',
-                                                    style: GLTextStyles.manropeStyle(
+                                                    style: GLTextStyles
+                                                        .manropeStyle(
                                                       color: ColorTheme.white,
                                                       size: 10.sp,
                                                       weight: FontWeight.w500,
@@ -562,9 +587,12 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                                                 Expanded(
                                                   child: Text(
                                                     user.name ?? '',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: GLTextStyles.manropeStyle(
-                                                      color: const Color(0xff1E232C),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: GLTextStyles
+                                                        .manropeStyle(
+                                                      color: const Color(
+                                                          0xff1E232C),
                                                       size: 12.sp,
                                                       weight: FontWeight.w500,
                                                     ),
@@ -582,11 +610,14 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                             ];
                           },
                           child: Center(
-                            child: selectedUserName == null || selectedUserName!.isEmpty
-                                ? Icon(Iconsax.profile_add, size: 20.sp, color: Colors.black87)
+                            child: selectedUserName == null ||
+                                    selectedUserName!.isEmpty
+                                ? Icon(Iconsax.profile_add,
+                                    size: 20.sp, color: Colors.black87)
                                 : Text(
                                     selectedUserName!
-                                        .substring(0, min(2, selectedUserName!.length))
+                                        .substring(
+                                            0, min(2, selectedUserName!.length))
                                         .toUpperCase(),
                                     style: GLTextStyles.robotoStyle(
                                       color: ColorTheme.lightBlue,
@@ -602,7 +633,9 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                         child: Text(
                           selectedUserName ?? 'Assign to User',
                           style: GLTextStyles.manropeStyle(
-                            color: selectedUserName == null ? Colors.black54 : Colors.black87,
+                            color: selectedUserName == null
+                                ? Colors.black54
+                                : Colors.black87,
                             size: 14.sp,
                             weight: FontWeight.w500,
                           ),
@@ -651,25 +684,36 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                                     child: ListView.separated(
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
-                                      physics: const AlwaysScrollableScrollPhysics(),
-                                      separatorBuilder: (context, index) => const Divider(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      separatorBuilder: (context, index) =>
+                                          const Divider(
                                         color: Color.fromARGB(44, 95, 95, 87),
                                         thickness: 0.55,
                                         height: 1,
                                         indent: 0,
                                         endIndent: 0,
                                       ),
-                                      itemCount: widget.leadController.projectListModel.projects?.length ?? 0,
+                                      itemCount: widget
+                                              .leadController
+                                              .projectListModel
+                                              .projects
+                                              ?.length ??
+                                          0,
                                       itemBuilder: (context, index) {
-                                        final project = widget.leadController.projectListModel.projects![index];
+                                        final project = widget.leadController
+                                            .projectListModel.projects![index];
                                         return InkWell(
                                           onTap: () {
                                             Navigator.pop(context);
                                             setState(() {
-                                              selectedProjectId = project.id.toString();
-                                              selectedProjectName = project.name;
+                                              selectedProjectId =
+                                                  project.id.toString();
+                                              selectedProjectName =
+                                                  project.name;
                                             });
-                                            _showSuccessMessage('Project selected');
+                                            _showSuccessMessage(
+                                                'Project selected');
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
@@ -680,14 +724,23 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                                               children: [
                                                 CircleAvatar(
                                                   radius: 12.r,
-                                                  backgroundColor: const Color(0xff25274B),
+                                                  backgroundColor:
+                                                      const Color(0xff25274B),
                                                   child: Text(
-                                                    (project.name ?? '').isNotEmpty
+                                                    (project.name ?? '')
+                                                            .isNotEmpty
                                                         ? (project.name ?? '')
-                                                            .substring(0, min(2, (project.name ?? '').length))
+                                                            .substring(
+                                                                0,
+                                                                min(
+                                                                    2,
+                                                                    (project.name ??
+                                                                            '')
+                                                                        .length))
                                                             .toUpperCase()
                                                         : '',
-                                                    style: GLTextStyles.manropeStyle(
+                                                    style: GLTextStyles
+                                                        .manropeStyle(
                                                       color: ColorTheme.white,
                                                       size: 10.sp,
                                                       weight: FontWeight.w500,
@@ -698,9 +751,12 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                                                 Expanded(
                                                   child: Text(
                                                     project.name ?? '',
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: GLTextStyles.manropeStyle(
-                                                      color: const Color(0xff1E232C),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: GLTextStyles
+                                                        .manropeStyle(
+                                                      color: const Color(
+                                                          0xff1E232C),
                                                       size: 12.sp,
                                                       weight: FontWeight.w500,
                                                     ),
@@ -718,11 +774,14 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                             ];
                           },
                           child: Center(
-                            child: selectedProjectName == null || selectedProjectName!.isEmpty
-                                ? Icon(Iconsax.activity, size: 20.sp, color: Colors.black87)
+                            child: selectedProjectName == null ||
+                                    selectedProjectName!.isEmpty
+                                ? Icon(Iconsax.activity,
+                                    size: 20.sp, color: Colors.black87)
                                 : Text(
                                     selectedProjectName!
-                                        .substring(0, min(2, selectedProjectName!.length))
+                                        .substring(0,
+                                            min(2, selectedProjectName!.length))
                                         .toUpperCase(),
                                     style: GLTextStyles.robotoStyle(
                                       color: ColorTheme.lightBlue,
@@ -738,7 +797,9 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                         child: Text(
                           selectedProjectName ?? 'Select Project',
                           style: GLTextStyles.manropeStyle(
-                            color: selectedProjectName == null ? Colors.black54 : Colors.black87,
+                            color: selectedProjectName == null
+                                ? Colors.black54
+                                : Colors.black87,
                             size: 14.sp,
                             weight: FontWeight.w500,
                           ),
@@ -752,7 +813,8 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
 
                 // Action buttons
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
                   child: Row(
                     children: [
                       Expanded(
@@ -783,7 +845,8 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.r)),
                           ),
-                          onPressed: (selectedUserId == null || selectedProjectId == null)
+                          onPressed: (selectedUserId == null ||
+                                  selectedProjectId == null)
                               ? null
                               : () {
                                   widget.onAssign(
@@ -814,6 +877,7 @@ class _BulkAssignmentModalState extends State<BulkAssignmentModal> {
     );
   }
 }
+
 class _UserAssignmentButton extends StatelessWidget {
   final String leadId;
   final String? assignedUserName;

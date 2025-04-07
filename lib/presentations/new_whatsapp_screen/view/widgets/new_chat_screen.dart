@@ -2,20 +2,18 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:desaihomes_crm_application/presentations/new_whatsapp_screen/controller/new_whatsapp_controller.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import '../../../../app_config/app_config.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/constants/textstyles.dart';
@@ -58,7 +56,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
   void initState() {
     super.initState();
     _messageController.addListener(_onTextChanged);
-    // _requestPermissions();
     _loadUserId();
     _pusherService.subscribeToChannelWithId(
         widget.leadId.toString(), _handleNewMessage, context);
@@ -68,11 +65,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
       Provider.of<WhatsappControllerCopy>(context, listen: false)
           .fetchChats(widget.leadId, context);
     });
-  }
-
-  Future<void> _requestPermissions() async {
-    await FlutterContacts.requestPermission();
-    await Geolocator.requestPermission();
   }
 
   @override
@@ -148,7 +140,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     String? templateName,
     String? templateContent,
     String? rawTemplateContent,
-    String? parameterFormat,
     Datum? templateData,
   }) async {
     final whatsappController =
@@ -244,10 +235,8 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
   String _formatTimestamp(DateTime? timestamp) {
     if (timestamp == null) return '';
 
-    // Convert UTC DateTime to local DateTime
     DateTime localTime = timestamp.toLocal();
 
-    // Format with am/pm
     String period = localTime.hour >= 12 ? 'pm' : 'am';
     int hour12 = localTime.hour > 12
         ? localTime.hour - 12
@@ -276,6 +265,10 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         leading: IconButton(
           onPressed: () {
             _clearChatAndPop(context);
+            Provider.of<WhatsappControllerCopy>(context, listen: false)
+                .fetchConversations(context);
+            Provider.of<WhatsappControllerCopy>(context, listen: false)
+                .fetchWhatsappLeads(context);
           },
           icon: Icon(Iconsax.arrow_left, color: Colors.black, size: 20.sp),
         ),
@@ -307,7 +300,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToBottom();
         });
-
         // if (controller.chatList.isEmpty) {
         //   return Padding(
         //     padding: EdgeInsets.only(right: 16.w),
@@ -319,7 +311,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         //     ),
         //   );
         // }
-
         return SafeArea(
           child: Column(
             children: [
@@ -554,88 +545,6 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
     );
   }
 
-  Future<void> _pickLocation() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text("Location services are disabled. Please enable them."),
-          ),
-        );
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Location permission denied")),
-          );
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                "Location permissions are permanently denied. Enable them in settings."),
-            duration: Duration(seconds: 3),
-          ),
-        );
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      Map<String, dynamic> locationData = _convertPositionToMap(position);
-
-      setState(() {
-        // _sendMessage(location: locationData);
-        isAttachmentOpen = false;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error getting location: $e")),
-      );
-    }
-  }
-
-  Map<String, dynamic> _convertPositionToMap(Position position) {
-    return {
-      "latitude": position.latitude.toString(),
-      "longitude": position.longitude.toString(),
-      "name": "Current Location",
-      "address": "Fetching address..."
-    };
-  }
-
-  Future<void> _pickContact() async {
-    if (await FlutterContacts.requestPermission()) {
-      final Contact? contact = await FlutterContacts.openExternalPick();
-      if (contact != null) {
-        // _sendMessage(contact: _convertContactToMap(contact));
-        setState(() {});
-        isAttachmentOpen = false;
-      } else {}
-    } else {
-      log('Permission denied.');
-    }
-  }
-
-  Map<String, dynamic> _convertContactToMap(Contact contact) {
-    return {
-      "name": contact.displayName,
-      "firstName": contact.name.first,
-      "lastName": contact.name.last,
-      "phone": contact.phones.isNotEmpty ? contact.phones.first.number : ""
-    };
-  }
-
   void _showTemplateModal(BuildContext context) {
     setState(() {
       isTemplateOpen = !isTemplateOpen;
@@ -649,22 +558,35 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
       String templateName, String rawTemplateContent, Datum template) {
     String headerType = "";
     List<String> headers = [];
+    List<String> filePaths = [];
 
-    /// **Extract Header Type & Headers from Template Components**
+    /// Extract Header Type & Headers from Template Components
     for (var component in template.components ?? []) {
       if (component.type == "HEADER") {
         headerType = component.format.toLowerCase();
 
-        // Debugging print
-        log("Example Object: ${component.example.toJson()}");
+        if (headerType == "text") {
+          headers = [component.text ?? ""];
+        } else {
+          final example = component.example?.toJson();
+          headers = List<String>.from(example?["header_handle"] ?? []);
 
-        // Extract header_handle
-        headers = List<String>.from(
-            component.example?.toJson()["header_handle"] ?? []);
-
-        break; // Stop loop after finding the first header
+          // Get file_path if available
+          if (example?["file_path"] != null) {
+            if (example["file_path"] is String) {
+              filePaths = [example["file_path"]];
+            } else if (example["file_path"] is List) {
+              filePaths = List<String>.from(example["file_path"]);
+            }
+          }
+        }
+        break;
       }
     }
+
+    // Use file_path if available, otherwise fall back to header_handle
+    final mediaUrls = filePaths.isNotEmpty ? filePaths : headers;
+    final mediaUrl = mediaUrls.isNotEmpty ? mediaUrls.first : null;
 
     showDialog(
       context: context,
@@ -673,102 +595,50 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
         return AlertDialog(
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
-          title: const Column(
-            children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
+          insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+          title: const SizedBox(
+            width: double.infinity, 
+            child: Column(
+              children: [Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))],
+            ),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Are you sure you want to send this template?',
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.blue,
-                  size: 15.sp,
-                  weight: FontWeight.w400,
-                ),
-              ),
-              SizedBox(height: 16.h),
-
-              /// **Header Preview Section**
-              if (headerType == "image" && headers.isNotEmpty) ...[
-                Text(
-                  'Image Preview:',
-                  style: GLTextStyles.manropeStyle(
-                    color: ColorTheme.blue,
-                    size: 14.sp,
-                    weight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Image.network(
-                    headers.first,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-              ] else if (headerType == "document" && headers.isNotEmpty) ...[
-                Text(
-                  'Document Preview:',
-                  style: GLTextStyles.manropeStyle(
-                    color: ColorTheme.blue,
-                    size: 14.sp,
-                    weight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Row(
-                  children: [
-                    Icon(Icons.insert_drive_file, color: Colors.blue, size: 40),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Text(
-                        headers.first.split('/').last, // Show document filename
-                        overflow: TextOverflow.ellipsis,
-                        style: GLTextStyles.manropeStyle(
-                          color: Colors.black87,
-                          size: 13.sp,
-                          weight: FontWeight.w400,
-                        ),
-                      ),
+          contentPadding: const EdgeInsets.all(16),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
+              maxHeight: MediaQuery.of(context).size.height * 0.7,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Are you sure you want to send this template?',
+                    style: GLTextStyles.manropeStyle(
+                      color: ColorTheme.blue,
+                      size: 15.sp,
+                      weight: FontWeight.w400,
                     ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-              ],
-
-              /// **Text Preview**
-              Text(
-                'Template Preview:',
-                style: GLTextStyles.manropeStyle(
-                  color: ColorTheme.blue,
-                  size: 14.sp,
-                  weight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  templateContent,
-                  style: GLTextStyles.manropeStyle(
-                    color: Colors.black87,
-                    size: 13.sp,
-                    weight: FontWeight.w400,
                   ),
-                ),
+                  SizedBox(height: 16.h),
+
+                  /// Header Preview Section
+                  if (headerType == "image" && mediaUrl != null)
+                    _buildImagePreview(context, mediaUrl),
+                  if (headerType == "document" && mediaUrl != null)
+                    _buildDocumentPreview(context, mediaUrl),
+                  if (headerType == "text" && headers.isNotEmpty)
+                    _buildTextPreview(headers.first),
+
+                  /// Template Text Preview
+                  _buildTemplatePreview(templateContent),
+                ],
               ),
-            ],
+            ),
           ),
+          actionsPadding:
+              const EdgeInsets.only(right: 16, bottom: 16, left: 16),
           actions: <Widget>[
             CustomButton(
               borderColor: Colors.transparent,
@@ -781,6 +651,7 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
               },
               width: (110 / ScreenUtil().screenWidth).sw,
             ),
+            const SizedBox(width: 8),
             CustomButton(
               borderColor: Colors.transparent,
               backgroundColor: const Color(0xffECF5FF),
@@ -790,15 +661,265 @@ class _ChatScreenCopyState extends State<ChatScreenCopy> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 _sendMessage(
-                    templateName: templateName,
-                    templateContent: templateContent,
-                    rawTemplateContent: rawTemplateContent,
-                    templateData: template);
+                  templateName: templateName,
+                  templateContent: templateContent,
+                  rawTemplateContent: rawTemplateContent,
+                  templateData: template,
+                );
               },
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildImagePreview(BuildContext context, String imageUrl) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Image:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            width: double.infinity,
+            height: 200.h,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: GestureDetector(
+                onTap: () => _showFullScreenImage(context, imageUrl),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image,
+                                size: 40, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text('Failed to load image'),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentPreview(BuildContext context, String documentUrl) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Document:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Container(
+            height: 200.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: FutureBuilder<String>(
+              future: _downloadPdf(documentUrl),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red),
+                        SizedBox(height: 8),
+                        Text('Failed to load document'),
+                      ],
+                    ),
+                  );
+                } else if (snapshot.hasData) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: PDFView(
+                      filePath: snapshot.data!,
+                      enableSwipe: true,
+                      swipeHorizontal: false,
+                      autoSpacing: true,
+                      pageFling: true,
+                      onError: (error) {
+                        print('PDF Error: $error');
+                      },
+                    ),
+                  );
+                }
+                return Container();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextPreview(String text) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Header Text:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            text,
+            style: GLTextStyles.manropeStyle(
+              color: Colors.black87,
+              size: 13.sp,
+              weight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTemplatePreview(String templateContent) {
+    return Container(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Template Preview:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              templateContent,
+              style: GLTextStyles.manropeStyle(
+                color: Colors.black87,
+                size: 13.sp,
+                weight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String> _downloadPdf(String url) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final filePath =
+          '${tempDir.path}/temp_preview_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      await Dio().download(url, filePath);
+      return filePath;
+    } catch (e) {
+      print('Error downloading PDF: $e');
+      throw e;
+    }
+  }
+
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: InteractiveViewer(
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text('Failed to load image'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 

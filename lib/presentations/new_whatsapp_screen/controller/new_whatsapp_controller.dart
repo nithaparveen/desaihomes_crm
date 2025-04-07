@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/whatsapp_lead_list_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app_config/app_config.dart';
@@ -21,8 +24,8 @@ class WhatsappControllerCopy extends ChangeNotifier {
   ChatModel chatModel = ChatModel();
   List<ChatModel> chatList = <ChatModel>[];
   TemplateModel templateModel = TemplateModel();
-  WhatsappToLeadListModel whatsappToLeadListModel = WhatsappToLeadListModel();
-
+  List<WhatsappToLeadListModel> whatsappToLeadList =
+      <WhatsappToLeadListModel>[];
   bool isChatLoading = false;
   bool isTemplateLoading = false;
   bool isWhatsappLeadsLoading = false;
@@ -108,59 +111,105 @@ class WhatsappControllerCopy extends ChangeNotifier {
     });
   }
 
-Future sendTemplateMessage(
-    String to,
-    String templateName,
-    String message,
-    String leadId,
-    String parameterFormat,
-    List<String> headers, 
-    String headerType,
-    BuildContext context) async {
-  
-  Map<String, dynamic> data = {
-    "lead_id": leadId,
-    "template_name": templateName,
-    "language": "en_US",
-    "to": to,
-    "message": message,
-    "parameter_format": parameterFormat,
-    "header_type": headerType,
-  };
+  Future<void> onConvert(dynamic data, BuildContext context) async {
+    try {
+      // Always format the data as {"leads": [...]} even for a single lead
+      dynamic formattedData;
+      if (data is List<Map<String, dynamic>>) {
+        // Format as "leads" array for both single and multiple leads
+        formattedData = {"leads": data};
+      } else {
+        // Handle unexpected data format
+        AppUtils.oneTimeSnackBar(
+          'Invalid lead data format',
+          context: context,
+          bgColor: Colors.redAccent,
+        );
+        return;
+      }
 
-  // Fix: Ensure headers are passed correctly
-  if (headerType == "image") {
-    data["header[]"] = "image"; 
-  } else {
-    for (var i = 0; i < headers.length; i++) {
-      data["header[$i]"] = headers[i]; 
+      final response = await WhatsappService.onConvert(formattedData);
+
+      if (response != null && response['success'] == true) {
+        // Show success message
+        AppUtils.oneTimeSnackBar(
+          response['message'] ?? 'Leads successfully converted',
+          context: context,
+          bgColor: ColorTheme.desaiGreen,
+        );
+      } else {
+        // Show error message
+        final errorMessage = response?['message'] ?? 'Failed to convert leads';
+        AppUtils.oneTimeSnackBar(
+          errorMessage,
+          context: context,
+          bgColor: Colors.redAccent,
+        );
+      }
+    } catch (e) {
+      AppUtils.oneTimeSnackBar(
+        'An error occurred while converting leads',
+        context: context,
+        bgColor: Colors.redAccent,
+      );
+      debugPrint('Error converting leads: $e');
     }
   }
 
-  var response = await WhatsappService.sendTemplateMessage(data);
-  log("API Response: $response");
+  Future sendTemplateMessage(
+      String to,
+      String templateName,
+      String message,
+      String leadId,
+      String parameterFormat,
+      List<String> headers,
+      String headerType,
+      BuildContext context) async {
+    Map<String, dynamic> data = {
+      "lead_id": leadId,
+      "template_name": templateName,
+      "language": "en_US",
+      "to": to,
+      "message": message,
+      "parameter_format": parameterFormat,
+      "header_type": headerType,
+    };
 
-  if (response != null && response["success"] == true) {
-    // AppUtils.oneTimeSnackBar("Messages sent successfully",
-    //     context: context, bgColor: Colors.green);
-  } else {
-    // String errorMessage = response?["message"] ?? "Failed to send messages";
-    // AppUtils.oneTimeSnackBar(errorMessage,
-    //     context: context, bgColor: Colors.redAccent);
+    // Fix: Ensure headers are passed correctly
+    if (headerType == "image") {
+      data["header[]"] = "image";
+    } else {
+      for (var i = 0; i < headers.length; i++) {
+        data["header[$i]"] = headers[i];
+      }
+    }
+
+    var response = await WhatsappService.sendTemplateMessage(data);
+    log("API Response: $response");
+
+    if (response != null && response["success"] == true) {
+      // AppUtils.oneTimeSnackBar("Messages sent successfully",
+      //     context: context, bgColor: Colors.green);
+    } else {
+      // String errorMessage = response?["message"] ?? "Failed to send messages";
+      // AppUtils.oneTimeSnackBar(errorMessage,
+      //     context: context, bgColor: Colors.redAccent);
+    }
   }
-}
 
   Future sendMultiMessages(List<int> leadIds, String templateName,
       String language, BuildContext context) async {
     Map<String, dynamic> data = {
-      "lead_ids": leadIds,
+      "lead_ids": List<int>.from(leadIds), // Ensure new list
       "template_name": templateName,
       "language": language,
     };
-
+    log("Sending data: $data");
     var response = await WhatsappService.multiSend(data);
 
     if (response != null && response["success"] == true) {
+      log("Sending response: $response");
+
       // AppUtils.oneTimeSnackBar("Messages sent successfully",
       //     context: context, bgColor: Colors.green);
     } else {
@@ -203,20 +252,33 @@ Future sendTemplateMessage(
   fetchWhatsappLeads(context) async {
     isWhatsappLeadsLoading = true;
     notifyListeners();
-    WhatsappService.fetchWhatsappLeads().then((value) {
-      if (value != null) {
-        whatsappToLeadListModel = WhatsappToLeadListModel.fromJson(value);
+    try {
+      final response = await WhatsappService.fetchWhatsappLeads();
+      if (response != null && response.isNotEmpty) {
+        whatsappToLeadList =
+            whatsappToLeadListModelFromJson(jsonEncode(response));
+
         isWhatsappLeadsLoading = false;
       } else {
-        AppUtils.oneTimeSnackBar("Unable to fetch Data",
+        AppUtils.oneTimeSnackBar("No data available",
             context: context, bgColor: ColorTheme.red);
       }
+    } catch (e) {
+      log('Error fetching WhatsApp leads: $e');
+      AppUtils.oneTimeSnackBar("Error fetching data",
+          context: context, bgColor: ColorTheme.red);
+    } finally {
       notifyListeners();
-    });
+    }
   }
 
   Future<void> addMessageToList(ChatModel message) async {
     chatList.add(message);
+    notifyListeners();
+  }
+
+  Future<void> addMessageToListt(ConversationModel message) async {
+    conversationModel.add(message);
     notifyListeners();
   }
 

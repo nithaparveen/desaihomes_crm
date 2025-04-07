@@ -1,3 +1,4 @@
+import 'package:desaihomes_crm_application/global_widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
@@ -13,6 +14,7 @@ class DetailCard extends StatelessWidget {
   final String? email;
   final String? phone;
   final String? age;
+  final String? assignTo;
   final int? leadId;
   final List<DetailText> detailTexts;
 
@@ -24,6 +26,7 @@ class DetailCard extends StatelessWidget {
     this.age,
     required this.detailTexts,
     this.leadId,
+    this.assignTo,
   });
 
   Future<void> makePhoneCall(String phoneNumber) async {
@@ -74,7 +77,7 @@ class DetailCard extends StatelessWidget {
                               child: Row(
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(12),
+                                    padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                         color: const Color(0xff93FAB4),
                                         borderRadius: BorderRadius.circular(4)),
@@ -121,19 +124,87 @@ class DetailCard extends StatelessWidget {
                             ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreenCopy(
-                                    contactedNumber: phone ?? "",
-                                    name: name ?? "",
-                                    leadId: leadId ?? 0,
+                              if (assignTo == null || assignTo!.isEmpty) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    surfaceTintColor: Colors.white,
+                                    backgroundColor: Colors.white,
+                                    title: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: (50 / ScreenUtil().screenWidth)
+                                              .sw,
+                                          height:
+                                              (50 / ScreenUtil().screenHeight)
+                                                  .sh,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xffFEE4E2),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                                width: 4.5,
+                                                color: const Color(0xffFEF3F2)),
+                                          ),
+                                          child: Center(
+                                              child: Icon(
+                                            Iconsax.warning_2,
+                                            color: const Color.fromARGB(
+                                                255, 224, 89, 84),
+                                            size: 20.sp,
+                                          )),
+                                        ),
+                                        SizedBox(height: 8.h),
+                                        Text(
+                                          'User Assignment Required',
+                                          style: GLTextStyles.manropeStyle(
+                                            color: ColorTheme.black,
+                                            size: 16.sp,
+                                            weight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    content: Text(
+                                      'The lead needs to be assigned before you can chat.',
+                                      style: GLTextStyles.manropeStyle(
+                                        color: ColorTheme.blue,
+                                        size: 14.sp,
+                                        weight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      CustomButton(
+                                        borderColor: const Color(0xffFEE4E2),
+                                        backgroundColor: Colors.transparent,
+                                        text: "OK",
+                                        textColor: ColorTheme.logoutRed,
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        width:
+                                            (110 / ScreenUtil().screenWidth).sw,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              );
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreenCopy(
+                                      contactedNumber: phone ?? "",
+                                      name: name ?? "",
+                                      leadId: leadId ?? 0,
+                                    ),
+                                  ),
+                                );
+                              }
                             },
                             child: Container(
-                              padding: EdgeInsets.all(1),
+                              padding: const EdgeInsets.all(1),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF25d366),
                                 borderRadius:
@@ -169,7 +240,7 @@ class DetailCard extends StatelessWidget {
                                 makePhoneCall(phone!);
                               },
                               child: Container(
-                                padding: EdgeInsets.all(1),
+                                padding: const EdgeInsets.all(1),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius:
@@ -232,7 +303,7 @@ class DetailCard extends StatelessWidget {
                                 makeEmail(email!);
                               },
                               child: Container(
-                                padding: EdgeInsets.all(1),
+                                padding: const EdgeInsets.all(1),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius:

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import '../../../../core/utils/app_utils.dart';
 import '../../../helper/api_helper.dart';
@@ -114,6 +113,18 @@ class WhatsappService {
       log("$e");
     }
   }
+  static Future<dynamic> onConvert(Map<String, dynamic> data) async {
+    try {
+      var decodedData = await ApiHelper.postDataWObaseUrl(
+          endPoint:
+              "https://console.omnisellcrm.com/api/whatsapp/beta/lead-list/update",
+          header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
+          body: data);
+      return decodedData;
+    } catch (e) {
+      log("$e");
+    }
+  }
 
   static Future<dynamic> sendMedias(Map<String, dynamic> data) async {
     try {
@@ -156,7 +167,7 @@ class WhatsappService {
   static Future<dynamic> fetchWhatsAppTemplates() async {
     try {
       var decodedData = await ApiHelper.getDataWObaseUrl(
-        endPoint: "https://www.desaihomes.com/api/whatsapp-meta-templates/list",
+        endPoint: "https://www.desaihomes.com/api/whatsapp-meta-templates/list?approved=true",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

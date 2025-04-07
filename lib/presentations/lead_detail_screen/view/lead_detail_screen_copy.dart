@@ -205,6 +205,7 @@ class LeadDetailScreenCopyState extends State<LeadDetailScreenCopy>
                                       age: controller
                                           .leadDetailModel.lead?.ageRange,
                                           leadId: controller.leadDetailModel.lead?.id,
+                                          assignTo: controller.leadDetailModel.lead?.assignedTo,
                                       detailTexts: [
                                         DetailText(
                                           text: 'Project',

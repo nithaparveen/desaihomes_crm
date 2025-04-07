@@ -15,6 +15,8 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 
+import '../../../repository/api/login_screen/pusher_service.dart';
+
 class LeadScreenCopy extends StatefulWidget {
   const LeadScreenCopy({super.key});
 
@@ -31,6 +33,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   bool _isFilterApplied = false;
   Timer? _debounceTimer;
   late final LeadController _leadController;
+  final PusherService _pusherService = PusherService();
+
 
   @override
   void didChangeDependencies() {
@@ -46,6 +50,7 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
         LoginController().checkForAppUpdates(context);
       }
       fetchData();
+      _pusherService.initializePusher();
       scrollController.addListener(_debouncedScrollListener);
     });
   }
@@ -110,8 +115,8 @@ class _LeadScreenCopyState extends State<LeadScreenCopy> {
   void dispose() {
     _debounceTimer?.cancel();
     scrollController.dispose();
-    _searchFocusNode.dispose();
-    _leadController.searchController.dispose();
+    // _searchFocusNode.dispose();
+    // _leadController.searchController.dispose();
     super.dispose();
   }
 

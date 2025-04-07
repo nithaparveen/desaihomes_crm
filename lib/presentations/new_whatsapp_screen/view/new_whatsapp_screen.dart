@@ -1,10 +1,12 @@
+import 'dart:developer';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/repository/api/login_screen/pusher_service.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
+import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/whatsapp_lead_list_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/colors.dart';
 import '../../../global_widgets/custom_button.dart';
@@ -26,11 +28,16 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
   bool showIcon = true;
   bool isSelectionMode = false;
   Set<int> selectedIndices = {};
+  Set<int> newMessageLeadIds = {};
   List<int> selectedLeadIds = [];
+  final PusherService _pusherService = PusherService();
 
   TextEditingController searchController = TextEditingController();
   String searchQuery = '';
   FocusNode searchFocusNode = FocusNode();
+
+  // To track the currently active lead ID for Pusher
+  String? currentActiveLeadId;
 
   @override
   void initState() {
@@ -40,6 +47,10 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
         searchQuery = searchController.text.toLowerCase();
       });
     });
+
+    // Initialize Pusher without subscribing to a specific lead yet
+    _pusherService.initializePusher();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchData();
     });
@@ -48,6 +59,77 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
   fetchData() async {
     await Provider.of<WhatsappControllerCopy>(context, listen: false)
         .fetchConversations(context);
+    await Provider.of<WhatsappControllerCopy>(context, listen: false)
+        .fetchWhatsappLeads(context);
+
+    // Subscribe to the general channel to listen for any new messages
+    _subscribeToGeneralPusherChannel();
+  }
+
+  void _subscribeToGeneralPusherChannel() {
+    _pusherService.subscribeToChannelWithId(
+        // Pass an empty string or "all" to listen for all messages
+        "all",
+        _handleNewMessage,
+        context);
+  }
+
+  void _handleNewMessage(dynamic data) {
+    try {
+      final Map<String, dynamic> messageData = data;
+
+      final leadId = messageData['lead_id']?.toString();
+      if (leadId == null) {
+        log("Received message without lead_id");
+        return;
+      }
+
+      final parsedLeadId = int.tryParse(leadId);
+      if (parsedLeadId == null) return;
+
+      final newMessage = ConversationModel(
+        message: messageData['message'] ?? '',
+        createdAt: DateTime.tryParse(messageData['created_at'] ?? '') ??
+            DateTime.now(),
+        msgType: messageData['msg_type'] ?? 'Text',
+        leadId: parsedLeadId,
+      );
+
+      final whatsappController =
+          Provider.of<WhatsappControllerCopy>(context, listen: false);
+
+      whatsappController.addMessageToListt(newMessage);
+
+      setState(() {
+        newMessageLeadIds.add(parsedLeadId);
+      });
+
+      // // Remove the green dot after 3 seconds
+      // Future.delayed(const Duration(seconds: 8), () {
+      //   if (mounted) {
+      //     setState(() {
+      //       newMessageLeadIds.remove(parsedLeadId);
+      //     });
+      //   }
+      // });
+
+      whatsappController.fetchConversations(context);
+
+      if (currentActiveLeadId == leadId) {
+        whatsappController.fetchChats(leadId, context);
+      }
+    } catch (e) {
+      log("Error handling new message: $e");
+    }
+  }
+
+  // Method to call when a lead/conversation is selected
+  void onLeadSelected(String leadId) {
+    currentActiveLeadId = leadId;
+
+    // Fetch the chats for this specific lead
+    Provider.of<WhatsappControllerCopy>(context, listen: false)
+        .fetchChats(leadId, context);
   }
 
   @override
@@ -97,6 +179,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
         selectedLeadIds = messages
             .where((msg) => msg.leadId != null)
             .map((msg) => msg.leadId!)
+            .toSet()
             .toList();
         isSelectionMode = true;
       }
@@ -118,13 +201,32 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
         floatingActionButton: FloatingActionButton(
           shape: const CircleBorder(),
           onPressed: () {
+            final whatsappController =
+                Provider.of<WhatsappControllerCopy>(context, listen: false);
+
+            final List<WhatsappToLeadListModel> modelList =
+                whatsappController.whatsappToLeadList;
+
+            final List<String> leadsList = modelList
+                .where((lead) => lead.name != null)
+                .map((lead) => lead.name!)
+                .toList();
+            final List<int> leadsListId = modelList
+                .where((lead) => lead.id != null)
+                .map((lead) => lead.id!)
+                .toList();
+
+            print('Final leadsList: $leadsList');
+
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return WhatsappLeadConvertor(
-                  leads: ['Anand', 'Steffy', 'John'],
+                  leadIds: leadsListId,
+                  leads: leadsList,
                   onConvert: (selectedLeads) {
-                    // Handle conversion logic here
+                    Provider.of<WhatsappControllerCopy>(context, listen: false)
+                        .onConvert(selectedLeads, context);
                     print('Converting leads: $selectedLeads');
                   },
                 );
@@ -141,17 +243,17 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
           onRefresh: () => fetchData(),
           child: Consumer<WhatsappControllerCopy>(
               builder: (context, controller, _) {
-            if (controller.isLoading) {
-              return Padding(
-                padding: EdgeInsets.only(right: 16.w),
-                child: Center(
-                  child: LoadingAnimationWidget.fourRotatingDots(
-                    color: const Color(0xffF0F6FF),
-                    size: 32,
-                  ),
-                ),
-              );
-            }
+            // if (controller.isLoading) {
+            //   return Padding(
+            //     padding: EdgeInsets.only(right: 16.w),
+            //     child: Center(
+            //       child: LoadingAnimationWidget.fourRotatingDots(
+            //         color: const Color(0xffF0F6FF),
+            //         size: 32,
+            //       ),
+            //     ),
+            //   );
+            // }
             final List<ConversationModel> messages =
                 controller.conversationModel;
 
@@ -239,11 +341,13 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                         width: (110 / ScreenUtil().screenWidth).sw,
                         onPressed: () async {
                           Navigator.of(context).pop();
+                            List<int> tempLeadIds = List.from(selectedLeadIds); // Save before clearing
+
                           clearSelection();
                           Provider.of<WhatsappControllerCopy>(context,
                                   listen: false)
                               .sendMultiMessages(
-                                  leadIds, templateName, "en_US", context);
+                                  tempLeadIds, templateName, "en_US", context);
                         },
                       ),
                     ],
@@ -321,12 +425,23 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                       Future.delayed(
                                           const Duration(milliseconds: 300),
                                           () {
-                                        showConfirmation(
-                                          parentContext,
-                                          template.name ?? "",
-                                          templateContent,
-                                          selectedLeadIds,
-                                        );
+                                        log(
+                                            "Selected Lead IDs: $selectedLeadIds");
+                                        if (selectedLeadIds.isNotEmpty) {
+                                          showConfirmation(
+                                            parentContext,
+                                            template.name ?? "",
+                                            templateContent,
+                                            selectedLeadIds,
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content:
+                                                    Text("No leads selected")),
+                                          );
+                                        }
                                       });
                                     },
                                   ),
@@ -432,52 +547,27 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                       CircleAvatar(
                                           backgroundColor: Colors.grey[200],
                                           radius: 22.r,
-                                          child:
-                                              // message.profilePicture == null ?
-                                              Text(
+                                          child: Text(
                                             message.leadName?[0] ?? "",
                                             style: GLTextStyles.manropeStyle(
                                               color: Colors.black,
                                               size: 16.sp,
                                             ),
-                                          )
-                                          // : ClipOval(
-                                          //     child: Image.network(
-                                          //       message.profilePicture!,
-                                          //       width: 44.r,
-                                          //       height: 44.r,
-                                          //       fit: BoxFit.cover,
-                                          //       errorBuilder: (context, error, stackTrace) => Text(
-                                          //         message.contactUser?.name?[0] ?? "",
-                                          //         style: GLTextStyles.manropeStyle(
-                                          //           color: Colors.black,
-                                          //           size: 16.sp,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          ),
-                                      // if (message.lastMessage?.isRead == false)
+                                          )),
                                       Positioned(
                                         right: 0,
                                         top: 0,
-                                        child: Container(
-                                          width: 17.r,
-                                          height: 17.r,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF3E9E7C),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            "",
-                                            style: GLTextStyles.manropeStyle(
-                                              size: 10.sp,
-                                              color: Colors.white,
-                                              weight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
+                                        child: newMessageLeadIds
+                                                .contains(message.leadId)
+                                            ? Container(
+                                                width: 17.r,
+                                                height: 17.r,
+                                                decoration: const BoxDecoration(
+                                                  color: Color(0xFF3E9E7C),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              )
+                                            : const SizedBox.shrink(),
                                       ),
                                     ],
                                   ),
@@ -536,30 +626,6 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                           weight: FontWeight.w400,
                                         ),
                                       ),
-                                      // if (message.lastMessage?.isRead == true ||
-                                      //     message.lastMessage?.isRead == false ||
-                                      //     message.lastMessage?.status == "sent")
-                                      //   SizedBox(height: 8.h),
-                                      // if (message.lastMessage?.isRead == true)
-                                      //   Icon(
-                                      //     Icons.done_all,
-                                      //     size: 16.sp,
-                                      //     color: Color(0xFF30C0E0),
-                                      //   )
-                                      // else if (message.lastMessage?.isRead ==
-                                      //     false)
-                                      //   Icon(
-                                      //     Icons.done_all,
-                                      //     size: 16.sp,
-                                      //     color: Color(0xffA4A4A4),
-                                      //   )
-                                      // else if (message.lastMessage?.status ==
-                                      //     "sent")
-                                      //   Icon(
-                                      //     Icons.done,
-                                      //     size: 16.sp,
-                                      //     color: Color(0xffA4A4A4),
-                                      //   ),
                                       if (isSelectionMode)
                                         SizedBox(height: 10.w),
                                       if (isSelectionMode)
@@ -592,6 +658,10 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                     if (isSelectionMode) {
                                       toggleSelection(index, message);
                                     } else {
+                                      setState(() {
+                                        newMessageLeadIds
+                                            .remove(message.leadId);
+                                      });
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -626,44 +696,6 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
               ],
             );
           }),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToggleButton({
-    required String text,
-    required bool isSelected,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF5F7FA) : Colors.transparent,
-          borderRadius: BorderRadius.circular(4.8.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16.sp,
-              color: const Color(0xffA4A4A4), // Icon always visible
-            ),
-            SizedBox(width: 6.w), // Spacing between icon and text
-            Text(
-              text,
-              style: GLTextStyles.manropeStyle(
-                size: 12.sp,
-                color: Colors.black,
-                weight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(width: 6.w),
-          ],
         ),
       ),
     );
