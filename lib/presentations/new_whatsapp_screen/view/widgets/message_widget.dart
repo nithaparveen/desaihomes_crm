@@ -440,7 +440,8 @@ class TextMessageWidget extends StatelessWidget {
     required this.message,
     required this.isMe,
     required this.timestamp,
-    required this.senderName, required this.mediaUrl,
+    required this.senderName, 
+    required this.mediaUrl,
   });
 
   @override
@@ -450,38 +451,96 @@ class TextMessageWidget extends StatelessWidget {
       timestamp: timestamp,
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       senderName: senderName,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Flexible(
-            child: Text(
-              message,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final textPainter = TextPainter(
+            text: TextSpan(
+              text: message,
               style: GLTextStyles.manropeStyle(
                 color: const Color(0xFF170E2B),
                 size: 14.sp,
                 weight: FontWeight.w400,
               ),
             ),
-          ),
-          SizedBox(width: 6.w),
-          Text(
-            timestamp,
-            style: GLTextStyles.manropeStyle(
-              color: const Color(0xFFA4A4A4),
-              size: 10.sp,
-              weight: FontWeight.w400,
-            ),
-          ),
-          if (!isMe) ...[
-            SizedBox(width: 4.w),
-            Icon(
-              Icons.done_all,
-              size: 16.sp,
-              color: const Color(0xFF30C0E0),
-            ),
-          ],
-        ],
+            maxLines: 2,
+            textDirection: TextDirection.ltr,
+          )..layout(maxWidth: constraints.maxWidth);
+
+          final isMultiLine = textPainter.didExceedMaxLines;
+
+          if (isMultiLine) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  message,
+                  style: GLTextStyles.manropeStyle(
+                    color: const Color(0xFF170E2B),
+                    size: 14.sp,
+                    weight: FontWeight.w400,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      timestamp,
+                      style: GLTextStyles.manropeStyle(
+                        color: const Color(0xFFA4A4A4),
+                        size: 10.sp,
+                        weight: FontWeight.w400,
+                      ),
+                    ),
+                    if (!isMe) ...[
+                      SizedBox(width: 4.w),
+                      Icon(
+                        Icons.done_all,
+                        size: 16.sp,
+                        color: const Color(0xFF30C0E0),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            );
+          } else {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(
+                    message,
+                    style: GLTextStyles.manropeStyle(
+                      color: const Color(0xFF170E2B),
+                      size: 14.sp,
+                      weight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  timestamp,
+                  style: GLTextStyles.manropeStyle(
+                    color: const Color(0xFFA4A4A4),
+                    size: 10.sp,
+                    weight: FontWeight.w400,
+                  ),
+                ),
+                if (!isMe) ...[
+                  SizedBox(width: 4.w),
+                  Icon(
+                    Icons.done_all,
+                    size: 16.sp,
+                    color: const Color(0xFF30C0E0),
+                  ),
+                ],
+              ],
+            );
+          }
+        },
       ),
     );
   }

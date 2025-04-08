@@ -180,7 +180,7 @@ class WhatsappControllerCopy extends ChangeNotifier {
       data["header[]"] = "image";
     } else {
       for (var i = 0; i < headers.length; i++) {
-        data["header[$i]"] = headers[i];
+        data["header"] = headers;
       }
     }
 
@@ -197,19 +197,30 @@ class WhatsappControllerCopy extends ChangeNotifier {
     }
   }
 
-  Future sendMultiMessages(List<int> leadIds, String templateName,
-      String language, BuildContext context) async {
+  Future sendMultiMessages(
+      List<int> leadIds,
+      String templateName,
+      String language,
+      String message,
+      String parameterFormat,
+      List<String> headers,
+      String headerType,
+      BuildContext context) async {
     Map<String, dynamic> data = {
-      "lead_ids": List<int>.from(leadIds), // Ensure new list
+      "lead_ids": List<int>.from(leadIds),
       "template_name": templateName,
       "language": language,
+      "message": message,
+      "parameter_format": parameterFormat,
+      "header_type": headerType,
     };
-    log("Sending data: $data");
+
+    for (var i = 0; i < headers.length; i++) {
+      data["header"] = headers;
+    }
     var response = await WhatsappService.multiSend(data);
 
     if (response != null && response["success"] == true) {
-      log("Sending response: $response");
-
       // AppUtils.oneTimeSnackBar("Messages sent successfully",
       //     context: context, bgColor: Colors.green);
     } else {

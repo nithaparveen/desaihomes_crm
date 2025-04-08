@@ -163,15 +163,23 @@ void _convertLeads() {
 
   for (var leadName in selectedLeads) {
     final leadId = nameToIdMap[leadName];
-    if (leadId != null) {
+    if (leadId != null && 
+        assignedUsers[leadName] != null && 
+        selectedProjects[leadName] != null) {
       leadsToConvert.add({
-        'id': leadId,  // Use the actual ID here
-        'project_id': selectedProjects[leadName],
-        'assigned_to': assignedUsers[leadName],
+        'id': leadId,
+        'project_id': int.tryParse(selectedProjects[leadName]!) ?? 0,
+        'assigned_to': int.tryParse(assignedUsers[leadName]!) ?? 0,
       });
     }
   }
 
+  if (leadsToConvert.isEmpty) {
+    _showErrorMessage('No valid leads to convert');
+    return;
+  }
+
+  // Call the callback with the converted data
   widget.onConvert(leadsToConvert);
   Navigator.of(context).pop();
 }

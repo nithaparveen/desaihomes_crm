@@ -1,12 +1,16 @@
 import 'dart:developer';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
+import 'package:desaihomes_crm_application/presentations/new_whatsapp_screen/view/widgets/whatsapp_lead_convertor.dart';
 import 'package:desaihomes_crm_application/repository/api/login_screen/pusher_service.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/whatsapp_lead_list_model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/colors.dart';
 import '../../../global_widgets/custom_button.dart';
@@ -14,7 +18,6 @@ import '../../../repository/api/whatsapp_screen/model/conversation_model.dart';
 import '../controller/new_whatsapp_controller.dart';
 import 'widgets/new_chat_screen.dart';
 import 'widgets/template_widget.dart';
-import 'widgets/whatsapp_lead_convertor.dart';
 
 class WhatsappScreenCopy extends StatefulWidget {
   const WhatsappScreenCopy({super.key});
@@ -198,44 +201,45 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
           forceMaterialTransparency: true,
           toolbarHeight: 20.0,
         ),
-        floatingActionButton: FloatingActionButton(
-          shape: const CircleBorder(),
-          onPressed: () {
-            final whatsappController =
-                Provider.of<WhatsappControllerCopy>(context, listen: false);
+        // WHATSAPP TO LEAD CONVERTION - Ui completed, conversion is pending
+        // floatingActionButton: FloatingActionButton(
+        //   shape: const CircleBorder(),
+        //   onPressed: () {
+        //     final whatsappController =
+        //         Provider.of<WhatsappControllerCopy>(context, listen: false);
 
-            final List<WhatsappToLeadListModel> modelList =
-                whatsappController.whatsappToLeadList;
+        //     final List<WhatsappToLeadListModel> modelList =
+        //         whatsappController.whatsappToLeadList;
 
-            final List<String> leadsList = modelList
-                .where((lead) => lead.name != null)
-                .map((lead) => lead.name!)
-                .toList();
-            final List<int> leadsListId = modelList
-                .where((lead) => lead.id != null)
-                .map((lead) => lead.id!)
-                .toList();
+        //     final List<String> leadsList = modelList
+        //         .where((lead) => lead.name != null)
+        //         .map((lead) => lead.name!)
+        //         .toList();
+        //     final List<int> leadsListId = modelList
+        //         .where((lead) => lead.id != null)
+        //         .map((lead) => lead.id!)
+        //         .toList();
 
-            print('Final leadsList: $leadsList');
+        //     print('Final leadsList: $leadsList');
 
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return WhatsappLeadConvertor(
-                  leadIds: leadsListId,
-                  leads: leadsList,
-                  onConvert: (selectedLeads) {
-                    Provider.of<WhatsappControllerCopy>(context, listen: false)
-                        .onConvert(selectedLeads, context);
-                    print('Converting leads: $selectedLeads');
-                  },
-                );
-              },
-            );
-          },
-          backgroundColor: const Color(0xff170E2B),
-          child: Icon(Icons.arrow_outward, color: Colors.white, size: 26.sp),
-        ),
+        //     showDialog(
+        //       context: context,
+        //       builder: (BuildContext context) {
+        //         return WhatsappLeadConvertor(
+        //           leadIds: leadsListId,
+        //           leads: leadsList,
+        //           onConvert: (selectedLeads) {
+        //             Provider.of<WhatsappControllerCopy>(context, listen: false)
+        //                 .onConvert(selectedLeads, context);
+        //             print('Converting leads: $selectedLeads');
+        //           },
+        //         );
+        //       },
+        //     );
+        //   },
+        //   backgroundColor: const Color(0xff170E2B),
+        //   child: Icon(Icons.arrow_outward, color: Colors.white, size: 26.sp),
+        // ),
         body: RefreshIndicator(
           backgroundColor: Colors.white,
           color: ColorTheme.desaiGreen,
@@ -270,7 +274,40 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
             }).toList();
 
             void showConfirmation(BuildContext context, String templateName,
-                String templateContent, List<int> leadIds) {
+                String templateContent, List<int> leadIds, Datum templateData) {
+              String headerType = "";
+              List<String> headers = [];
+              List<String> filePaths = [];
+
+              /// Extract Header Type & Headers from Template Components
+              for (var component in templateData.components ?? []) {
+                if (component.type == "HEADER") {
+                  headerType = component.format.toLowerCase();
+
+                  if (headerType == "text") {
+                    headers = [component.text ?? ""];
+                  } else {
+                    final example = component.example?.toJson();
+                    headers =
+                        List<String>.from(example?["header_handle"] ?? []);
+
+                    // Get file_path if available
+                    if (example?["file_path"] != null) {
+                      if (example["file_path"] is String) {
+                        filePaths = [example["file_path"]];
+                      } else if (example["file_path"] is List) {
+                        filePaths = List<String>.from(example["file_path"]);
+                      }
+                    }
+                  }
+                  break;
+                }
+              }
+
+              // Use file_path if available, otherwise fall back to header_handle
+              final mediaUrls = filePaths.isNotEmpty ? filePaths : headers;
+              final mediaUrl = mediaUrls.isNotEmpty ? mediaUrls.first : null;
+
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -278,50 +315,53 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                   return AlertDialog(
                     surfaceTintColor: Colors.white,
                     backgroundColor: Colors.white,
-                    title: const Column(
-                      children: [
-                        Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))
-                      ],
+                    insetPadding:
+                        EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+                    title: const SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          Icon(Iconsax.warning_2, color: Color(0xffFF9C8E))
+                        ],
+                      ),
                     ),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Are you sure you want to send this template?',
-                          style: GLTextStyles.manropeStyle(
-                            color: ColorTheme.blue,
-                            size: 15.sp,
-                            weight: FontWeight.w400,
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          'Template Preview:',
-                          style: GLTextStyles.manropeStyle(
-                            color: ColorTheme.blue,
-                            size: 14.sp,
-                            weight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            templateContent,
-                            style: GLTextStyles.manropeStyle(
-                              color: Colors.black87,
-                              size: 13.sp,
-                              weight: FontWeight.w400,
+                    contentPadding: const EdgeInsets.all(16),
+                    content: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.9,
+                        maxHeight: MediaQuery.of(context).size.height * 0.7,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Are you sure you want to send this template?',
+                              style: GLTextStyles.manropeStyle(
+                                color: ColorTheme.blue,
+                                size: 15.sp,
+                                weight: FontWeight.w400,
+                              ),
                             ),
-                          ),
+                            SizedBox(height: 16.h),
+
+                            /// Header Preview Section
+                            if (headerType == "image" && mediaUrl != null)
+                              _buildImagePreview(context, mediaUrl),
+                            if (headerType == "document" && mediaUrl != null)
+                              _buildDocumentPreview(context, mediaUrl),
+                            if (headerType == "text" && headers.isNotEmpty)
+                              _buildTextPreview(headers.first),
+
+                            /// Template Text Preview
+                            _buildTemplatePreview(templateContent),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
+                    actionsPadding:
+                        const EdgeInsets.only(right: 16, bottom: 16, left: 16),
                     actions: <Widget>[
                       CustomButton(
                         borderColor: Colors.transparent,
@@ -340,14 +380,43 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                         textColor: const Color(0xff3893FF),
                         width: (110 / ScreenUtil().screenWidth).sw,
                         onPressed: () async {
-                          Navigator.of(context).pop();
-                            List<int> tempLeadIds = List.from(selectedLeadIds); // Save before clearing
+                          String parameterFormat =
+                              templateData.parameterFormat ?? "POSITIONAL";
 
+                          List<String> headers = [];
+                          String headerType = "";
+
+                          for (var component in templateData.components ?? []) {
+                            if (component.type == "HEADER") {
+                              headerType = component.format.toLowerCase();
+
+                              log("Example Object: ${component.example?.toJson()}");
+
+                              if (component.example != null) {
+                                var exampleJson = component.example!.toJson();
+                                if (exampleJson.containsKey("header_handle")) {
+                                  headers = List<String>.from(
+                                      exampleJson["header_handle"] ?? []);
+                                }
+                              }
+                              break;
+                            }
+                          }
+                          Navigator.of(context).pop();
+                          List<int> tempLeadIds = List.from(selectedLeadIds);
                           clearSelection();
                           Provider.of<WhatsappControllerCopy>(context,
                                   listen: false)
                               .sendMultiMessages(
-                                  tempLeadIds, templateName, "en_US", context);
+                                  tempLeadIds,
+                                  templateName,
+                                  "en_US",
+                                  templateContent,
+                                  parameterFormat,
+                                  headers,
+                                  headerType,
+                                  context);
+                          fetchData();
                         },
                       ),
                     ],
@@ -425,15 +494,14 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                       Future.delayed(
                                           const Duration(milliseconds: 300),
                                           () {
-                                        log(
-                                            "Selected Lead IDs: $selectedLeadIds");
+                                        log("Selected Lead IDs: $selectedLeadIds");
                                         if (selectedLeadIds.isNotEmpty) {
                                           showConfirmation(
-                                            parentContext,
-                                            template.name ?? "",
-                                            templateContent,
-                                            selectedLeadIds,
-                                          );
+                                              parentContext,
+                                              template.name ?? "",
+                                              templateContent,
+                                              selectedLeadIds,
+                                              template);
                                         } else {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
@@ -515,7 +583,7 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                               ),
                             ),
                           ),
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -560,8 +628,8 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
                                         child: newMessageLeadIds
                                                 .contains(message.leadId)
                                             ? Container(
-                                                width: 17.r,
-                                                height: 17.r,
+                                                width: 15.r,
+                                                height: 15.r,
                                                 decoration: const BoxDecoration(
                                                   color: Color(0xFF3E9E7C),
                                                   shape: BoxShape.circle,
@@ -696,6 +764,255 @@ class _WhatsappScreenCopyState extends State<WhatsappScreenCopy> {
               ],
             );
           }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePreview(BuildContext context, String imageUrl) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Image:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            width: double.infinity,
+            height: 200.h,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: GestureDetector(
+                onTap: () => _showFullScreenImage(context, imageUrl),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image,
+                                size: 40, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text('Failed to load image'),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentPreview(BuildContext context, String documentUrl) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Document:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Container(
+            height: 200.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: FutureBuilder<String>(
+              future: _downloadPdf(documentUrl),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red),
+                        SizedBox(height: 8),
+                        Text('Failed to load document'),
+                      ],
+                    ),
+                  );
+                } else if (snapshot.hasData) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: PDFView(
+                      filePath: snapshot.data!,
+                      enableSwipe: true,
+                      swipeHorizontal: false,
+                      autoSpacing: true,
+                      pageFling: true,
+                      onError: (error) {
+                        print('PDF Error: $error');
+                      },
+                    ),
+                  );
+                }
+                return Container();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextPreview(String text) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Header Text:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            text,
+            style: GLTextStyles.manropeStyle(
+              color: Colors.black87,
+              size: 13.sp,
+              weight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTemplatePreview(String templateContent) {
+    return Container(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Template Preview:',
+            style: GLTextStyles.manropeStyle(
+              color: ColorTheme.blue,
+              size: 14.sp,
+              weight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              templateContent,
+              style: GLTextStyles.manropeStyle(
+                color: Colors.black87,
+                size: 13.sp,
+                weight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String> _downloadPdf(String url) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final filePath =
+          '${tempDir.path}/temp_preview_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      await Dio().download(url, filePath);
+      return filePath;
+    } catch (e) {
+      print('Error downloading PDF: $e');
+      throw e;
+    }
+  }
+
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: InteractiveViewer(
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text('Failed to load image'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
