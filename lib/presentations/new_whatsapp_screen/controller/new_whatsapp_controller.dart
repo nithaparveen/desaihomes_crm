@@ -1,14 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/whatsapp_lead_list_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app_config/app_config.dart';
@@ -281,6 +278,10 @@ class WhatsappControllerCopy extends ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  Future<void> checkPhoneNumber(phone, BuildContext context) async {
+    var phoneData = await WhatsappService.checkPhoneNumber(phone);
   }
 
   Future<void> addMessageToList(ChatModel message) async {

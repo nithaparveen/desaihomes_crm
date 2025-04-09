@@ -278,7 +278,7 @@ class TemplateMessageWidget extends StatelessWidget {
                   child: Container(
                     width: 50.w,
                     height: 50.h,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.black54,
                       shape: BoxShape.circle,
                     ),
@@ -396,7 +396,7 @@ class MessageBubble extends StatelessWidget {
             child: Text(
               senderName,
               style: GLTextStyles.interStyle(
-                color: Color(0xff000000),
+                color: const Color(0xff000000),
                 size: 12.sp,
                 weight: FontWeight.w500,
               ),
@@ -1132,7 +1132,7 @@ class _VideoMessageWidgetState extends State<VideoMessageWidget> {
                 child: Container(
                   width: 50.w,
                   height: 50.h,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.black54,
                     shape: BoxShape.circle,
                   ),

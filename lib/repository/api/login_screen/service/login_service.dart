@@ -20,7 +20,7 @@ class LoginService {
   }
     static Future<dynamic> checkAppVersion() async {
     try {
-      var response = await http.get(
+      var response = await http.get(  
         Uri.parse("https://www.desaihomes.com/api/app/version/check"),
       );
       if (response.statusCode == 200) {

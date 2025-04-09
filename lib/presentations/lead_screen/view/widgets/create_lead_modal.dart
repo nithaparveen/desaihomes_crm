@@ -18,6 +18,8 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_io/io.dart';
 
+import '../../../../repository/api/whatsapp_screen/service/whatsapp_service.dart';
+
 class CreateLeadModal extends StatefulWidget {
   const CreateLeadModal({
     super.key,
@@ -86,6 +88,35 @@ class _CreateLeadModalState extends State<CreateLeadModal>
     final leadController = Provider.of<LeadController>(context, listen: false);
     final statusController =
         Provider.of<LeadDetailController>(context, listen: false);
+    bool _phoneExists = false;
+
+    Future<void> validatePhoneNumber(
+        String phone, BuildContext context) async {
+      if (phone.isEmpty) {
+        setState(() => _phoneExists = false);
+        return;
+      }
+
+      final phoneData = await WhatsappService.checkPhoneNumber(phone);
+      if (phoneData != null && phoneData['valid'] == false) {
+        setState(() => _phoneExists = true);
+      } else {
+        setState(() => _phoneExists = false);
+      }
+    }
+
+    Widget buildPhoneErrorText() {
+      return _phoneExists
+          ? Text(
+              'This phone number already exists',
+              style: GLTextStyles.manropeStyle(
+                color: Colors.red,
+                size: 12.sp,
+                weight: FontWeight.w400,
+              ),
+            )
+          : SizedBox.shrink();
+    }
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -389,7 +420,12 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                           SizedBox(height: 6.h),
                                           FormTextField(
                                             controller: phoneController,
+                                            onChanged: (value) =>
+                                                validatePhoneNumber(
+                                                    value, context),
                                           ),
+                                          SizedBox(height: 4.h),
+                                          buildPhoneErrorText(),
                                         ],
                                       ),
                                     ),

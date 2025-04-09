@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 import '../../../../core/utils/app_utils.dart';
 import '../../../helper/api_helper.dart';
+import 'package:http/http.dart' as http;
 
 class WhatsappService {
   static Future<dynamic> fetchConversations() async {
@@ -101,6 +103,23 @@ class WhatsappService {
     }
   }
 
+    static Future<dynamic> checkPhoneNumber(String phone) async {
+    try {
+      var response = await http.get(  
+        Uri.parse("https://www.desaihomes.com/api/phonenumber-check?phone_number=$phone"),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        log("Failed. Status code: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      log("Error: $e");
+      return null;
+    }
+  }
+
   static Future<dynamic> sendLocation(Map<String, dynamic> data) async {
     try {
       var decodedData = await ApiHelper.postDataWObaseUrl(
@@ -113,6 +132,7 @@ class WhatsappService {
       log("$e");
     }
   }
+
   static Future<dynamic> onConvert(Map<String, dynamic> data) async {
     try {
       var decodedData = await ApiHelper.postDataWObaseUrl(
@@ -167,7 +187,8 @@ class WhatsappService {
   static Future<dynamic> fetchWhatsAppTemplates() async {
     try {
       var decodedData = await ApiHelper.getDataWObaseUrl(
-        endPoint: "https://www.desaihomes.com/api/whatsapp-meta-templates/list?approved=true",
+        endPoint:
+            "https://www.desaihomes.com/api/whatsapp-meta-templates/list?approved=true",
         header: ApiHelper.getApiHeader(access: await AppUtils.getToken()),
       );
       return decodedData;

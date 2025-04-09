@@ -13,6 +13,8 @@ class FormTextField extends StatelessWidget {
   final double? width;
   final bool readOnly;
   final int? maxLines;
+  final String? errorText; 
+  final Function(String)? onChanged;
 
   const FormTextField({
     super.key,
@@ -25,6 +27,8 @@ class FormTextField extends StatelessWidget {
     this.width = double.infinity,
     this.readOnly = false,
     this.maxLines,
+    this.errorText, // Initialize errorText
+    this.onChanged, // Initialize onChanged
   });
 
   @override
@@ -34,7 +38,7 @@ class FormTextField extends StatelessWidget {
       width: width,
       child: GestureDetector(
         onTap: onTap,
-        child: TextField( 
+        child: TextField(
           controller: controller,
           readOnly: readOnly,
           style: textStyle ??
@@ -45,6 +49,7 @@ class FormTextField extends StatelessWidget {
               ),
           cursorColor: ColorTheme.desaiGreen,
           maxLines: maxLines,
+          onChanged: onChanged, // Pass onChanged callback
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
@@ -56,7 +61,7 @@ class FormTextField extends StatelessWidget {
                   )
                 : null,
             contentPadding:
-                 EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: Color(0xffD5D7DA)),
@@ -67,8 +72,9 @@ class FormTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide:  BorderSide(color: ColorTheme.desaiGreen),
+              borderSide: BorderSide(color: ColorTheme.desaiGreen),
             ),
+            errorText: errorText, // Show error message if exists
           ),
         ),
       ),

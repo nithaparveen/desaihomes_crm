@@ -253,8 +253,8 @@ Future<void> _tryInitializeVideo() async {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 48, color: Colors.red),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          const SizedBox(height: 16),
           Text(
             "Media preview unavailable",
             style: TextStyle(
@@ -262,16 +262,16 @@ Future<void> _tryInitializeVideo() async {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               message,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             "You can still send this media",
             style: TextStyle(
@@ -289,12 +289,12 @@ Future<void> _tryInitializeVideo() async {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.video_file_outlined,
             size: 80,
             color: Color(0xff3874F6),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             "Video Selected",
             style: TextStyle(
@@ -302,7 +302,7 @@ Future<void> _tryInitializeVideo() async {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             "Preview not available",
             style: TextStyle(
@@ -310,7 +310,7 @@ Future<void> _tryInitializeVideo() async {
               color: Colors.grey[600],
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             widget.file.path.split('/').last,
             style: TextStyle(
@@ -389,10 +389,10 @@ Future<void> _tryInitializeVideo() async {
           size: 80,
           color: iconColor,
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
         Container(
           width: MediaQuery.of(context).size.width * 0.8,
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.grey[100],
             borderRadius: BorderRadius.circular(8),
@@ -409,7 +409,7 @@ Future<void> _tryInitializeVideo() async {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 fileSize,
                 style: TextStyle(
