@@ -64,7 +64,7 @@ class WhatsappService {
       return {
         "success": false,
         "message": "Error: $e"
-      }; // Ensure response is always a Map
+      }; 
     }
   }
 
@@ -103,22 +103,36 @@ class WhatsappService {
     }
   }
 
-    static Future<dynamic> checkPhoneNumber(String phone) async {
-    try {
-      var response = await http.get(  
-        Uri.parse("https://www.desaihomes.com/api/phonenumber-check?phone_number=$phone"),
-      );
-      if (response.statusCode == 200) {
+static Future<dynamic> checkPhoneNumber(String phone) async {
+  try {
+    // Replace with however you're storing/retrieving the token
+    String? token = await AppUtils.getToken(); 
+
+    var response = await http.get(
+      Uri.parse("https://www.desaihomes.com/api/phonenumber-check?phone_number=$phone"),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token', // 🔐 Add token here
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final contentType = response.headers['content-type'];
+      if (contentType?.contains('application/json') == true) {
         return jsonDecode(response.body);
       } else {
-        log("Failed. Status code: ${response.statusCode}");
-        return null;
+        log("Received non-JSON response: ${response.body}");
+        return {'valid': false};
       }
-    } catch (e) {
-      log("Error: $e");
-      return null;
+    } else {
+      log("Failed. Status code: ${response.statusCode}. Body: ${response.body}");
+      return {'valid': false};
     }
+  } catch (e) {
+    log("Error checking phone number: $e");
+    return {'valid': false};
   }
+}
 
   static Future<dynamic> sendLocation(Map<String, dynamic> data) async {
     try {

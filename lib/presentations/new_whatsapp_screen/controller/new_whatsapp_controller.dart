@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/template_model.dart';
 import 'package:desaihomes_crm_application/repository/api/whatsapp_screen/model/whatsapp_lead_list_model.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import '../../../repository/api/whatsapp_screen/model/chat_model.dart';
 class WhatsappControllerCopy extends ChangeNotifier {
   List<ConversationModel> conversationModel = [];
   bool isLoading = false;
+  bool phoneExists = false;
   ChatModel chatModel = ChatModel();
   List<ChatModel> chatList = <ChatModel>[];
   TemplateModel templateModel = TemplateModel();
@@ -171,15 +173,17 @@ class WhatsappControllerCopy extends ChangeNotifier {
       "parameter_format": parameterFormat,
       "header_type": headerType,
     };
-
-    // Fix: Ensure headers are passed correctly
-    if (headerType == "image") {
-      data["header[]"] = "image";
-    } else {
-      for (var i = 0; i < headers.length; i++) {
-        data["header"] = headers;
-      }
+    for (var i = 0; i < headers.length; i++) {
+      data["header"] = headers;
     }
+
+    log("input: $data");
+
+    // // Fix: Ensure headers are passed correctly
+    // if (headerType == "image") {
+    //   data["header"] = "image";
+    // } else {
+    // }
 
     var response = await WhatsappService.sendTemplateMessage(data);
     log("API Response: $response");
@@ -280,8 +284,29 @@ class WhatsappControllerCopy extends ChangeNotifier {
     }
   }
 
-  Future<void> checkPhoneNumber(phone, BuildContext context) async {
-    var phoneData = await WhatsappService.checkPhoneNumber(phone);
+  Future<void> validatePhoneNumber(String phone, BuildContext context) async {
+    if (phone.isEmpty) {
+      phoneExists = false;
+      return;
+    }
+
+    final phoneData = await WhatsappService.checkPhoneNumber(phone);
+
+    if (phoneData != null && phoneData is Map<String, dynamic>) {
+      phoneExists = phoneData['valid'] == false;
+
+      if (phoneExists) {
+        Flushbar(
+          message: "Phone number already exists",
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ).show(context);
+      }
+    } else {
+      log("Invalid response received from checkPhoneNumber");
+    }
+
+    log("Phone number validation: $phoneExists");
   }
 
   Future<void> addMessageToList(ChatModel message) async {

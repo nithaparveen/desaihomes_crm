@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:desaihomes_crm_application/core/constants/colors.dart';
 import 'package:desaihomes_crm_application/core/constants/textstyles.dart';
@@ -6,8 +9,8 @@ import 'package:desaihomes_crm_application/global_widgets/dropdowm_textfield.dar
 import 'package:desaihomes_crm_application/global_widgets/form_textfield.dart';
 import 'package:desaihomes_crm_application/presentations/lead_detail_screen/controller/lead_detail_controller.dart';
 import 'package:desaihomes_crm_application/presentations/lead_screen/controller/lead_controller.dart';
+import 'package:desaihomes_crm_application/presentations/new_whatsapp_screen/controller/new_whatsapp_controller.dart';
 import 'package:desaihomes_crm_application/presentations/reports_screen/controller/reports_controller.dart';
-import 'package:desaihomes_crm_application/repository/api/lead_detail_screen/model/lead_detail_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
@@ -43,7 +46,6 @@ class _CreateLeadModalState extends State<CreateLeadModal>
   String? selectedLeadSource;
   List<String> selectedLabels = [];
   List<int> selectedLabelId = [];
-  // String? selectedLabelId;
   String? selectedLeadType;
   String? selectedCampaign;
   String? selectedPerson;
@@ -79,6 +81,11 @@ class _CreateLeadModalState extends State<CreateLeadModal>
           .fetchLabelList(context);
       Provider.of<ReportsController>(context, listen: false)
           .fetchCampaignList(context);
+      Provider.of<WhatsappControllerCopy>(context, listen: false)
+          .validatePhoneNumber(
+        phoneController.text,
+        context,
+      );
     });
     super.initState();
   }
@@ -88,35 +95,8 @@ class _CreateLeadModalState extends State<CreateLeadModal>
     final leadController = Provider.of<LeadController>(context, listen: false);
     final statusController =
         Provider.of<LeadDetailController>(context, listen: false);
-    bool _phoneExists = false;
-
-    Future<void> validatePhoneNumber(
-        String phone, BuildContext context) async {
-      if (phone.isEmpty) {
-        setState(() => _phoneExists = false);
-        return;
-      }
-
-      final phoneData = await WhatsappService.checkPhoneNumber(phone);
-      if (phoneData != null && phoneData['valid'] == false) {
-        setState(() => _phoneExists = true);
-      } else {
-        setState(() => _phoneExists = false);
-      }
-    }
-
-    Widget buildPhoneErrorText() {
-      return _phoneExists
-          ? Text(
-              'This phone number already exists',
-              style: GLTextStyles.manropeStyle(
-                color: Colors.red,
-                size: 12.sp,
-                weight: FontWeight.w400,
-              ),
-            )
-          : SizedBox.shrink();
-    }
+    bool phoneExists = false;
+    Timer? _debounce;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -419,13 +399,23 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                           ),
                                           SizedBox(height: 6.h),
                                           FormTextField(
-                                            controller: phoneController,
-                                            onChanged: (value) =>
-                                                validatePhoneNumber(
-                                                    value, context),
-                                          ),
-                                          SizedBox(height: 4.h),
-                                          buildPhoneErrorText(),
+                                              controller: phoneController,
+                                              onChanged: (value) {
+                                                if (_debounce?.isActive ??
+                                                    false) _debounce!.cancel();
+                                                _debounce = Timer(
+                                                    const Duration(
+                                                        milliseconds: 500), () {
+                                                  Provider.of<WhatsappControllerCopy>(
+                                                          context,
+                                                          listen: false)
+                                                      .validatePhoneNumber(
+                                                          value, context);
+                                                });
+                                              },
+                                              errorText: phoneExists == true
+                                                  ? 'This phone number already exists'
+                                                  : null),
                                         ],
                                       ),
                                     ),
@@ -1188,7 +1178,7 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                   maxLines: 3,
                                   controller: descriptionController,
                                 ),
-                                SizedBox(height: 20.h),
+                                SizedBox(height: 20.h), 
                                 Row(
                                   children: [
                                     Expanded(
@@ -1198,6 +1188,17 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                             (45 / ScreenUtil().screenHeight).sh,
                                         child: ElevatedButton(
                                           onPressed: () async {
+                                            if (phoneExists == true) {
+                                              Flushbar(
+                                                message:
+                                                    "Phone number already exists",
+                                                duration:
+                                                    const Duration(seconds: 2),
+                                                backgroundColor: Colors.red,
+                                              ).show(context);
+                                              return;
+                                            }
+
                                             if (selectedLeadType == null ||
                                                 selectedLeadType!.isEmpty ||
                                                 selectedProjectId == null ||
@@ -1222,7 +1223,6 @@ class _CreateLeadModalState extends State<CreateLeadModal>
                                                 flushbarPosition:
                                                     FlushbarPosition.BOTTOM,
                                               ).show(context);
-
                                               return;
                                             }
 
